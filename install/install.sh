@@ -3,17 +3,20 @@
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
+MAGENTA='\033[0;35m'
 RESET='\033[0m'
 
-echo ""
-echo "  Apagee Installation Script"
-echo "            v1.0"
-echo "  --------------------------"
-echo ""
+info() { printf "${MAGENTA}$@${RESET}\n"; }
+status() { printf "${BLUE}$@${RESET}\n"; }
+success() { printf "${GREEN}$@${RESET}\n"; }
+error() { printf "${RED}$@${RESET}\n"; }
 
-status() { printf "\n${BLUE}$@${RESET}\n"; }
-success() { printf "\n${GREEN}$@${RESET}\n"; }
-error() { printf "\n${RED}$@${RESET}\n"; }
+info ""
+info "  Apagee Installation Script"
+info "            v1.0"
+info "  --------------------------"
+info ""
+
 
 if [ "$EUID" -ne 0 ]; then
     error "Script must be run as root."
@@ -21,9 +24,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 status "Installing dependencies..."
-echo ""
 
-apt update && apt upgrade -y
+apt update > /dev/null && 
 apt install -y git curl wget tar libcap2-bin
 
 if ! id -u apagee &>/dev/null; then
@@ -36,19 +38,18 @@ fi
 
 pushd "$(eval echo ~apagee)" >/dev/null
 
-echo ""
 status "Now working in: $(pwd)"
 status "Downloading..."
 
 # TODO: Automate this...
 
-wget -qO apagee.tar.gz "https://github.com/Eladriagon/apagee/releases/download/v1.0.2-Pre/apagee-linux-x64.tar.gz"
+wget -qO apagee.tar.gz "https://github.com/Eladriagon/apagee/releases/download/v1.0.2-Pre/apagee-linux-x64.tar.gz" > /dev/null
 
 WAS_RUNNING=false
 if systemctl status apagee.service &>/dev/null; then
     status "Stopping existing service..."
     
-    systemctl stop apagee.service > /dev/null 2>&1
+    systemctl stop apagee.service > /dev/null
     WAS_RUNNING=true
 fi
 
@@ -56,7 +57,7 @@ status "Extracting..."
 
 mkdir -p apagee
 tar -xzf apagee.tar.gz -C apagee --overwrite --warning=no-unknown-keyword
-rm apagee.tar.gz > /dev/null 2>&1
+rm apagee.tar.gz > /dev/null
 
 status "Setting permissions..."
 
@@ -96,10 +97,10 @@ systemctl enable apagee.service
 # If the config.json file already existed or if the service was previously running...
 if [ -f "$(pwd)/apagee/config.json" ] || [ "$WAS_RUNNING" = true ]; then
     status "Starting service..."
-    systemctl start apagee.service > /dev/null 2>&1
-    success "Update complete!\nApagee should now be running.\nCheck status with:\nsudo systemctl status apagee.service"
+    systemctl start apagee.service > /dev/null
+    success " > Update complete!\nApagee should now be running if no errors are present.\nCheck status with:\nsudo systemctl status apagee.service"
 else
-    success "Installation complete!\nNext steps:\n • Configure your instance using the provided config.example.json\n • Start the service with: sudo systemctl start apagee.service\n • Check status with: sudo systemctl status apagee.service"
+    success " > Installation complete!\nNext steps:\n   • Configure your instance using the provided config.example.json\n   • Start the service with: sudo systemctl start apagee.service\n   • Check status with: sudo systemctl status apagee.service"
 fi
 
 status "Leaving $(pwd)..."
