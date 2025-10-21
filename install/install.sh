@@ -45,6 +45,14 @@ status "Downloading..."
 
 wget -qO apagee.tar.gz "https://github.com/Eladriagon/apagee/releases/download/v1.0.2-Pre/apagee-linux-x64.tar.gz"
 
+WAS_RUNNING=false
+if systemctl status apagee.service &>/dev/null; then
+    status "Stopping existing service..."
+    
+    systemctl stop apagee.service > /dev/null 2>&1
+    WAS_RUNNING=true
+fi
+
 status "Extracting..."
 
 mkdir -p apagee
@@ -57,13 +65,7 @@ chown -R apagee:apagee apagee
 chmod +x apagee/apagee # Should already have +x from the tarball, but just in case.
 setcap 'cap_net_bind_service=+ep' "$(pwd)/apagee/apagee" # Required to listen on 80/443.
 
-WAS_RUNNING=false
-
-if systemctl status apagee.service &>/dev/null; then
-    status "Stopping existing service..."
-    
-    systemctl stop apagee.service > /dev/null 2>&1
-    WAS_RUNNING=true
+if [ WAS_RUNNING = true ]; then
     status "Updating service..."
 else
     status "Creating new service..."
