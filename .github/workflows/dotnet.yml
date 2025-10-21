@@ -112,8 +112,8 @@ jobs:
       - name: Create/Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: ${{ github.event.release.name || inputs.releaseName }}
           tag_name: ${{ github.event.release.tag_name || inputs.tagName }}
-          release_name: ${{ github.event.release.name || inputs.releaseName }}
           generate_release_notes: false
           files: |
             _artifacts/**/*.zip
