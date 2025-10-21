@@ -15,10 +15,8 @@ on:
         description: 'Release Name'
         required: false
         type: string
-
-  push:
-    releases:
-      types: [released, prereleased]
+  release:
+    types: [released, prereleased]
 
 env:
   PROJ_FILE: Apagee.csproj
