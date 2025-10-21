@@ -25,7 +25,7 @@ status "Installing dependencies..."
 echo ""
 
 apt update && apt upgrade -y
-apt install -y git curl wget tar
+apt install -y git curl wget tar libcap2-bin
 
 if ! id -u apagee &>/dev/null; then
   status "Creating user and group..."
@@ -55,6 +55,7 @@ status "Setting permissions..."
 
 chown -R apagee:apagee apagee
 chmod +x apagee/apagee # Should already have +x from the tarball, but just in case.
+setcap 'cap_net_bind_service=+ep' "$(pwd)/apagee/apagee" # Required to listen on 80/443.
 
 WAS_RUNNING=false
 
