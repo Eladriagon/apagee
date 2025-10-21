@@ -6,7 +6,16 @@ on:
       publishArtifacts:
         description: 'Publish Artifacts'
         required: false
-        type: boolean    
+        type: boolean
+      tagName:
+        description: 'Tag Name'
+        required: false
+        type: string
+      releaseName:
+        description: 'Release Name'
+        required: false
+        type: string
+
   push:
     releases:
       types: [released, prereleased]
@@ -93,7 +102,7 @@ jobs:
     name: release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'published'
+    if: github.event_name == 'published' || ${{ inputs.publishArtifacts }} == 'true'
     steps:
       - name: Download all build artifacts
         uses: actions/download-artifact@v5
@@ -103,5 +112,9 @@ jobs:
       - name: Create/Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: _artifacts/**/*
+          tag_name: ${{ github.event.release.tag_name || inputs.tagName }}
+          release_name: ${{ github.event.release.name || inputs.releaseName }}
           generate_release_notes: false
+          files: |
+            _artifacts/**/*.zip
+            _artifacts/**/*.tar.gz
