@@ -77,6 +77,7 @@ After=network.target
 Type=simple
 User=apagee
 Group=apagee
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 WorkingDirectory=$(pwd)/apagee
 ExecStart=$(pwd)/apagee/apagee
 Restart=on-failure
