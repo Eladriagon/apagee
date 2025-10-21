@@ -12,9 +12,9 @@ echo ""
 echo "Current directory is: $(pwd)"
 echo "Apagee will be installed to: $(pwd)/apagee"
 
-status() { echo "\n${BLUE}$@${RESET}\n"; }
-success() { echo "\n${GREEN}$@${RESET}\n"; }
-error() { echo "\n${RED}$@${RESET}\n"; }
+status() { printf "\n${BLUE}$@${RESET}\n\n"; }
+success() { printf "\n${GREEN}$@${RESET}\n\n"; }
+error() { printf "\n${RED}$@${RESET}\n\n"; }
 
 if [ "$EUID" -ne 0 ]; then
     error "Script must be run as root."
@@ -43,17 +43,27 @@ wget -qO apagee.tar.gz "https://github.com/Eladriagon/apagee/releases/download/v
 status "Extracting..."
 
 mkdir -p apagee
-tar -xzf apagee.tar.gz -C apagee --overwrite --warning=no-unknown-keyword --quiet
-rm apagee.tar.gz
+tar -xzf apagee.tar.gz -C apagee --overwrite --warning=no-unknown-keyword
+rm apagee.tar.gz > /dev/null 2>&1
 
 status "Setting permissions..."
 
 chown -R apagee:apagee apagee
 chmod +x apagee/apagee # Should already have +x from the tarball, but just in case.
 
-status "Creating service..."
+WAS_RUNNING=false
 
-cat << EOF > /etc/systemd/system/apagee.service
+if systemctl status apagee.service &>/dev/null; then
+    status "Stopping existing service..."
+    
+    systemctl stop apagee.service > /dev/null 2>&1
+    WAS_RUNNING=true
+    status "Updating service..."
+else
+    status "Creating new service..."
+fi
+
+cat > /etc/systemd/system/apagee.service <<EOF
 [Unit]
 Description=Apagee Web Server
 After=network.target
@@ -75,8 +85,8 @@ status "Registering service..."
 systemctl daemon-reload
 systemctl enable apagee.service
 
-# If the config.json file already exist...
-if [ -f "$(pwd)/apagee/config.json" ]; then
+# If the config.json file already existed or if the service was previously running...
+if [ -f "$(pwd)/apagee/config.json" ] || [ "$WAS_RUNNING" = true ]; then
     status "Starting service..."
     systemctl start apagee.service > /dev/null 2>&1
     success "Update complete!\nApagee should now be running.\nCheck status with:\nsudo systemctl status apagee.service"
