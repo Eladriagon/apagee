@@ -65,7 +65,7 @@ chown -R apagee:apagee apagee
 chmod +x apagee/apagee # Should already have +x from the tarball, but just in case.
 setcap 'cap_net_bind_service=+ep' "$(pwd)/apagee/apagee" # Required to listen on 80/443.
 
-if [ WAS_RUNNING = true ]; then
+if [ "$WAS_RUNNING" = true ]; then
     status "Updating service..."
 else
     status "Creating new service..."
