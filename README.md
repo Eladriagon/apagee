@@ -17,13 +17,13 @@ Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 
 ## Todo List
 
-[x] JSON configuration file with environment variable overrides
-[x] SQLite database
-[x] Automatic admin login creation with UI for password change
-[x] Auto-generated Fediverse signing keys stored locally
-[ ] Author articles in Markdown
-[ ] Receive boosts/favorites from Fediverse
-[ ] Draft articles
-[ ] View article list
-[ ] Delete/unpublish articles
-[ ] Send Fediverse 
+* [x] JSON configuration file with environment variable overrides
+* [x] SQLite database
+* [x] Automatic admin login creation with UI for password change
+* [x] Auto-generated Fediverse signing keys stored locally
+* [ ] Author articles in Markdown
+* [ ] Receive boosts/favorites from Fediverse
+* [ ] Draft articles
+* [ ] View article list
+* [ ] Delete/unpublish articles
+* [ ] Send Fediverse 
