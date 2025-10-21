@@ -12,9 +12,9 @@ echo ""
 echo "Current directory is: $(pwd)"
 echo "Apagee will be installed to: $(pwd)/apagee"
 
-status() { printf "\n${BLUE}$@${RESET}\n\n"; }
-success() { printf "\n${GREEN}$@${RESET}\n\n"; }
-error() { printf "\n${RED}$@${RESET}\n\n"; }
+status() { printf "\n${BLUE}$@${RESET}\n"; }
+success() { printf "\n${GREEN}$@${RESET}\n"; }
+error() { printf "\n${RED}$@${RESET}\n"; }
 
 if [ "$EUID" -ne 0 ]; then
     error "Script must be run as root."
@@ -22,6 +22,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 status "Installing dependencies..."
+echo ""
 
 apt update && apt upgrade -y
 apt install -y git curl wget tar
@@ -34,6 +35,10 @@ if ! id -u apagee &>/dev/null; then
   status "User/group 'apagee:apagee' created."
 fi
 
+pushd "$(eval echo ~apagee)" >/dev/null
+
+echo ""
+status "Now working in: $(pwd)"
 status "Downloading..."
 
 # TODO: Automate this...
@@ -95,3 +100,8 @@ else
     success "Installation complete!\nNext steps:\n • Configure your instance using the provided config.example.json\n • Start the service with: sudo systemctl start apagee.service\n • Check status with: sudo systemctl status apagee.service"
 fi
 
+echo ""
+status "Leaving $(pwd)..."
+popd >/dev/null
+success "Done!"
+exit 0
