@@ -7,6 +7,7 @@ on:
 
 env:
   PROJ_FILE: Apagee.csproj
+  APP_NAME: apagee
 
 permissions:
   contents: write
@@ -43,6 +44,7 @@ jobs:
         run: dotnet build --no-restore
         
       - name: dotnet publish
+        if: github.event_name == 'release' && (github.event.action == 'released' || github.event.action == 'prereleased')
         run: >
           dotnet publish ${{ env.PROJ_FILE }}
           -c Release
@@ -53,25 +55,29 @@ jobs:
           -p:PublishTrimmed=false
           -p:DebugType=None
           -p:DebugSymbols=false
+          -p:AssemblyName=${{ env.APP_NAME }}
           -o publish/${{ matrix.rid }}
           
       - name: chmod executable
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' && (github.event_name == 'release' && (github.event.action == 'released' || github.event.action == 'prereleased'))
         run: chmod +x publish/${{ matrix.rid }}/${{ env.APP_NAME }}
         
       - name: zip artifacts
+        if: github.event_name == 'release' && (github.event.action == 'released' || github.event.action == 'prereleased')
         shell: bash
         run: |
           mkdir -p dist
           if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            # Keep only what's needed to run
-            tar -C publish/${{ matrix.rid }} -czf dist/${{ env.APP_NAME }}-${{ matrix.rid }}.${{ matrix.archive_ext }} .
+            mkdir -p dist
+            pushd publish/${{ matrix.rid }}
+            tar -czf "../../dist/${{ env.APP_NAME }}-${{ matrix.rid }}.${{ matrix.archive_ext }}" *
+            popd
           else
-            powershell -NoProfile -Command ^
-              "Compress-Archive -Path 'publish/${{ matrix.rid }}/*' -DestinationPath 'dist/${{ env.APP_NAME }}-${{ matrix.rid }}.${{ matrix.archive_ext }}' -Force"
+            powershell -NoProfile -Command "Compress-Archive -Path 'publish/${{ matrix.rid }}/*' -DestinationPath 'dist/${{ env.APP_NAME }}-${{ matrix.rid }}.${{ matrix.archive_ext }}' -Force"
           fi
           
       - name: upload artifacts
+        if: github.event_name == 'release' && (github.event.action == 'released' || github.event.action == 'prereleased')
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-${{ matrix.rid }}
@@ -81,7 +87,7 @@ jobs:
     name: release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && (github.event_name == 'release' && (github.event.action == 'released' || github.event.action == 'prereleased'))
     steps:
       - name: Download all build artifacts
         uses: actions/download-artifact@v5
