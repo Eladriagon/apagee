@@ -39,8 +39,8 @@ public sealed class KeypairHelper
 
             using var rsa = RSA.Create(Globals.RSA_KEY_STRENGTH);
 
-            var privateKey = rsa.ExportRSAPrivateKeyPem();
-            var publicKey = rsa.ExportRSAPublicKeyPem();
+            var privateKey = rsa.ExportPkcs8PrivateKeyPem();
+            var publicKey = rsa.ExportSubjectPublicKeyInfoPem();
 
             await File.WriteAllTextAsync(ActorPrivPath(Config.FediverseUsername), privateKey);
             await File.WriteAllTextAsync(ActorPubPath(Config.FediverseUsername), publicKey);

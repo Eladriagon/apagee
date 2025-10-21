@@ -97,7 +97,6 @@ if [ -f "$(pwd)/apagee/config.json" ] || [ "$WAS_RUNNING" = true ]; then
     status "Starting service..."
     systemctl start apagee.service > /dev/null 2>&1
     success "Update complete!\nApagee should now be running.\nCheck status with:\nsudo systemctl status apagee.service"
-    exit 0
 else
     success "Installation complete!\nNext steps:\n • Configure your instance using the provided config.example.json\n • Start the service with: sudo systemctl start apagee.service\n • Check status with: sudo systemctl status apagee.service"
 fi
