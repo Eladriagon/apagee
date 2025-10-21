@@ -2,6 +2,10 @@
 
 Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 
+## Apa-what?
+
+*Apagee* is a portmanteau (specifically, an [intercalative blend](https://en.wikipedia.org/wiki/Portmanteau#Total_blends)) of *apogee* and *page*.
+
 ## Features
 
 * Single-user
