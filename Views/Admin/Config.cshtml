@@ -1,0 +1,103 @@
+<h1 class="title is-2">Configuration</h1>
+
+<div class="block is-size-5">
+    Configuration file: <code>@ConfigManager.ConfigPath</code>
+</div>
+
+<div class="block">
+    <a class="disabled button is-link is-small is-outlined" href="/" rel="nofollow">
+        <span>View Config Docs</span>
+        <span class="icon">
+            <i class="fas fa-external-link"></i>
+        </span>
+    </a>
+</div>
+
+<hr />
+
+<h2 class="title is-4">HTTP</h2>
+
+<table class="table is-narrow">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PublicHostname</td>
+            <td><code>@ConfigManager.GetGlobalConfig().PublicHostname</code></td>
+        </tr>
+        <tr>
+            <td>HttpBindUrl</td>
+            <td><code>@ConfigManager.GetGlobalConfig().HttpBindUrl</code></td>
+        </tr>
+        <tr>
+            <td>UsesReverseProxy</td>
+            <td><code>@ConfigManager.GetGlobalConfig().UsesReverseProxy</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 class="title is-4">Database</h2>
+
+<table class="table is-narrow">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>SqliteDbFilePath</td>
+            <td><code>@ConfigManager.GetGlobalConfig().SqliteDbFilePath</code></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 class="title is-4">Author and Fediverse</h2>
+
+<table class="table is-narrow">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>FediverseUsername</td>
+            <td><code>@ConfigManager.GetGlobalConfig().FediverseUsername</code></td>
+        </tr>
+        <tr>
+            <td>AuthorDisplayName</td>
+            <td><code>@ConfigManager.GetGlobalConfig().AuthorDisplayName</code></td>
+        </tr>
+        <tr>
+            <td>FediverseBio</td>
+            <td><code>@ConfigManager.GetGlobalConfig().FediverseBio</code></td>
+        </tr>
+        <tr>
+            <td>ShowBioOnArticles</td>
+            <td><code>@ConfigManager.GetGlobalConfig().ShowProfilePictureOnArticles</code></td>
+        </tr>
+    </tbody>
+</table>
+<h2 class="title is-4">Theme and Style</h2>
+
+<table class="table is-narrow">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>ForceDarkMode</td>
+            <td><code>@ConfigManager.GetGlobalConfig().ForceDarkMode</code></td>
+        </tr>
+    </tbody>
+</table>

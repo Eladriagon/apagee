@@ -1,0 +1,31 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.IO;
+global using System.Linq;
+global using System.Net.Http;
+global using System.Reflection;
+global using System.Security.Cryptography;
+global using System.Text;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Text.RegularExpressions;
+
+global using Microsoft.Data.Sqlite;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Authentication.Cookies;
+global using Microsoft.AspNetCore.HttpOverrides;
+global using Microsoft.AspNetCore.DataProtection;
+
+global using Apagee;
+global using Apagee.Configuration;
+global using Apagee.Handlers;
+global using Apagee.Models;
+global using Apagee.Models.APub;
+global using Apagee.Services;
+global using Apagee.Storage;
+global using Apagee.Utilities;
+global using Dapper;
+global using Dapper.Contrib.Extensions;
+global using Fluid;

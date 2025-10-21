@@ -1,0 +1,17 @@
+@model GlobalConfiguration
+
+@{
+    Layout = "_PublicLayout";
+}
+
+<h1>About the Author</h1>
+
+<p>
+    <b>@Model.AuthorDisplayName</b> @@@Model.FediverseUsername
+</p>
+@if (Model.FediverseBio is string { Length: > 0 } bio)
+{
+    <p>
+        @bio
+    </p>
+}

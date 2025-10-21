@@ -1,0 +1,104 @@
+<h1 class="title is-2">Change Password</h1>
+
+<div class="block">
+
+    <div class="fixed-grid">
+        <div class="grid">
+            <div class="cell">
+
+                <p class="block">Passwords must be at least 8 characters in length.</p>
+
+                @if (ViewBag.Success is true)
+                {
+                    <div class="message is-success">
+                        <div class="message-body">
+                            <p>
+                                <span class="icon is-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </span>
+                                <span class="has-text-weight-semibold">Success</span>
+                            </p>
+                            <p>
+                                Password has been updated successfully.
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                @if (ViewBag.FormError is string error)
+                {
+                    <div class="message is-danger">
+                        <div class="message-body">
+                            <p>
+                                <span class="icon is-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </span>
+                                <span class="has-text-weight-semibold">Error</span>
+                            </p>
+                            <p>
+                                @error
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <form method="post" asp-antiforgery="true">
+
+                    <div class="field">
+                        <label for="oldPass" class="label">Username:</label>
+                        <div class="control has-icons-left">
+                            <input class="input" value="admin" type="text" disabled />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </div>
+                        <p class="help">Changing your login username is not yet supported. To change your author information, see <a href="/admin">Author Info</a>.</p>
+                    </div>
+
+                    <div class="field">
+                        <label for="oldPass" class="label">Old Password:</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="password" autocomplete="current-password" id="oldPass"
+                                name="oldPass" />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-unlock-keyhole"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="newPass" class="label">New Password:</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="password" autocomplete="new-password" id="newPass"
+                                name="newPass" />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="newPassAgain" class="label">Again:</label>
+                        <div class="control has-icons-left">
+                            <input class="input" type="password" autocomplete="new-password" id="newPassAgain"
+                                name="newPassAgain" />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-repeat"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <button class="button is-primary">
+                            <span class="icon">
+                                <i class="fas fa-save"></i>
+                            </span>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+@{
+    Layout = "_PublicLayout";
+}
+
+<section class="section is-medium">
+    <div class="container is-max-tablet">
+
+        @if (ViewBag.LoginFailed is true)
+        {
+            <div class="message is-danger">
+                <div class="message-body">
+                    <b>Login failed.</b> Please try again.
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.LoginError is true)
+        {
+            <div class="message is-danger">
+                <div class="message-body">
+                    <b>An error occurred.</b> Check logs and console output for details.
+                </div>
+            </div>
+        }
+
+        <div class="box mx-6">
+
+            <h1 class="title is-2 has-text-centered">Apagee</h1>
+            <h3 class="subtitle is-5 has-text-centered">Author Login</h3>
+
+            <form method="post" asp-antiforgery="true">
+                <div class="field">
+                    <label for="username" class="label">Username</label>
+                    <div class="control has-icons-left">
+                        <input autocomplete="username" id="username" name="username" type="text" class="input">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-user"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="password" class="label">Password</label>
+                    <div class="control has-icons-left">
+                        <input autocomplete="password" id="password" name="password" type="password" class="input">
+                        <span class="icon is-small is-left">
+                            <span class="fas fa-asterisk"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="field has-text-centered">
+                    <div class="control mt-5">
+                        <button class="button is-primary" role="button" type="submit">
+                            <span class="icon is-small">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <span>Login</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

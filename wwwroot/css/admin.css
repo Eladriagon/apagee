@@ -1,0 +1,5 @@
+/* Icons in active links should always be white */
+.menu a.is-active span.icon i
+{
+    color: hsl(var(--bulma-menu-item-h),var(--bulma-menu-item-s),var(--bulma-menu-item-color-l));
+}

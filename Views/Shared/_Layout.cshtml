@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html class="@(ConfigManager.GetGlobalConfig().ForceDarkMode ? "theme-dark" : "")">
+<head>
+    <title>Apagee Admin Area</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" integrity="sha256-Z/om3xyp6V2PKtx8BPobFfo9JCV0cOvBDMaLmquRS+4=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="/css/admin.css" asp-append-version="true" />
+
+    @RenderSection("head", false)
+</head>
+<body class="apagee-admin container is-max-desktop">
+
+    <div id="main" class="mt-6 is-flex is-flex-direction-row is-flex-wrap-nowrap is-align-content-stretch">
+        <partial name="SideNav" />
+        
+        <div class="content-area is-flex-grow-1">
+            @RenderBody()
+        </div>
+
+    </div>
+
+    <footer class="footer has-background-inherit">
+        <div class="content has-text-centered is-size-6">
+        <p>
+            <strong>Apagee</strong> is a fediverse-first foss blogging platform &mdash;
+            <a href="https://github.com/eladriagon/apagee" rel="nofollow" target="_blank"><i class="fab fa-github"></i> github</a>
+            </p>
+            <p class="is-size-7">version @(Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "[error]")</p>
+        </div>
+    </footer>
+    
+    <script src="/js/admin.js" asp-append-version="true"></script>
+
+    @RenderSection("scripts", false)
+</body>
+</html>

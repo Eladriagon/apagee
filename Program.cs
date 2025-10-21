@@ -1,0 +1,173 @@
+Output.WriteLine($"{Output.Ansi.Blue}Apagee Blog Server{Output.Ansi.Reset} - v{Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "?.?.?"}");
+
+GlobalConfiguration config = default!;
+try
+{
+    Output.WriteLine("Loading configuration...");
+
+    // Load and validate global configuration
+    await ConfigManager.Init();
+    config = ConfigManager.GetGlobalConfig();
+    var configErrors = ConfigManager.ValidateGlobalConfig(config);
+
+    if (configErrors.Count != 0)
+    {
+        foreach (var (propertyName, errorMessage, warningOnly) in configErrors)
+        {
+            Output.WriteLine($"{(warningOnly ? Output.Ansi.Yellow : Output.Ansi.Red)} {(warningOnly ? "»" : ">")} [Config {(warningOnly ? "warning" : "error")}] {propertyName}: {errorMessage}");
+        }
+
+        if (configErrors.Any(c => !c.warningOnly))
+        {
+            Environment.Exit(3);
+        }
+    }
+
+    Output.WriteLine($"{Output.Ansi.Green}Configuration loaded successfully.");
+}
+catch (ApageeException aex)
+{
+    Output.WriteLine($"{Output.Ansi.Red}Init error: {aex.Message}");
+    if (aex.InnerException is not null)
+    {
+        Output.WriteLine($"  {Output.Ansi.Red}Nested error: {aex.InnerException.GetType().FullName}: {aex.InnerException.Message}");
+    }
+    Environment.Exit(1);
+}
+catch (Exception ex)
+{
+    Output.WriteLine($"{Output.Ansi.Red}Unknown init error: {ex.GetType().FullName}: {ex.Message}");
+    if (ex.InnerException is not null)
+    {
+        Output.WriteLine($"  {Output.Ansi.Red}Nested error: {ex.InnerException.GetType().FullName}: {ex.InnerException.Message}");
+    }
+    Environment.Exit(2);
+}
+
+int eCode = 0;
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+
+    // This is super noisy.
+    builder.Logging.ClearProviders();
+
+    // Bind Kestrel directly to port 80 (no IIS)
+    builder.WebHost.ConfigureKestrel(o =>
+    {
+        o.AddServerHeader = false;
+        o.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB, subject to change or via config?
+        o.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(60);
+    });
+
+    builder.WebHost.UseUrls(config.HttpBindUrl);
+
+    builder.Services
+        .AddDataProtection()
+        .SetApplicationName(Globals.APP_NAME)
+        .PersistKeysToFileSystem(new DirectoryInfo(Globals.KeyringDir));
+
+    builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                    .AddCookie(cookie =>
+                    {
+                        cookie.LoginPath = "/admin/login";
+                        cookie.AccessDeniedPath = "/403";
+
+                        cookie.Cookie.Name = "apagee_login";
+                        cookie.Cookie.HttpOnly = true;
+                        cookie.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+                        cookie.Cookie.SameSite = SameSiteMode.Strict;
+
+                        cookie.SlidingExpiration = true;
+                        cookie.ExpireTimeSpan = TimeSpan.FromDays(1); // TODO: Allow configuration
+                    });
+
+    builder.Services.AddAuthorization();
+
+    builder.Services.AddRazorComponents();
+
+    var mvcBuilder = builder.Services.AddControllersWithViews();
+
+    if (builder.Environment.IsDevelopment())
+    {
+        mvcBuilder = mvcBuilder.AddRazorRuntimeCompilation();                
+    }
+
+    builder.Services.AddHttpClient(Globals.HTTP_CLI_NAME_FED)
+                    .AddHttpMessageHandler<FediverseSigningHandler>();
+
+    builder.Services.AddSingleton(config);
+    builder.Services.AddSingleton(new FluidParser());
+    builder.Services.AddSingleton(_ =>
+    {
+        var opts = new TemplateOptions
+        {
+            MemberAccessStrategy = new UnsafeMemberAccessStrategy()
+        };
+        return opts;
+    });
+
+    builder.Services.AddSingleton<StorageService>();
+    builder.Services.AddSingleton<KeypairHelper>();
+    builder.Services.AddSingleton<UserService>();
+    builder.Services.AddSingleton<SecurityHelper>();
+
+    var app = builder.Build();
+
+    // Custom app init code
+    await app.InitApagee();
+
+    // -----------------------
+    // Request pipeline:
+
+    if (config.UsesReverseProxy)
+    {
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto
+        });
+    }
+
+    app.UseStaticFiles();
+
+    app.UseRouting();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Attribute routing
+    // Covers most system pages
+    app.MapControllers();
+
+    // APub and other API endpoints
+    app.MapControllerRoute("api", "api/{controller}/{action=Get}/{id?}");
+
+    // Article "permalink" view URL
+    app.MapControllerRoute("page", "{*slug}", new { controller = "Page", action = "Get" });
+
+    app.MapFallback(() => Results.LocalRedirect("404"));
+
+    Output.WriteLine($"{Output.Ansi.White}Apagee is now running! ({config.HttpBindUrl})");
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    eCode = -1;
+
+    var errorAnsiPrefix = $"   {Output.Ansi.BgRed}{Output.Ansi.White} {Output.Ansi.Underline}/!\\{Output.Ansi.Reset}{Output.Ansi.BgRed}{Output.Ansi.White}";
+
+    Output.WriteLine("");
+    Output.WriteLine($"{errorAnsiPrefix} [Global unhandled error] {ex.GetType().FullName} ");
+    Output.WriteLine($"{errorAnsiPrefix} {ex.Message} ");
+    Output.WriteLine("");
+    Output.WriteLine($"{Output.Ansi.Red}{ex.StackTrace}");
+}
+finally
+{
+    Output.WriteLine("");
+    Output.WriteLine("Apagee has exited.");
+    Output.WriteLine("");
+    Environment.Exit(eCode);
+}

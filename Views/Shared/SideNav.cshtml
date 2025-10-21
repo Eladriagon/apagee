@@ -1,0 +1,93 @@
+<aside class="menu is-flex-grow-0 mr-6">
+    <h3 class="title is-4 has-text-weight-semibold">Apagee</h3>
+    <ul class="menu-list">
+        <li><a asp-action="Index">
+            <span class="icon-text">
+                <span class="icon has-text-primary mr-2">
+                    <i class="fas fa-sm fa-house-chimney"></i>
+                </span>
+                Dashboard
+            </span>
+        </a></li>
+    </ul>
+    <p class="menu-label">Articles</p>
+    <ul class="menu-list">
+        <li><a href="#">
+            <span class="icon-text">
+                <span class="icon has-text-success mr-2">
+                    <i class="fas fa-sm fa-pencil"></i>
+                </span>
+                New Article
+            </span>
+        </a></li>
+        <li><a href="#">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-sm fa-table-list"></i>
+                </span>
+                Manage Articles
+            </span>
+        </a></li>
+    </ul>
+
+    <p class="menu-label">Account</p>
+    <ul class="menu-list">
+        <li><a>
+            <span class="icon-text">
+                <span class="icon has-text-info mr-2">
+                    <i class="fas fa-sm fa-user-circle"></i>
+                </span>
+                View My Info
+            </span>
+        </a></li>
+        <li><a asp-action="UpdatePass">
+            <span class="icon-text">
+                <span class="icon has-text-warning mr-2">
+                    <i class="fas fa-sm fa-asterisk"></i>
+                </span>
+                Change Password
+            </span>
+        </a></li>
+    </ul>
+
+    <p class="menu-label">System</p>
+    <ul class="menu-list">
+        <li><a asp-action="Config">
+            <span class="icon-text">
+                <span class="icon has-text-danger mr-2">
+                    <i class="fas fa-sm fa-cogs"></i>
+                </span>
+                Configuration
+            </span>
+        </a></li>
+    </ul>
+
+    <p class="menu-label">About Apagee</p>
+    <ul class="menu-list">
+        <li><a href="https://github.com/eladriagon/apagee" rel="nofollow" target="_blank">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fab fa-sm fa-github"></i>
+                </span>
+                Project Home
+            </span>
+        </a></li>
+        @* Will eventually point to a GH Pages microsite for it. *@
+        <li><a href="https://github.com/eladriagon/apagee/tree/main" rel="nofollow" target="_blank">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-sm fa-code-merge"></i>
+                </span>
+                Source
+            </span>
+        </a></li>
+        <li><a href="https://github.com/eladriagon/apagee/issues" rel="nofollow" target="_blank">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-sm fa-bug"></i>
+                </span>
+                Report a Bug
+            </span>
+        </a></li>
+    </ul>
+</aside>

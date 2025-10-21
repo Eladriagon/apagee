@@ -1,0 +1,95 @@
+name: Release Builder
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+env:
+  PROJ_FILE: Apagee.csproj
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive_ext: tar.gz
+          - os: windows-latest
+            rid: win-x64
+            archive_ext: zip
+    
+    steps:
+      - uses: actions/checkout@v5
+        name: git checkout
+        
+      - uses: actions/setup-dotnet@v5
+        name: dotnet use 10.x
+        with:
+          dotnet-version: 10.0.x
+          dotnet-quality: 'preview' # todo: remove me in a month or so
+      
+      - name: dotnet restore
+        run: dotnet restore
+        
+      - name: dotnet build
+        run: dotnet build --no-restore
+        
+      - name: dotnet publish
+        run: >
+          dotnet publish ${{ env.PROJ_FILE }}
+          -c Release
+          -r ${{ matrix.rid }}
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:PublishTrimmed=false
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          -o publish/${{ matrix.rid }}
+          
+      - name: chmod executable
+        if: matrix.os == 'ubuntu-latest'
+        run: chmod +x publish/${{ matrix.rid }}/${{ env.APP_NAME }}
+        
+      - name: zip artifacts
+        shell: bash
+        run: |
+          mkdir -p dist
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            # Keep only what's needed to run
+            tar -C publish/${{ matrix.rid }} -czf dist/${{ env.APP_NAME }}-${{ matrix.rid }}.${{ matrix.archive_ext }} .
+          else
+            powershell -NoProfile -Command ^
+              "Compress-Archive -Path 'publish/${{ matrix.rid }}/*' -DestinationPath 'dist/${{ env.APP_NAME }}-${{ matrix.rid }}.${{ matrix.archive_ext }}' -Force"
+          fi
+          
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-${{ matrix.rid }}
+          path: dist/*
+          
+  release:
+    name: release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: _artifacts
+
+      - name: Create/Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: _artifacts/**/*
+          generate_release_notes: false
