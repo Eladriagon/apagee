@@ -25,8 +25,8 @@ fi
 
 status "Installing dependencies..."
 
-apt update -q > /dev/null && 
-apt install -qq git curl wget tar libcap2-bin
+apt update -q > /dev/null
+apt --quiet=2 install git curl wget tar libcap2-bin > /dev/null
 
 if ! id -u apagee &>/dev/null; then
   status "Creating user and group..."
