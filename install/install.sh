@@ -5,12 +5,11 @@ BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 RESET='\033[0m'
 
-echo "Apagee Installation Script"
-echo "          v1.0"
-echo "--------------------------"
 echo ""
-echo "Current directory is: $(pwd)"
-echo "Apagee will be installed to: $(pwd)/apagee"
+echo "  Apagee Installation Script"
+echo "            v1.0"
+echo "  --------------------------"
+echo ""
 
 status() { printf "\n${BLUE}$@${RESET}\n"; }
 success() { printf "\n${GREEN}$@${RESET}\n"; }
@@ -103,7 +102,6 @@ else
     success "Installation complete!\nNext steps:\n • Configure your instance using the provided config.example.json\n • Start the service with: sudo systemctl start apagee.service\n • Check status with: sudo systemctl status apagee.service"
 fi
 
-echo ""
 status "Leaving $(pwd)..."
 popd >/dev/null
 success "Done!"
