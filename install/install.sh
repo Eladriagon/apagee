@@ -43,7 +43,7 @@ status "Downloading..."
 
 # TODO: Automate this...
 
-wget -qO apagee.tar.gz "https://github.com/Eladriagon/apagee/releases/download/v1.0.2-Pre/apagee-linux-x64.tar.gz" > /dev/null
+wget -qO apagee.tar.gz "https://github.com/Eladriagon/apagee/releases/download/v1.0.3-Pre/apagee-linux-x64.tar.gz" > /dev/null
 
 WAS_RUNNING=false
 if systemctl status apagee.service &>/dev/null; then
