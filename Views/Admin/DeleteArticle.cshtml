@@ -1,0 +1,46 @@
+@model Article
+
+<h1 class="title is-size-2">Delete Article</h1>
+
+<p>Are you <b>absolutely sure</b> that you want to delete this article?</p>
+
+<table class="table mt-3">
+    <tbody>
+        <tr>
+            <th>Article ID</th>
+            <td>@Model.Uid</td>
+        </tr>
+        <tr>
+            <th>Title</th>
+            <td>@Model.Title</td>
+        </tr>
+        <tr>
+            <th>Created</th>
+            <td>@Model.CreatedOn.ToString("d MMM yyyy @ HH:mm")</td>
+        </tr>        
+    </tbody>
+</table>
+
+<article class="message is-danger">
+  <div class="message-body p-3">
+    <i class="fas fa-triangle-exclamation"></i>
+    <b>This action cannot be undone.</b>
+  </div>
+</article>
+
+<div class="block mt-3">
+    <form asp-action="Delete" asp-route-id="@Model.Uid" method="post" asp-antiforgery="true">
+        <button class="button is-danger" type="submit">
+            <span class="icon">
+                <i class="fas fa-trash"></i>
+            </span>
+            <span>Yes, Delete</span>
+        </button>
+        <a class="button is-outline">
+            <span class="icon">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span>No, Cancel</span>
+        </a>
+    </form>
+</div>

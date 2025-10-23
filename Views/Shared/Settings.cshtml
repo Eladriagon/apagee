@@ -1,0 +1,52 @@
+@model Settings
+
+<h1 class="title is-2">Settings</h1>
+
+@if (ViewBag.SettingsSuccess is true)
+{
+    <div class="message is-success">
+        <div class="message-body p-3">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-lg fa-check-circle"></i>
+                </span>
+                <span>Settings updated successfully!</span>
+            </span>
+        </div>
+    </div>
+}
+
+<form class="form" method="post" asp-antiforgery="true">
+    <div class="field">
+        <label class="label" for="Theme CSS">Theme CSS</label>
+        <div class="control">
+            <textarea class="textarea is-family-monospace" asp-for="ThemeCss" rows="10"></textarea>
+        </div>
+    </div>
+    <div class="field">
+        <label class="label" asp-for="Favicon">Favicon</label>
+        <div class="control">
+            <input asp-for="Favicon" type="file" accept=".png,.jpg,.jpeg" class="input" />
+        </div>
+    </div>
+    <div class="field">
+        <label class="label" asp-for="AuthorAvatar">Author Avatar</label>
+        <div class="control">
+            <input type="file" accept=".png,.jpg,.jpeg" class="input" />
+        </div>
+    </div>
+    <div class="field">
+        <label class="label">
+            <input asp-for="EnableFontAwesome" class="checkbox" />
+            Enable Font Awesome?
+        </label>
+    </div>
+    <div class="field">
+        <button class="button is-success" type="submit">
+            <span class="icon">
+                <i class="fas fa-save"></i>
+            </span>
+            <span>Save Settings</span>
+        </button>
+    </div>
+</form>

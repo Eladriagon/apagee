@@ -11,12 +11,12 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
-global using Microsoft.Data.Sqlite;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.AspNetCore.HttpOverrides;
 global using Microsoft.AspNetCore.DataProtection;
+global using Microsoft.Data.Sqlite;
 
 global using Apagee;
 global using Apagee.Configuration;
@@ -26,6 +26,8 @@ global using Apagee.Models.APub;
 global using Apagee.Services;
 global using Apagee.Storage;
 global using Apagee.Utilities;
+global using Apagee.ViewModels;
+
 global using Dapper;
 global using Dapper.Contrib.Extensions;
 global using Fluid;

@@ -9,6 +9,9 @@ public static class Init
         await app.InitDatabase();
         await app.CheckFirstTimeUserSetup();
         await app.InitKeypair();
+
+        await app.Services.GetRequiredService<SettingsService>().RefreshSettings();
+
         return app;
     }
 

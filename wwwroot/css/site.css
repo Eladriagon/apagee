@@ -1,0 +1,110 @@
+/* Reset */
+
+:root {
+    --base-font-size: 10px;
+    --size-h1-title: 4.8rem;
+    --size-h1: 4.0rem;
+    --size-h2: 3.4rem;
+    --size-h3: 3rem;
+    --size-h4: 2.4rem;
+    --size-h5: 1.8rem;
+    --size-h6: 1.5rem;
+}
+
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { interpolate-size: allow-keywords; }
+}
+
+:root {
+  --flow-space: 1rem;
+  color-scheme: light dark;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+img, video {
+  height: auto;
+}
+
+b, strong { font-weight: bolder; }
+em, i { font-style: italic; }
+sub, sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sub { bottom: -0.25em; }
+sup { top: -0.5em; }
+
+code, kbd, pre, samp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.95em;
+}
+
+p { text-wrap: pretty; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; }
+
+html { font-size: var(--base-font-size); }
+body { font-size: 1.6rem; }
+
+h1.title { font-size: var(--size-h1-title); }
+h1 { font-size: var(--size-h1); }
+h2 { font-size: var(--size-h2); }
+h3 { font-size: var(--size-h3); }
+h4 { font-size: var(--size-h4); }
+h5 { font-size: var(--size-h5); font-weight: 600; }
+h6 { font-size: var(--size-h6); font-weight: 600; }
+
+:where(h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure, table) {
+  margin-block: 0;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure, table) + :where(*) {
+  margin-block-start: var(--flow-space);
+}
+
+ul, ol { padding-inline-start: 1.25rem; }
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button, [type="button"], [type="submit"], [role="button"] {
+  cursor: pointer;
+}
+
+input, textarea, select { background-clip: padding-box; }
+
+table { border-collapse: collapse; }
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  overflow-wrap: break-word;
+}

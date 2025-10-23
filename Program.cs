@@ -108,9 +108,12 @@ try
         return opts;
     });
 
+    builder.Services.AddSingleton<SettingsService>();
     builder.Services.AddSingleton<StorageService>();
-    builder.Services.AddSingleton<KeypairHelper>();
+    builder.Services.AddSingleton<ArticleService>();
     builder.Services.AddSingleton<UserService>();
+    
+    builder.Services.AddSingleton<KeypairHelper>();
     builder.Services.AddSingleton<SecurityHelper>();
 
     var app = builder.Build();

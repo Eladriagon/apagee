@@ -1,0 +1,14 @@
+@model (string error, string? subError)
+
+<span class="icon-text has-text-left has-text-danger is-align-items-center">
+    <span class="icon">
+        <i class="fas fa-triangle-exclamation"></i>
+    </span>
+    <span>
+        @Model.error
+        @if (Model.subError is not null)
+        {
+            <br><span class="help mt-0">@Model.subError</span>
+        }
+    </span>
+</span>

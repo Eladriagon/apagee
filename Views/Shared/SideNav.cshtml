@@ -12,7 +12,7 @@
     </ul>
     <p class="menu-label">Articles</p>
     <ul class="menu-list">
-        <li><a href="#">
+        <li><a asp-action="NewArticle">
             <span class="icon-text">
                 <span class="icon has-text-success mr-2">
                     <i class="fas fa-sm fa-pencil"></i>
@@ -20,7 +20,7 @@
                 New Article
             </span>
         </a></li>
-        <li><a href="#">
+        <li><a asp-action="Articles">
             <span class="icon-text">
                 <span class="icon mr-2">
                     <i class="fas fa-sm fa-table-list"></i>
@@ -52,12 +52,20 @@
 
     <p class="menu-label">System</p>
     <ul class="menu-list">
+        <li><a asp-action="Settings">
+            <span class="icon-text">
+                <span class="icon has-text-primary mr-2">
+                    <i class="fas fa-sm fa-cog"></i>
+                </span>
+                Settings
+            </span>
+        </a></li>
         <li><a asp-action="Config">
             <span class="icon-text">
-                <span class="icon has-text-danger mr-2">
-                    <i class="fas fa-sm fa-cogs"></i>
+                <span class="icon mr-2">
+                    <i class="fas fa-sm fa-server"></i>
                 </span>
-                Configuration
+                View Config
             </span>
         </a></li>
     </ul>

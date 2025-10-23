@@ -1,0 +1,91 @@
+@model IEnumerable<Article>
+
+<h1 class="title is-2">Articles</h1>
+
+@if (ViewBag.ArticleSuccess is true)
+{
+    <div class="message is-success">
+        <div class="message-body p-3">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-lg fa-check-circle"></i>
+                </span>
+                <span>Article created successfully!</span>
+            </span>
+        </div>
+    </div>
+}
+
+@if (ViewBag.DelSuccess is true)
+{
+    <div class="message is-success">
+        <div class="message-body p-3">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-lg fa-file-circle-xmark"></i>
+                </span>
+                <span>Article deleted successfully.</span>
+            </span>
+        </div>
+    </div>
+}
+
+<table class="table is-fullwidth is-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Created On</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="4" class="has-text-centered pt-6">
+                    <p><em>No articles found! Why not <a asp-action="NewArticle">write one now</a>?</em></p>
+                    <p class="pt-3"><i class="e is-size-2">😢</i></p>
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var article in Model)
+            {
+                <tr class="@(article.Status == ArticleStatus.Draft ? "is-dark" : "")">
+                    <td class="is-line-height-small is-vcentered" title="UID: @(article.Uid)">
+                        <span>@article.Title</span><br />
+                        <small class="is-size-7 mt-0">
+                            <a href="/@article.Slug" target="_blank">/@article.Slug</a>
+                        </small>
+                    </td>
+                    <td class="is-vcentered">@article.CreatedOn.ToString("d MMM yyyy \\@ HH:mm")</td>
+                    <td class="is-vcentered">
+                        @switch (article.Status)
+                        {
+                            case ArticleStatus.Draft:
+                                <span class="tag is-warning">Draft</span>
+                                break;
+                            case ArticleStatus.Published:
+                                <span class="tag is-success">Published</span>
+                                break;
+                        }
+                    </td>
+                    <td class="is-vcentered">
+                        <a asp-action="EditArticle" asp-route-id="@article.Uid" class="button is-outline is-small is-warning">
+                            <span class="icon">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                        </a>
+                        <a asp-action="DeleteArticle" asp-route-id="@article.Uid" class="button is-outline is-small is-danger">
+                            <span class="icon">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

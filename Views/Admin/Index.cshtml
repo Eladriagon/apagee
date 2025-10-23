@@ -1,3 +1,6 @@
+@using Microsoft.AspNetCore.SignalR.Protocol
+@model DashboardViewModel
+
 <h1 class="title is-2">Dashboard</h1>
 
 <section class="section">
@@ -8,20 +11,20 @@
     <div class="level">
         <div class="level-item has-text-centered">
             <div>
-                <p class="title is-1">0</p>
-                <p class="heading">articles</p>
+                <p class="title is-1">@Model.PostCount</p>
+                <p class="heading">article@(@Model.PostCount == 1 ? "" : "s")</p>
             </div>
         </div>
         <div class="level-item has-text-centered">
             <div>
-                <p class="title is-1">0</p>
-                <p class="heading">boosts</p>
+                <p class="title is-1">@Model.BoostCount</p>
+                <p class="heading">boost@(@Model.BoostCount == 1 ? "" : "s")</p>
             </div>
         </div>
         <div class="level-item has-text-centered">
             <div>
-                <p class="title is-1">0</p>
-                <p class="heading">favorites</p>
+                <p class="title is-1">@Model.FavoriteCount</p>
+                <p class="heading">favorite@(@Model.FavoriteCount == 1 ? "" : "s")</p>
             </div>
         </div>
     </div>
@@ -43,35 +46,50 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td><a href="/">My Post</a></td>
-                <td>1 week ago</td>
-                <td>3 days ago</td>
-                <td>
-                    <div class="field is-grouped is-grouped-multiline">
-                        <div class="control">
-                            <span class="tags has-addons has-text-weight-semibold">
-                                <span class="tag is-warning">
-                                    <span class="icon">
-                                        <i class="fas fa-star"></i>
+            @if (Model.RecentArticles is null || !Model.RecentArticles.Any())
+            {
+                <tr>
+                    <td colspan="4" class="has-text-centered pt-5">
+                        <p><em>No articles found! Why not <a asp-action="NewArticle">write one now</a>?</em></p>
+                        <p class="pt-3"><i class="e is-size-2">😢</i></p>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var article in Model.RecentArticles)
+                {
+                    <tr>
+                        <td><a href="/@article.Slug" target="_blank">@article.Title</a></td>
+                        <td>@article.CreatedOn.ToString("d MMM yyyy")</td>
+                        <td>@(article.PublishedOn?.ToString("d MMM yyyy") ?? "Never")</td>
+                        <td>
+                            <div class="field is-grouped is-grouped-multiline">
+                                <div class="control">
+                                    <span class="tags has-addons has-text-weight-semibold">
+                                        <span class="tag is-warning">
+                                            <span class="icon">
+                                                <i class="fas fa-star"></i>
+                                            </span>
+                                        </span>
+                                        <span class="tag is-dark">27</span>
                                     </span>
-                                </span>
-                                <span class="tag is-dark">27</span>
-                            </span>
-                        </div>
-                        <div class="control">
-                            <span class="tags has-addons is-info has-text-weight-semibold">
-                                <span class="tag is-info">
-                                    <span class="icon">
-                                        <i class="fas fa-retweet"></i>
+                                </div>
+                                <div class="control">
+                                    <span class="tags has-addons is-info has-text-weight-semibold">
+                                        <span class="tag is-info">
+                                            <span class="icon">
+                                                <i class="fas fa-retweet"></i>
+                                            </span>
+                                        </span>
+                                        <span class="tag is-dark">39</span>
                                     </span>
-                                </span>
-                                <span class="tag is-dark">39</span>
-                            </span>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </thead>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            </thead>
     </table>
 </section>

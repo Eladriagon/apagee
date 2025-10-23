@@ -1,5 +1,61 @@
+/* Site Theme */
+:root {
+    --bulma-primary-h: 333;
+    --bulma-primary-s: 85%;
+    --bulma-primary-l: 55%;
+
+    --bulma-danger-h: 0deg;
+    --bulma-danger-s: 84%;
+    --bulma-danger-l: 65%;
+
+    --bulma-success-h: 140deg;
+    --bulma-success-s: 53%;
+    --bulma-success-l: 53%;
+}
+
+body.apagee-admin #main {
+    min-height: calc(100vh - 250px);
+}
+
+/* Custom stuff */
+i.e,
+span.e {
+    font-family: "Noto Color Emoji", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
 /* Icons in active links should always be white */
-.menu a.is-active span.icon i
-{
-    color: hsl(var(--bulma-menu-item-h),var(--bulma-menu-item-s),var(--bulma-menu-item-color-l));
+.menu a.is-active span.icon i {
+    color: hsl(var(--bulma-menu-item-h), var(--bulma-menu-item-s), var(--bulma-menu-item-color-l));
+}
+
+/* Stuff that should have been in Bulma in the first place... */
+
+.x100,
+.w100 {
+    width: 100%;
+}
+
+.y100,
+.h100 {
+    height: 100%;
+}
+
+.mx100,
+.mw100 {
+    min-width: 100%;
+}
+
+.my100,
+.mh100 {
+    min-height: 100%;
+}
+
+.is-resize-vertical {
+    resize: vertical;
+}
+
+.is-line-height-small {
+    line-height: 1.15;
 }

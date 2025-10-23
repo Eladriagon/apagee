@@ -25,8 +25,8 @@ fi
 
 status "Installing dependencies..."
 
-apt update -q > /dev/null
-apt --quiet=2 install git curl wget tar libcap2-bin > /dev/null
+apt-get update -q > /dev/null 2>&1
+apt-get install git curl wget tar libcap2-bin | grep "upgraded"
 
 if ! id -u apagee &>/dev/null; then
   status "Creating user and group..."
@@ -64,6 +64,8 @@ status "Setting permissions..."
 chown -R apagee:apagee apagee
 chmod +x apagee/apagee # Should already have +x from the tarball, but just in case.
 setcap 'cap_net_bind_service=+ep' "$(pwd)/apagee/apagee" # Required to listen on 80/443.
+
+# TODO: chmod -R 700 apagee .keys ?
 
 if [ "$WAS_RUNNING" = true ]; then
     status "Updating service..."
