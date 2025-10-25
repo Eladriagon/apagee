@@ -14,6 +14,7 @@ error() { printf "${RED}$@${RESET}\n"; }
 # Function to get the latest release from Github and parse their JSON.
 fetch_gh_release_latest() {
   local api="https://api.github.com/repos/eladriagon/apagee/releases/latest"
+  local url json tag
 
   command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; return 3; }
 
@@ -44,7 +45,7 @@ fetch_gh_release_latest() {
   tag="$(jq -r '.tag_name // empty' <<<"$json")"
   url="$(jq -r '
     .assets
-    | (//[])
+    | (. // [])
     | map(select((.name|test("linux-x64"; "i")) and .state=="uploaded"))
     | first
     | .browser_download_url // empty
@@ -54,13 +55,15 @@ fetch_gh_release_latest() {
   export LATEST_TAG_RAW="$tag"
   export LATEST_TAG_STRIPPED="${tag#v}"
 
-  if [[ -n "$url" ]]; then
-    printf '%s\n' "$url"
-    return 0
+  # if URL is empty, return 1 (no uploaded linux-x64 asset found)
+  if [[ -z "$url" ]]; then
+    return 1
   fi
 
-  # No match.
-  return 1
+  [[ -z "$url" ]] && return 1
+
+  printf -v _GH_URL '%s' "$url"  # store locally accessible variable
+  return 0
 }
 
 info ""
@@ -93,8 +96,8 @@ status "Now working in: $(pwd)"
 
 status "Fetching the latest release..."
 
-if ! url="$(fetch_gh_release_latest)"; then
-  error "Fatal: No uploaded linux-x64 asset found. A build may be in progress. Try again in a few minutes." >&2
+if ! gh_latest_linux_x64_url; then
+  error "Fatal: No uploaded linux-x64 asset found. (error code $?) A build may be in progress. Try again in a few minutes." >&2
   return
 fi
 
@@ -102,7 +105,7 @@ status "Downloading $LATEST_TAG_RAW..."
 
 # TODO: Automate this...
 
-wget -qO apagee.tar.gz "$url" > /dev/null
+wget -qO apagee.tar.gz "$_GH_URL" > /dev/null
 
 WAS_RUNNING=false
 if systemctl status apagee.service &>/dev/null; then
