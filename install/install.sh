@@ -11,12 +11,63 @@ status() { printf "${BLUE}$@${RESET}\n"; }
 success() { printf "${GREEN}$@${RESET}\n"; }
 error() { printf "${RED}$@${RESET}\n"; }
 
+# Function to get the latest release from Github and parse their JSON.
+fetch_gh_release_latest() {
+  local api="https://api.github.com/repos/eladriagon/apagee/releases/latest"
+
+  command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; return 3; }
+
+  # Build curl args; keep your headers, add resiliency.
+  local -a curl_args=(
+    -fsSL
+    --connect-timeout 10
+    --max-time 30
+    --retry 3
+    --retry-delay 1
+    --retry-all-errors
+    -H "Accept: application/vnd.github+json"
+    -H "X-GitHub-Api-Version: 2022-11-28"
+  )
+  # Optional: use GITHUB_TOKEN to dodge low rate limits
+  if [[ -n "$GITHUB_TOKEN" ]]; then
+    curl_args+=(-H "Authorization: Bearer $GITHUB_TOKEN")
+  fi
+
+  local json
+  if ! json="$(curl "${curl_args[@]}" "$api")"; then
+    # Curl already printed something sane; just exit with a failure code.
+    return 2
+  fi
+
+  # Extract both tag and matching Linux asset URL
+  local tag url
+  tag="$(jq -r '.tag_name // empty' <<<"$json")"
+  url="$(jq -r '
+    .assets
+    | (//[])
+    | map(select((.name|test("linux-x64"; "i")) and .state=="uploaded"))
+    | first
+    | .browser_download_url // empty
+  ' <<<"$json")"
+
+  # Export for external use (e.g., in other parts of your script)
+  export LATEST_TAG_RAW="$tag"
+  export LATEST_TAG_STRIPPED="${tag#v}"
+
+  if [[ -n "$url" ]]; then
+    printf '%s\n' "$url"
+    return 0
+  fi
+
+  # No match.
+  return 1
+}
+
 info ""
 info "  Apagee Installation Script"
 info "            v1.0"
 info "  --------------------------"
 info ""
-
 
 if [ "$EUID" -ne 0 ]; then
     error "Script must be run as root."
@@ -26,7 +77,7 @@ fi
 status "Installing dependencies..."
 
 apt-get update -q > /dev/null 2>&1
-apt-get install git curl wget tar libcap2-bin | grep "upgraded"
+apt-get install git curl wget tar libcap2-bin jq | grep "upgraded"
 
 if ! id -u apagee &>/dev/null; then
   status "Creating user and group..."
@@ -39,11 +90,19 @@ fi
 pushd "$(eval echo ~apagee)" >/dev/null
 
 status "Now working in: $(pwd)"
-status "Downloading..."
+
+status "Fetching the latest release..."
+
+if ! url="$(fetch_gh_release_latest)"; then
+  error "Fatal: No uploaded linux-x64 asset found. A build may be in progress. Try again in a few minutes." >&2
+  return
+fi
+
+status "Downloading $LATEST_TAG_RAW..."
 
 # TODO: Automate this...
 
-wget -qO apagee.tar.gz "https://github.com/Eladriagon/apagee/releases/download/v1.0.3-Pre/apagee-linux-x64.tar.gz" > /dev/null
+wget -qO apagee.tar.gz "$url" > /dev/null
 
 WAS_RUNNING=false
 if systemctl status apagee.service &>/dev/null; then
