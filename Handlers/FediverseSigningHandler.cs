@@ -4,6 +4,21 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper) : DelegatingHa
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        // Include JSON-LD
+        request.Headers.Accept.Clear();
+        request.Headers.TryAddWithoutValidation("Accept", @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""");
+
+        if (request.Content is not null)
+        {
+            request.Content.Headers.Remove("Content-Type");
+            request.Content.Headers.TryAddWithoutValidation("Content-Type", @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""");
+        }
+
+        // Good internet citizenry
+        request.Headers.UserAgent.Clear();
+        request.Headers.TryAddWithoutValidation("User-Agent", $"Apagee/{Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "1.0"} (+https://github.com/eladriagon/apagee)");
+
+        // And sign it
         var privKey = keypairHelper.ActorRsaPrivateKey
             ?? throw new ApageeException("Cannot create FediverseSigningHandler: Actor private key is missing.");
 

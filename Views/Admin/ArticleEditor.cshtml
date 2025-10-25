@@ -1,16 +1,18 @@
+@model ArticleEditViewModel?
+
 <div class="block mh100 is-flex is-flex-direction-column is-flex-wrap-nowrap">
 
-    <form method="post" asp-antiforgery="true" class="is-flex-grow-1 is-flex is-flex-direction-column is-flex-wrap-nowrap">
-
+    <form method="post" asp-action="SaveArticle" asp-antiforgery="true" asp-route-id="@Model?.Uid" class="is-flex-grow-1 is-flex is-flex-direction-column is-flex-wrap-nowrap">
+        <input type="hidden" name="Uid" value="@Model?.Uid" />
         <div class="level">
             <div class="level-left">
                 <div class="level-item">
-                    <h1 class="title is-2">Write an Article</h1>
+                    <h1 class="title is-2">@(Model?.Uid is null ? "Write an" : "Edit") Article</h1>
                 </div>
             </div>
             <div class="level-right">
                 <div class="level-item">
-                    <button class="button is-secondary is-outline" asp-route-isDraft="@(true)">
+                    <button disabled="@(Model?.WasEverPublished ?? false)" title="@(Model?.WasEverPublished is true ? "Cannot save a draft once it's been published." : "Saves the article as a draft.")" class="button is-secondary is-outline" asp-route-isDraft="@(true)">
                         <span class="icon-text">
                             <span class="icon">
                                 <i class="fas fa-pen-to-square"></i>
@@ -20,7 +22,7 @@
                     </button>
                 </div>
                 <div class="level-item">
-                    <button class="button is-primary" type="submit">
+                    <button class="button is-primary" title="Publishes the article right now for the whole world to see!" type="submit">
                         <span class="icon-text">
                             <span class="icon">
                                 <i class="fas fa-paper-plane"></i>
@@ -41,7 +43,7 @@
 
         <div class="field">
             <div class="control has-icons-left">
-                <input class="input is-large" type="text" name="title" id="title" placeholder="Article Title" />
+                <input asp-for="Title" class="input is-large" id="title" placeholder="Article Title" />
                 <span class="icon is-small is-left">
                     <i class="fas fa-font"></i>
                 </span>
@@ -53,7 +55,7 @@
         </p>
 
         <div class="field is-flex-grow-1 is-flex is-flex-direction-column is-flex-wrap-nowrap">
-            <textarea name="article" id="article" class="input is-resize-vertical is-flex-grow-1 is-family-monospace" placeholder="Your next *masterpiece* awaits..."></textarea>
+            <textarea asp-for="Body" id="article" class="textarea is-resize-vertical is-flex-grow-1 is-family-monospace" placeholder="Your next *masterpiece* awaits..."></textarea>
         </div>
         
     </form>

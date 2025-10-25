@@ -10,6 +10,31 @@ public static class ApageeExtensions
         (noTrim ? str : str.Trim()).Equals((noTrim ? other : other.Trim()), StringComparison.InvariantCultureIgnoreCase);
 
     /// <summary>
+    /// Truncates a string and optionally adds a suffix, such as "..." to the end if it was truncated.
+    /// </summary>
+    public static string? Truncate(this string? str, int length, string suffix = "...") =>
+        str is null || str.Length <= length ? str : string.Concat(str.AsSpan(0, length), suffix);
+
+    /// <summary>
+    /// Converts a long string into a short status note.
+    /// </summary>
+    public static string? ToStatusNote(this string? str)
+    {
+        if (str is null) return null;
+
+        str = str.Trim().Replace("\r", "");
+
+        if (str.Contains("\n\n"))
+        {
+            return str.Split("\n\n")[0].Truncate(400);
+        }
+        else
+        {
+            return str.Truncate(400);
+        }
+    }
+
+    /// <summary>
     /// Takes only alphanumeric characters, replaces everything else with spaces, condenses multiple spaces to single hyphens,
     /// trims leading/trailing hyphens, and lowercases the result.
     /// </summary>

@@ -6,6 +6,8 @@ namespace Apagee.Configuration;
 /// </summary>
 public sealed class GlobalConfiguration
 {
+    public static GlobalConfiguration? Current { get; set; }
+
     #region HTTP
 
     /// <summary>
@@ -63,7 +65,7 @@ public sealed class GlobalConfiguration
     /// <summary>
     /// The summary/bio for your fediverse profile. Can optionally be displayed on the blog as well.
     /// </summary>
-    public string FediverseBio { get; set; } = default!;
+    public string? FediverseBio { get; set; }
 
     /// <summary>
     /// Whether or not to include the sumamry/bio text in the author block of the article.
@@ -74,6 +76,11 @@ public sealed class GlobalConfiguration
     /// Whether or not to include the profile picture in the author block of the article.
     /// </summary>
     public bool ShowProfilePictureOnArticles { get; set; } = true;
+
+    /// <summary>
+    /// The language code preference for Fediverse activities.
+    /// </summary>
+    public string? LanguageCode { get; set; } = "en";
 
     #endregion
 

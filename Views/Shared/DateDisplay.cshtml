@@ -1,0 +1,12 @@
+@model (DateTime? date, bool includeTime)
+
+<span class="datetime" title="@(Model.date?.ToString("ddd, d MMM yyyy HH:mm:ss")) (UTC)">
+    @if (Model.date is null)
+    {
+        <em>Never</em>
+    }
+    else
+    {
+        @Model.date?.ToString(Model.includeTime is true ? "d MMM yyyy @ HH:mm" : "d MMM yyyy")
+    }
+</span>

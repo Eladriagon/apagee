@@ -23,6 +23,8 @@ try
         }
     }
 
+    GlobalConfiguration.Current = config;
+
     Output.WriteLine($"{Output.Ansi.Green}Configuration loaded successfully.");
 }
 catch (ApageeException aex)
@@ -62,6 +64,8 @@ try
 
     builder.WebHost.UseUrls(config.HttpBindUrl);
 
+    builder.Services.AddMemoryCache();
+
     builder.Services
         .AddDataProtection()
         .SetApplicationName(Globals.APP_NAME)
@@ -96,6 +100,11 @@ try
 
     builder.Services.AddHttpClient(Globals.HTTP_CLI_NAME_FED)
                     .AddHttpMessageHandler<FediverseSigningHandler>();
+
+    builder.Services.Configure<JsonOptions>(json =>
+    {
+        APubJsonOptions.OptionModifier(json.JsonSerializerOptions);
+    });
 
     builder.Services.AddSingleton(config);
     builder.Services.AddSingleton(new FluidParser());
@@ -143,11 +152,10 @@ try
     // Covers most system pages
     app.MapControllers();
 
-    // APub and other API endpoints
-    app.MapControllerRoute("api", "api/{controller}/{action=Get}/{id?}");
-
     // Article "permalink" view URL
     app.MapControllerRoute("page", "{*slug}", new { controller = "Page", action = "Get" });
+
+    //app.UseStatusCodePagesWithReExecute();
 
     app.MapFallback(() => Results.LocalRedirect("404"));
 

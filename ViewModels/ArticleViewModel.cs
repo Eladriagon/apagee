@@ -2,7 +2,7 @@ namespace Apagee.ViewModels;
 
 public class ArticleViewModel
 {
-    public required Article Article { get; set; }
+    public required Models.Article Article { get; set; }
 
     public required string BodyHtml { get; set; }
 

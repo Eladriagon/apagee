@@ -21,17 +21,51 @@ public class ArticleService(StorageService storageService)
         }
     }
 
-    public async Task<int> GetCount()
+    public async Task<uint> GetCount(bool publishedOnly = false)
     {
         try
         {
             using var conn = await StorageService.Conn();
 
-            return await conn.ExecuteScalarAsync<int>(CreateFluent().Select($"COUNT(*)").From($"Article").Sql);
+            return await conn.ExecuteScalarAsync<uint>($"SELECT COUNT(*) FROM Article {(publishedOnly ? $"WHERE Status = {(int)ArticleStatus.Published}" : "")}");
         }
         catch (Exception ex)
         {
             throw new ApageeException($"Failed to get article count - {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Returns an oldest-to-newest list of articles newer than the specified ulid.
+    /// </summary>
+    public async Task<IEnumerable<Article>> GetNewerThan(string? ulid = null, bool inclusive = false, int count = 25)
+    {
+        try
+        {
+            using var conn = await StorageService.Conn();
+
+            return await conn.QueryAsync<Article>($"SELECT * FROM Article WHERE Status = {(int)ArticleStatus.Published} AND UID {(inclusive ? ">=" : ">")} '{ulid ?? Ulid.MinValue.ToString()}' ORDER BY UID ASC LIMIT {count};");
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Failed to get articles - {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Returns a newest-to-oldest list of articles newer than the specified ulid.
+    /// </summary>
+    public async Task<IEnumerable<Article>> GetOlderThan(string? ulid = null, bool inclusive = false, int count = 25)
+    {
+        try
+        {
+            using var conn = await StorageService.Conn();
+
+            return await conn.QueryAsync<Article>($"SELECT * FROM Article WHERE Status = {(int)ArticleStatus.Published} AND UID {(inclusive ? "<=" : "<")} '{ulid ?? Ulid.MaxValue.ToString()}' ORDER BY UID DESC LIMIT {count};");
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Failed to get articles - {ex.Message}", ex);
         }
     }
 

@@ -12,4 +12,8 @@ public class Article
     public required string Title { get; set; }
     public string? Body { get; set; }
     public BodyMode BodyMode { get; set; }
+
+    // If we end up having a <!-- more --> or something similar, add support for that here.
+    [Write(false)]
+    public string? ArticleSummary => Markdown.ToHtml($"{Title}{(Body is not null ? "\n\n" + Body.Replace("\r", "").Split("\n\n")[0].Truncate(400) : null)}").Trim();
 }

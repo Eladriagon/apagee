@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html class="@(ConfigManager.GetGlobalConfig().ForceDarkMode ? "theme-dark" : "")">
+<head>
+    <title>Apagee Admin Area</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" integrity="sha256-Z/om3xyp6V2PKtx8BPobFfo9JCV0cOvBDMaLmquRS+4=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    @RenderSection("head", false)
+</head>
+<body class="apagee-admin container is-max-desktop">
+
+    <div id="main" class="mt-6">
+        @RenderBody()
+    </div>
+    
+    @RenderSection("scripts", false)
+</body>
+</html>

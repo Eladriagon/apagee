@@ -20,7 +20,7 @@ public class AdminController(UserService userService, ArticleService articleServ
 
         return View(new DashboardViewModel
         {
-            PostCount = articleCount,
+            PostCount = (int)articleCount,
             RecentArticles = recentArticles
         });
     }
@@ -62,7 +62,8 @@ public class AdminController(UserService userService, ArticleService articleServ
     [Route("articles")]
     public async Task<IActionResult> Articles()
     {
-        ViewBag.ArticleSuccess = TempData["ArticleSuccess"];
+        ViewBag.NewSuccess = TempData["NewSuccess"];
+        ViewBag.EditSuccess = TempData["EditSuccess"];
         ViewBag.DelSuccess = TempData["DelSuccess"];
         var articles = await ArticleService.GetAll();
         return View(articles);
@@ -74,43 +75,90 @@ public class AdminController(UserService userService, ArticleService articleServ
     {
         ViewBag.ArticleError = TempData["ArticleError"];
         ViewBag.ArticleSubError = TempData["ArticleSubError"];
-        return View();
+        return View("ArticleEditor");
+    }
+
+    [HttpGet]
+    [Route("articles/edit/{id}")]
+    public async Task<IActionResult> EditArticle(string id, [FromQuery] bool isDraft = false)
+    {
+        try
+        {
+            var article = await ArticleService.GetByUid(id);
+
+            if (article is null)
+            {
+                return NotFound();
+            }
+
+            return View("ArticleEditor", new ArticleEditViewModel
+            {
+                Uid = article.Uid,
+                Title = article.Title,
+                Body = article.Body,
+                WasEverPublished = article.PublishedOn is not null
+            });
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Error fetching article \"{id}\" to preview delete - {ex.Message}", ex);
+        }
     }
 
     [HttpPost]
-    [Route("articles/new")]
+    [Route("articles/save/{id?}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> NewArticle([FromForm] string title, [FromForm] string article, [FromQuery] bool isDraft = false)
+    public async Task<IActionResult> SaveArticle([FromForm] ArticleEditViewModel formArticle, [FromRoute] string? id = null, [FromQuery] bool isDraft = false)
     {
-        if (string.IsNullOrWhiteSpace(title))
+        var article = formArticle.Uid is not null
+            ? await ArticleService.GetByUid(formArticle.Uid)
+            : new()
+            {
+                Uid = Ulid.NewUlid().ToString(),
+                Title = formArticle.Title,
+                Slug = "",
+                Body = formArticle.Body,
+                CreatedOn = DateTime.UtcNow
+            };
+            
+        // If it's null here, it's because it wasn't found
+        // Also check the IDs match
+        if (article is null || (id is not null && formArticle.Uid != id))
+        {
+            return BadRequest("Invalid article ID for editing.");
+        }
+
+        if (string.IsNullOrWhiteSpace(article.Title))
         {
             TempData["ArticleError"] = "Forgetting something?";
             TempData["ArticleSubError"] = "Title is missing.";
-            return RedirectToAction("NewArticle");
+            return View("ArticleEditor");
         }
 
-        if (string.IsNullOrWhiteSpace(article))
+        if (string.IsNullOrWhiteSpace(article.Body))
         {
             TempData["ArticleError"] = "Forgetting something?";
             TempData["ArticleSubError"] = "Article body is missing.";
-            return RedirectToAction("NewArticle");
+            return View("ArticleEditor");
         }
 
-        var slug = title.ToUrlSlug();
+        // Compute extra properties
+        article.Slug = article.Title.ToUrlSlug();
+        article.BodyMode = BodyMode.Markdown;
+        article.Status = isDraft ? ArticleStatus.Draft : ArticleStatus.Published;
+        article.PublishedOn = isDraft ? null : DateTime.UtcNow;
 
-        await ArticleService.Create(new Article
+        if (id is null)
         {
-            Uid = Ulid.NewUlid().ToString(),
-            Title = title.Trim(),
-            Slug = slug,
-            Body = article.Trim(),
-            BodyMode = BodyMode.Markdown,
-            Status = isDraft ? ArticleStatus.Draft : ArticleStatus.Published,
-            CreatedOn = DateTime.UtcNow
-        });
-
-        TempData["ArticleSuccess"] = true;
-
+            await ArticleService.Create(article);
+            TempData["NewSuccess"] = true;
+        }
+        else
+        {
+            await ArticleService.Update(article);
+            TempData["EditSuccess"] = true;
+        }
+        
         return RedirectToAction("Articles");
     }
 

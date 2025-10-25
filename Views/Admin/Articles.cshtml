@@ -16,6 +16,20 @@
     </div>
 }
 
+@if (ViewBag.EditSuccess is true)
+{
+    <div class="message is-success">
+        <div class="message-body p-3">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-lg fa-file-edit"></i>
+                </span>
+                <span>Article edited successfully.</span>
+            </span>
+        </div>
+    </div>
+}
+
 @if (ViewBag.DelSuccess is true)
 {
     <div class="message is-success">
@@ -60,7 +74,7 @@
                             <a href="/@article.Slug" target="_blank">/@article.Slug</a>
                         </small>
                     </td>
-                    <td class="is-vcentered">@article.CreatedOn.ToString("d MMM yyyy \\@ HH:mm")</td>
+                    <td class="is-vcentered"><partial name="DateDisplay" model="@(((DateTime?)article.CreatedOn, false))" /></td>
                     <td class="is-vcentered">
                         @switch (article.Status)
                         {

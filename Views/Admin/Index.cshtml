@@ -61,8 +61,8 @@
                 {
                     <tr>
                         <td><a href="/@article.Slug" target="_blank">@article.Title</a></td>
-                        <td>@article.CreatedOn.ToString("d MMM yyyy")</td>
-                        <td>@(article.PublishedOn?.ToString("d MMM yyyy") ?? "Never")</td>
+                        <td><partial name="DateDisplay" model="@(((DateTime?)article.CreatedOn, false))" /></td>
+                        <td><partial name="DateDisplay" model="@((article.PublishedOn, false))" /></td>
                         <td>
                             <div class="field is-grouped is-grouped-multiline">
                                 <div class="control">
