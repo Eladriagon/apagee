@@ -96,7 +96,7 @@ status "Now working in: $(pwd)"
 
 status "Fetching the latest release..."
 
-if ! gh_latest_linux_x64_url; then
+if ! fetch_gh_release_latest; then
   error "Fatal: No uploaded linux-x64 asset found. (error code $?) A build may be in progress. Try again in a few minutes." >&2
   return
 fi
