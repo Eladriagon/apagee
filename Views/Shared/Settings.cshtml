@@ -16,7 +16,7 @@
     </div>
 }
 
-<form class="form" method="post" asp-antiforgery="true">
+<form class="form" method="post" asp-antiforgery="true" enctype="multipart/form-data">
 
     <h2 class="subtitle is-3">Theme and Styling</h2>
 
@@ -33,7 +33,7 @@
 
         <div class="file has-name is-boxed">
             <label class="file-label">
-                <input asp-for="Favicon" type="file" accept=".png,.ico" class="file-input" />
+                <input asp-for="FaviconInput" type="file" accept=".png,.ico" class="file-input" />
                 <span class="file-cta">
                     <span class="file-icon">
                         <i class="fas fa-upload"></i>
@@ -43,14 +43,19 @@
                 <span class="file-name mw100">No file selected.</span>
             </label>
         </div>
+        @if (Model.Favicon is not null)
+        {
+            <img src="@Model.Favicon?.ToDataUri()" alt="Favicon for @(GlobalConfiguration.Current?.PublicHostname)" style="width: 32px !important; height: 32px !important;" />
+        }
         <span class="help">This is the 16x16 icon that appears in browser tabs.</span>
     </div>
+
     <div class="field">
         <label class="label" asp-for="AuthorAvatar">Author Avatar</label>
 
         <div class="file has-name is-boxed">
             <label class="file-label">
-                <input asp-for="AuthorAvatar" type="file" accept=".png,.jpg,.jpeg" class="file-input" />
+                <input asp-for="AuthorAvatarInput" type="file" accept=".png,.jpg,.jpeg" class="file-input" />
                 <span class="file-cta">
                     <span class="file-icon">
                         <i class="fas fa-upload"></i>
@@ -60,6 +65,10 @@
                 <span class="file-name mw100">No file selected.</span>
             </label>
         </div>
+        @if (Model.AuthorAvatar is not null)
+        {
+            <img src="@Model.AuthorAvatar?.ToDataUri()" alt="Avatar for @(GlobalConfiguration.Current?.FediverseUsername)" style="width: 96px !important; height: 96px !important;" />
+        }
         <span class="help">This is your Fediverse and site avatar image. Must be square. 120x120 recommended.</span>
     </div>
     <div class="field">

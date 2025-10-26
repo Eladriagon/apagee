@@ -46,6 +46,29 @@ public class AdminController(UserService userService, ArticleService articleServ
     {
         try
         {
+            var settings = SettingsService.Current;
+
+            // Copy some non-persistent settings over
+            newSettings.Favicon = settings?.Favicon;
+            newSettings.AuthorAvatar = settings?.AuthorAvatar;
+
+            if (newSettings.FaviconInput is not null)
+            {
+                var b64favicon = await newSettings.FaviconInput.ReadToBase64();
+                if (b64favicon is { Length: > 0 } && Utils.IsIco(b64favicon) || Utils.IsPng(b64favicon))
+                {
+                    newSettings.Favicon = b64favicon;
+                }
+            }
+            if (newSettings.AuthorAvatarInput is not null)
+            {
+                var b64avatar = await newSettings.AuthorAvatarInput.ReadToBase64();
+                if (b64avatar is { Length: > 0 } && Utils.IsJpeg(b64avatar) || Utils.IsPng(b64avatar))
+                {
+                    newSettings.AuthorAvatar = b64avatar;
+                }
+            }
+
             await SettingsService.UpsertSettings(newSettings);
 
             TempData["SettingsSuccess"] = true;
@@ -110,9 +133,17 @@ public class AdminController(UserService userService, ArticleService articleServ
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SaveArticle([FromForm] ArticleEditViewModel formArticle, [FromRoute] string? id = null, [FromQuery] bool isDraft = false)
     {
-        var article = formArticle.Uid is not null
-            ? await ArticleService.GetByUid(formArticle.Uid)
-            : new()
+        Article? article;
+
+        if (formArticle.Uid is not null)
+        {
+            article = await ArticleService.GetByUid(formArticle.Uid) ?? throw new ApageeException($"Edit article not found: {formArticle.Uid}");
+            article.Title = formArticle.Title;
+            article.Body = formArticle.Body;
+        }
+        else
+        {
+            article = (Article?)new()
             {
                 Uid = Ulid.NewUlid().ToString(),
                 Title = formArticle.Title,
@@ -120,7 +151,8 @@ public class AdminController(UserService userService, ArticleService articleServ
                 Body = formArticle.Body,
                 CreatedOn = DateTime.UtcNow
             };
-            
+        }
+
         // If it's null here, it's because it wasn't found
         // Also check the IDs match
         if (article is null || (id is not null && formArticle.Uid != id))

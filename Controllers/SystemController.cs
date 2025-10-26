@@ -1,14 +1,16 @@
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 
 namespace Apagee.Controllers;
 
 [Route("")]
-public class SystemController(UserService userService, GlobalConfiguration config) 
+public class SystemController(UserService userService, SettingsService settingsService, GlobalConfiguration config) 
     : BaseController
 {
     public UserService UserService { get; } = userService;
+    public SettingsService SettingsService { get; } = settingsService;
     public GlobalConfiguration Config { get; } = config;
 
     [Route("")]
@@ -24,7 +26,6 @@ public class SystemController(UserService userService, GlobalConfiguration confi
 
         return View("Author");
     }
-
     [Route("404")]
     public IActionResult PageNotFound() => Content("Apagee -- 404 Not Found");
 
@@ -78,6 +79,97 @@ public class SystemController(UserService userService, GlobalConfiguration confi
             TempData["LoginErr"] = true;
             return RedirectToAction(nameof(LoginView));
         }
+    }
+    
+    // Image handling
+
+    [HttpGet]
+    [Route("/favicon.ico")]
+    public async Task<IActionResult> GetFavicon()
+    {
+        var settings = SettingsService.Current;
+
+        if (settings is null)
+        {
+            return NotFound();
+        }
+
+        var b64 = settings.Favicon;
+        if (string.IsNullOrWhiteSpace(b64))
+            return NotFound();
+
+        byte[] bytes;
+        try
+        {
+            bytes = Convert.FromBase64String(b64);
+        }
+        catch
+        {
+            return NotFound(); // invalid base64
+        }
+
+        // ICO header check:
+        // ICO files start with: 00 00 01 00 (little-endian reserved/type fields)
+        if (Utils.IsIco(b64))
+        {
+            // Serve it as an actual favicon
+            return File(bytes, "image/x-icon");
+        }
+        else if (Utils.IsPng(b64))
+        {
+            return File(bytes, "image/png");
+        }
+        else
+        {
+            return NotFound(); // not a valid ICO/PNG file
+        }
+
+    }
+
+    [HttpGet]
+    [Route("/avatar.png")]
+    public IActionResult GetAvatar()
+    {
+        var settings = SettingsService.Current;
+
+        if (settings is null)
+        {
+            return NotFound();
+        }
+
+        var b64 = settings.AuthorAvatar;
+        if (string.IsNullOrWhiteSpace(b64))
+            return NotFound();
+
+        byte[] bytes;
+        try
+        {
+            bytes = Convert.FromBase64String(b64);
+        }
+        catch
+        {
+            return NotFound(); // invalid Base64
+        }
+
+        // --- PNG check ---
+        if (bytes.Length >= 8 &&
+            bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47 &&
+            bytes[4] == 0x0D && bytes[5] == 0x0A && bytes[6] == 0x1A && bytes[7] == 0x0A)
+        {
+            Response.Headers.CacheControl = "public, max-age=86400";
+            return File(bytes, "image/png");
+        }
+
+        // --- JPEG check ---
+        if (bytes.Length >= 4 &&
+            bytes[0] == 0xFF && bytes[1] == 0xD8 &&
+            bytes[^2] == 0xFF && bytes[^1] == 0xD9)
+        {
+            Response.Headers.CacheControl = "public, max-age=86400";
+            return File(bytes, "image/jpeg");
+        }
+
+        return NotFound(); // unsupported or invalid image
     }
 
     private async Task SignIn(string username)

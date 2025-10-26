@@ -15,7 +15,16 @@
     <meta property="og:description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
     <meta name="description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Article.Slug" />
+    <meta property="og:published_time" content="@(vm.Article.PublishedOn?.ToString("s"))Z" />
+    <meta property="og:locale" content="en" />
+    <meta property="profile:username" content="@(GlobalConfiguration.Current?.FediverseUsername)@@@(GlobalConfiguration.Current?.PublicHostname)" />
     <meta name="initialPath" content="/" />
+
+    @if (vm.SiteSettings?.Favicon is not null)
+    {
+        <link rel="icon" type="@(Utils.IsIco(vm.SiteSettings.Favicon) ? "image/x-icon" : "image/png")" href="/favicon.ico" />
+    }
 
     <link rel="stylesheet" href="/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />

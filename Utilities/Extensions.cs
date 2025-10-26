@@ -68,4 +68,37 @@ public static class ApageeExtensions
         // Trim leading/trailing hyphens
         return sb.ToString().Trim('-');
     }
+
+    public static async Task<string?> ReadToBase64(this IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return null;
+        }
+
+        using var ms = new MemoryStream();
+        await file.CopyToAsync(ms);
+        return Convert.ToBase64String(ms.ToArray());
+    }
+
+    /// <summary>
+    /// Converts the base64 string into an inline data URI for use in an <img> tag.
+    /// </summary>
+    public static string? ToDataUri(this string base64)
+    {
+        if (string.IsNullOrWhiteSpace(base64))
+            return null;
+
+        if (Utils.IsPng(base64))
+        {
+            return $"data:image/png;base64,{base64}";
+        }
+
+        if (Utils.IsJpeg(base64))
+        {
+            return $"data:image/jpeg;base64,{base64}";
+        }
+
+        return null;
+    }
 }

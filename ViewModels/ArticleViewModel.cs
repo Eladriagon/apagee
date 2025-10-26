@@ -12,6 +12,8 @@ public class ArticleViewModel
 
     public string? AuthorDisplayName { get; set; }
 
+    public string? AuthorAvatarB64 { get; set; }
+
     public string? AuthorBio { get; set; }
 
     public string? ThemeCss { get; set; }

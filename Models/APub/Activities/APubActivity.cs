@@ -22,6 +22,7 @@ public class APubActivity : APubObject
 
         return new TAct
         {
+            Id = innerObject.Id + "/activity",
             Actor = actorUri,
             Object = innerObject,
             Target = target,

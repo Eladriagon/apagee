@@ -5,30 +5,39 @@
 @model ArticleViewModel
 <article>
     <header>
-        <h1 class="title is-2">@Model.Article.Title</h1>
+        <h1 class="title">@Model.Article.Title</h1>
+
+        <div class="published">
+            <time datetime="@(Model.Article.PublishedOn?.ToString("s"))Z">@(Model.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
+        </div>
     </header>
     
-    <div class="content">
+    <section class="content">
         @Html.Raw(Model.BodyHtml)
     </div>
-
-    <aside class="ata">
-        <div class="ata-header">
-            About the Author
-        </div>
-        @* pfp *@
-        <div class="author">
-            @if (Model.AuthorDisplayName is string { Length: > 0 } displayName)
-            {
-                <span class="display">@displayName</span>
-            }
-            <span class="username">@@@(Model.AuthorUsername)</span>
-        </div>
-        @if (Model.AuthorBio is string { Length: > 0 } bio)
-        {
-            <div class="bio">
-                @bio
-            </div>
-        }
-    </aside>
 </article>
+
+<aside class="ata mr-3">
+    <div class="ata-header">
+        Author
+    </div>
+    
+    @if (Model.SiteSettings?.AuthorAvatar is not null)
+    {
+        <img class="ata-avatar" alt="Profile picture for @(Model.AuthorDisplayName ?? Model.AuthorUsername)" src="/avatar.png" />
+    }
+
+    <div class="author">
+        @if (Model.AuthorDisplayName is string { Length: > 0 } displayName)
+        {
+            <span class="display">@displayName</span>
+        }
+        <span class="username">@@@(Model.AuthorUsername)</span>
+    </div>
+    @if (Model.AuthorBio is string { Length: > 0 } bio)
+    {
+        <div class="bio">
+            @bio
+        </div>
+    }
+</aside>
