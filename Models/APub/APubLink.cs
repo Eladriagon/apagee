@@ -38,4 +38,10 @@ public class APubLink : APubObject
     /// </summary>
     [JsonIgnore]
     public string? BadHref { get; set; }
+
+    [JsonIgnore]
+    public bool IsEmpty => Href is null && Name is null && MediaType is null;
+
+    [JsonIgnore]
+    public bool IsOnlyLink => Href is not null && Name is null && MediaType is null;
 }

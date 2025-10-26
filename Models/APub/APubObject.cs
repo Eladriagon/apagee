@@ -62,11 +62,17 @@ public class APubObject : APubBase
         }
     }
 
+    public APubCollection? Likes { get; set; }
+    public APubCollection? Shares { get; set; }
+
     public APubPolyBase? Url { get; set; }
     public APubPolyBase? Tag { get; set; }
     public APubPolyBase? Context { get; set; }
     
+    [AlwaysArray]
+    public APubPolyBase? Attachment { get; set; }
     public APubPolyBase? AttributedTo { get; set; }
+
     public Uri? AtomUri { get; set; }
     public bool? Sensitive { get; set; }
 
@@ -86,4 +92,39 @@ public class APubObject : APubBase
     public APubPolyBase? Bcc { get; set; }
     
     public APubPolyBase? Audience { get; set; }
+
+    public static TObj FromArticle<TObj>(Article article) where TObj : APubObject, new()
+    {
+        var author = $"https://{GlobalConfiguration.Current?.PublicHostname}/api/users/{GlobalConfiguration.Current?.FediverseUsername}";
+        var id = $"{author}/statuses/{article.Uid}";
+        var content = Markdown.ToHtml(article.Body ?? "");
+
+        return new TObj
+        {
+            Id = id,
+            Published = article.PublishedOn,
+            Url = $"https://{GlobalConfiguration.Current?.PublicHostname}/{article.Slug}",
+            AttributedTo = author,
+            To = APubConstants.TARGET_PUBLIC,
+            Cc = $"{author}/followers",
+            AtomUri = new Uri(id),
+            ContentSingle = content,
+            ContentMap = new()
+            {
+                ["en"] = content,
+            },
+            Attachment = [],
+            Likes = new()
+            {
+                Id = $"{id}/likes",
+                TotalItems = 0
+            },
+            Shares = new()
+            {
+                Id = $"{id}/shares",
+                TotalItems = 0
+            }
+        };
+    }
+
 }

@@ -1,0 +1,3 @@
+ALTER TABLE Settings ADD COLUMN ODataTitle TEXT;
+ALTER TABLE Settings ADD COLUMN ODataDescription TEXT;
+ALTER TABLE Settings ADD COLUMN ClaimProfileUrl TEXT;

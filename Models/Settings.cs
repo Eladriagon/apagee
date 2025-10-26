@@ -12,8 +12,11 @@ public sealed class Settings
 
     public string? Favicon { get; set; }
 
-    /// <summary>
-    /// Stored here and not in the config because we offer a file upload for it.
-    /// </summary>
     public string? AuthorAvatar { get; set; }
+
+    public string? ODataTitle { get; set; }
+
+    public string? ODataDescription { get; set; }
+
+    public string? ClaimProfileUrl { get; set; }
 }

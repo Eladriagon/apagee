@@ -52,6 +52,11 @@ public class SystemController(UserService userService, GlobalConfiguration confi
     {
         try
         {
+            if (HttpContext.User.Identity is { IsAuthenticated: true })
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+
             if (await UserService.CheckUserLogin(username, password))
             {
                 var user = await UserService.GetUser() ?? throw new ApageeException("Unable to find user in database (check connection).");

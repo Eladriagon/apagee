@@ -24,6 +24,7 @@ public class PageController(ArticleService articleService, GlobalConfiguration c
                 AuthorUsername = Config.FediverseUsername,
                 AuthorDisplayName = Config.AuthorDisplayName,
                 AuthorBio = Config.ShowBioOnArticles ? Config.FediverseBio : null,
+                SiteSettings = SettingsService.Current,
                 BodyHtml = article.BodyMode switch
                 {
                     BodyMode.Markdown => Markdig.Markdown.ToHtml(article.Body ?? ""),

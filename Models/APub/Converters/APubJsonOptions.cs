@@ -20,7 +20,6 @@ public static class APubJsonOptions
         {
             if (ti.Kind != JsonTypeInfoKind.Object) return;
 
-            // 1) If this is your polymorphic base, move the discriminator off "type"
             if (ti.Type == typeof(APubObject))
             {
                 ti.PolymorphismOptions ??= new JsonPolymorphismOptions();
@@ -28,20 +27,16 @@ public static class APubJsonOptions
 
                 foreach (var type in CachedTypes.Where(t => t.GetCustomAttribute<AutoDerivedTypeAttribute>() is not null))
                 {
-                    // TODO: We can move this to the attribute to avoid a new-up
                     var inst = Activator.CreateInstance(type) as APubBase ?? throw new ApageeException("Found [AutoDerivedType] on something other than APubBase!");
                     ti.PolymorphismOptions.DerivedTypes.Add(new(type, inst.Type));
                 }
             }
 
-            // 2) Add read-only aliases for MultiplePropertyAttribute
             foreach (var prop in ti.Properties.ToList())
             {
-                // "Should Serialize" logic
-                // 1. APubLink
                 if (prop.PropertyType == typeof(APubLink))
                 {
-                    prop.ShouldSerialize = (parent, self) => self is APubLink link && (link.Href is not null || link.BadHref is { Length: > 0 });
+                    prop.ShouldSerialize = (parent, self) => self is APubLink link && (!link.IsEmpty || link.BadHref is { Length: > 0 });
                 }
 
                 var member = prop.AttributeProvider as MemberInfo;
@@ -52,7 +47,7 @@ public static class APubJsonOptions
 
                 if (multi is null || multi.Names.Length == 0) continue;
 
-                var canonical = prop.Name; // JSON name after naming policy
+                var canonical = prop.Name;
 
                 foreach (var alias in multi.Names.Distinct(StringComparer.Ordinal))
                 {
@@ -61,14 +56,13 @@ public static class APubJsonOptions
 
                     var aliasInfo = ti.CreateJsonPropertyInfo(prop.PropertyType, alias);
 
-                    // read-only alias: used only for deserialization
                     aliasInfo.Set = prop.Set;
                     aliasInfo.IsRequired = prop.IsRequired;
                     aliasInfo.NumberHandling = prop.NumberHandling;
                     aliasInfo.ObjectCreationHandling = prop.ObjectCreationHandling;
                     aliasInfo.AttributeProvider = prop.AttributeProvider;
 
-                    aliasInfo.ShouldSerialize = static (_, _) => false;   // never emit alias
+                    aliasInfo.ShouldSerialize = static (_, _) => false;
 
                     ti.Properties.Add(aliasInfo);
                 }
@@ -77,7 +71,55 @@ public static class APubJsonOptions
 
         opt.Converters.Add(new APubDateConverter());
         opt.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-        opt.Converters.Add(new APubSingleArrayConverter<string>());
-        opt.Converters.Add(new PolyConverterFactory());
+        opt.Converters.Add(new APubConverterFactory());
     });
+    
+    internal static void SerializeObject(Utf8JsonWriter writer, object? item, JsonSerializerOptions opts)
+    {
+        if (item is null) return;
+
+        writer.WriteStartObject();
+        foreach (var pi in item.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+            var val = pi.GetValue(item);
+
+            if (item == default || val == default)
+            {
+                continue;
+            }
+
+            if (pi.GetCustomAttribute<JsonIgnoreAttribute>() is not null) continue;
+
+            var name = pi.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
+            writer.WritePropertyName(name ?? JsonNamingPolicy.CamelCase.ConvertName(pi.Name));
+
+            var requiresArray = pi.GetCustomAttribute<AlwaysArrayAttribute>(true) is not null && val is APubPolyBase a && a.Count > 0;
+
+            if (requiresArray)
+            {
+                writer.WriteStartArray();
+            }
+
+            if (val is APubPolyBase poly)
+            {
+                var polyConv = (JsonConverter<APubPolyBase>)opts.GetConverter(pi.PropertyType);
+                polyConv.Write(writer, poly, opts);
+            }
+            else if (val is APubBase baseVal)
+            {
+                var baseConv = (JsonConverter<APubBase>)opts.GetConverter(pi.PropertyType);
+                baseConv.Write(writer, baseVal, opts);
+            }
+            else
+            {
+                JsonSerializer.Serialize(writer, val, pi.PropertyType, opts);
+            }
+
+            if (requiresArray)
+            {
+                writer.WriteEndArray();
+            }
+        }
+        writer.WriteEndObject();
+    }
 }

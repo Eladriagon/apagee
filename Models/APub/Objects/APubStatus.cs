@@ -5,26 +5,21 @@ public class APubStatus : APubObject
 {
     public override string Type => APubConstants.TYPE_OBJ_NOTE;
 
-    public static APubStatus Create(Article article)
+    public static APubStatus FromArticle(Article article)
     {
-        var author = $"https://{GlobalConfiguration.Current?.PublicHostname}/api/users/{GlobalConfiguration.Current?.FediverseUsername}";
-        var id = $"{author}/statuses/{article.Uid}";
-        var content = Markdig.Markdown.ToHtml(article.Body ?? "");
+        var status = FromArticle<APubStatus>(article);
 
-        return new APubStatus
+        status.Content = article.ArticleSummary;
+        status.ContentMap = new()
         {
-            Id = id,
-            Published = article.PublishedOn,
-            Updated = article.PublishedOn,
-            Url = $"https://{GlobalConfiguration.Current?.PublicHostname}/{article.Slug}",
-            AttributedTo = author,
-            To = APubConstants.TARGET_PUBLIC,
-            AtomUri = new Uri(id),
-            ContentSingle = article.ArticleSummary,
-            ContentMap = new()
-            {
-                ["en"] = article.ArticleSummary,
-            }
+            ["en"] = article.ArticleSummary
         };
+        status.Attachment = new APubLink($"https://{GlobalConfiguration.Current?.PublicHostname}/{article.Slug}")
+        {
+            Name = "Read more...",
+            MediaType = "text/html"
+        };
+
+        return status;
     }
 }

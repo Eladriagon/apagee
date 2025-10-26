@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting.Internal;
 namespace Apagee.Controllers;
 
 [ApiController]
-public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache) 
+public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
@@ -76,7 +76,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound();
         }
 
-        var aPubArticle = APubStatus.Create(article);
+        var aPubArticle = APubStatus.FromArticle(article);
 
         return Ok(aPubArticle);
     }
@@ -98,9 +98,9 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound();
         }
 
-        var aPubArticle = APubArticle.Create(article);
+        var aPubArticle = APubArticle.FromArticle(article);
 
-        var act = APubActivity.Wrap<Create>(aPubArticle, CurrentActor.Id, published: article.PublishedOn);
+        var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
         return Ok(act);
@@ -123,7 +123,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound();
         }
 
-        var aPubArticle = APubArticle.Create(article);
+        var aPubArticle = APubArticle.FromArticle(article);
 
         return Ok(aPubArticle);
     }
@@ -145,9 +145,9 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound();
         }
 
-        var aPubArticle = APubArticle.Create(article);
+        var aPubArticle = APubArticle.FromArticle(article);
 
-        var act = APubActivity.Wrap<Create>(aPubArticle, CurrentActor.Id, published: article.PublishedOn);
+        var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
         return Ok(act);
@@ -265,9 +265,10 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                 return StatusCode(400, "Cannot specify both min and max.");
             }
 
-            ocp.Items.AddRange(articles.Select(
-                a => APubActivity.Wrap<Create>(APubArticle.Create(a), CurrentActor.Id, published: a.PublishedOn)
-            ));
+            ocp.Items.AddRange(articles.SelectMany(a => new[] {
+                APubActivity.Wrap<Create>(APubStatus.FromArticle(a), CurrentActor.Id, published: a.PublishedOn),
+                APubActivity.Wrap<Create>(APubArticle.FromArticle(a), CurrentActor.Id, published: a.PublishedOn)
+            }));
 
             return Ok(ocp);
         }
@@ -290,12 +291,15 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound("User not found.");
         }
 
-        var body = await new StreamReader(Request.Body).ReadToEndAsync();
-
-        Console.WriteLine($"DBG: Inbox post request with {body.Length / 1024.0:#,#0.00} KB of data.");
-
-        Console.WriteLine(body);
-
+        if (Request.HasJsonContentType() || Request.ContentType?.ToLower() == Globals.JSON_LD_CONTENT_TYPE)
+        {
+            if (!Directory.Exists("./inbox"))
+            {
+                Directory.CreateDirectory("./inbox");
+            }
+            using var sr = new StreamReader(Request.Body);
+            await System.IO.File.WriteAllTextAsync($"./inbox/{DateTime.UtcNow.ToFileTime()}.inbox", await sr.ReadToEndAsync());
+        }
         return Ok();
     }
 }

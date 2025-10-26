@@ -17,23 +17,50 @@
 }
 
 <form class="form" method="post" asp-antiforgery="true">
+
+    <h2 class="subtitle is-3">Theme and Styling</h2>
+
     <div class="field">
-        <label class="label" for="Theme CSS">Theme CSS</label>
+        <label class="label" for="Theme CSS">Public Theme CSS</label>
         <div class="control">
             <textarea class="textarea is-family-monospace" asp-for="ThemeCss" rows="10"></textarea>
         </div>
+        <span class="help">This is the CSS style applied to your public posts. It does not affect the admin area. You can use @@imports and any other valid CSS here.</span>
     </div>
+
     <div class="field">
         <label class="label" asp-for="Favicon">Favicon</label>
-        <div class="control">
-            <input asp-for="Favicon" type="file" accept=".png,.jpg,.jpeg" class="input" />
+
+        <div class="file has-name is-boxed">
+            <label class="file-label">
+                <input asp-for="Favicon" type="file" accept=".png,.ico" class="file-input" />
+                <span class="file-cta">
+                    <span class="file-icon">
+                        <i class="fas fa-upload"></i>
+                    </span>
+                    <span class="file-label">Choose a file to upload...</span>
+                </span>
+                <span class="file-name mw100">No file selected.</span>
+            </label>
         </div>
+        <span class="help">This is the 16x16 icon that appears in browser tabs.</span>
     </div>
     <div class="field">
         <label class="label" asp-for="AuthorAvatar">Author Avatar</label>
-        <div class="control">
-            <input type="file" accept=".png,.jpg,.jpeg" class="input" />
+
+        <div class="file has-name is-boxed">
+            <label class="file-label">
+                <input asp-for="AuthorAvatar" type="file" accept=".png,.jpg,.jpeg" class="file-input" />
+                <span class="file-cta">
+                    <span class="file-icon">
+                        <i class="fas fa-upload"></i>
+                    </span>
+                    <span class="file-label">Choose a file to upload...</span>
+                </span>
+                <span class="file-name mw100">No file selected.</span>
+            </label>
         </div>
+        <span class="help">This is your Fediverse and site avatar image. Must be square. 120x120 recommended.</span>
     </div>
     <div class="field">
         <label class="label">
@@ -41,6 +68,39 @@
             Enable Font Awesome?
         </label>
     </div>
+
+    <h2 class="subtitle is-3">Social</h2>
+
+    <div class="field">
+        <label class="label" asp-for="ClaimProfileUrl">Claim Profile (rel=me) URL</label>
+        <div class="control">
+            <input class="input" asp-for="ClaimProfileUrl"
+                placeholder="https://fediverse.social.example/@@yourUsername" />
+        </div>
+        <span class="help">This is the URL to your profile on another fediverse server that supports site
+            verification.</span>
+    </div>
+
+    <h2 class="subtitle is-3">Site Metadata (OData)</h2>
+
+    <div class="field">
+        <label class="label" asp-for="ODataTitle">Title (og:title)</label>
+        <div class="control">
+            <input class="input" asp-for="ODataTitle" placeholder="@(GlobalConfiguration.Current?.AuthorDisplayName)"
+                maxlength="100" />
+        </div>
+        <span class="help">If not specified, uses your Author Display Name.</span>
+    </div>
+
+    <div class="field">
+        <label class="label" asp-for="ODataDescription">Description (og:description)</label>
+        <div class="control">
+            <input class="input" asp-for="ODataDescription" placeholder="@(GlobalConfiguration.Current?.FediverseBio)"
+                maxlength="255" />
+        </div>
+        <span class="help">If not specified, uses your fediverse bio.</span>
+    </div>
+
     <div class="field">
         <button class="button is-success" type="submit">
             <span class="icon">

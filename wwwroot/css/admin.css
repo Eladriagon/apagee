@@ -25,6 +25,14 @@ span.e {
     font-style: normal;
 }
 
+/* Checkboxes can be a bit bigger */
+input.checkbox[type=checkbox] {
+    transform-origin: 50% 50%;
+    transform: scale(1.65);
+    margin-left: 0.4rem;
+    margin-right: 1rem;
+}
+
 /* Icons in active links should always be white */
 .menu a.is-active span.icon i {
     color: hsl(var(--bulma-menu-item-h), var(--bulma-menu-item-s), var(--bulma-menu-item-color-l));

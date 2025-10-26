@@ -6,6 +6,7 @@ public partial class Globals
     internal const string KEYRING_NAME = "Keys";
     internal const string ENC_KEY_ID = "Apagee.v1.key";
     internal const string HTTP_CLI_NAME_FED = "Fediverse";
+    internal const string JSON_LD_CONTENT_TYPE = @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""";
 
     // Warning: Don't change this or federation may break for some legacy clients.
     internal const int RSA_KEY_STRENGTH = 2048;

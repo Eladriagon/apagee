@@ -6,12 +6,12 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper) : DelegatingHa
     {
         // Include JSON-LD
         request.Headers.Accept.Clear();
-        request.Headers.TryAddWithoutValidation("Accept", @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""");
+        request.Headers.TryAddWithoutValidation("Accept", Globals.JSON_LD_CONTENT_TYPE);
 
         if (request.Content is not null)
         {
             request.Content.Headers.Remove("Content-Type");
-            request.Content.Headers.TryAddWithoutValidation("Content-Type", @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""");
+            request.Content.Headers.TryAddWithoutValidation("Content-Type", Globals.JSON_LD_CONTENT_TYPE);
         }
 
         // Good internet citizenry
