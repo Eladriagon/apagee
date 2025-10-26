@@ -30,4 +30,7 @@ public partial class Globals
     // Regex
     [GeneratedRegex(@"^[a-zA-Z0-9_]{1,30}$")]
     public static partial Regex RgxFediverseUsername();
+    
+    [GeneratedRegex(@"<.*?>")]
+    public static partial Regex RgxStripHtml();
 }

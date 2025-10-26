@@ -19,8 +19,8 @@
     {
         @* Article-specific meta properties *@
         <meta property="og:title" content="@a.Article.Title" />
-        <meta property="og:description" content="@a.Article.ArticleSummary" />
-        <meta name="description" content="@a.Article.ArticleSummary" />
+        <meta property="og:description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")" />
+        <meta name="description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")" />
         <meta property="og:published_time" content="@(a.Article.PublishedOn?.ToString("s"))Z" />
     }
     else
