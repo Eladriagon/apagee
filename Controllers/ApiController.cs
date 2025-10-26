@@ -282,6 +282,13 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     }
 
     [HttpPost]
+    [Route("api/inbox")]
+    public async Task<IActionResult> PostToSharedInbox()
+    {
+        return await PostToInbox(GlobalConfiguration.Current!.FediverseUsername);
+    }
+
+    [HttpPost]
     [Route("api/users/{username}/inbox")]
     public async Task<IActionResult> PostToInbox([FromRoute] string username)
     {
@@ -326,7 +333,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             item.ID = "err-" + item.UID;
             item.Type = "err-" + item.UID;
         }
-        
+
         if (Request.HasJsonContentType() || Request.ContentType?.ToLower() == Globals.JSON_LD_CONTENT_TYPE)
         {
             // TBD

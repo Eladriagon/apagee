@@ -17,7 +17,35 @@ Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 
 ## Instructions
 
-*Coming soon...*
+### ⚠️ THIS IS PRE-ALPHA! ⚠️
+
+You have been warned. 🙂
+
+### Linux (Debian)
+
+Run this to self-install:
+
+> `wget --cache=off -qO- https://raw.githubusercontent.com/Eladriagon/apagee/main/install/install.sh | bash`
+
+You should always review shell scripts before executing them. Here is a link to the script to review:
+
+https://raw.githubusercontent.com/Eladriagon/apagee/main/install/install.sh
+
+It performs the following tasks:
+
+* Installs required dependencies via `apt-get update && apt-get install ...`
+* Creates user `apagee` / group `apagee`
+* Downloads the release marked "Latest" from this Github repo
+* Extracts it to `/home/apagee/apagee`
+* Runs `setcap` to allow binding to 80/443
+* (Re-)registers `apagee.service` in `systemctl`
+* Starts the service
+
+### All other OSes
+
+Not yet supported but you're welcome to try!
+
+The releases contain precompiled binaries that should run on most Linux and Windows OSes.
 
 ## Todo List
 
@@ -25,9 +53,9 @@ Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 * [x] SQLite database
 * [x] Automatic admin login creation with UI for password change
 * [x] Auto-generated Fediverse signing keys stored locally
-* [ ] Author articles in Markdown
+* [x] Author articles in Markdown
 * [ ] Receive boosts/favorites from Fediverse
-* [ ] Draft articles
-* [ ] View article list
-* [ ] Delete/unpublish articles
-* [ ] Send Fediverse 
+* [x] Draft articles
+* [x] View article list
+* [x] Delete~~/unpublish~~ articles
+* [ ] Send Fediverse activities/replies to activities
