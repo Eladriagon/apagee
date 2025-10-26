@@ -15,13 +15,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-    @if (vm.Articles.Count() == 1 && vm.Articles.Single() is ArticleViewModel a)
+    @if (vm.Articles.Count() == 1 && vm.Articles.Single() is ArticleViewModel a && Context.Request.Path != "/")
     {
         @* Article-specific meta properties *@
         <meta property="og:title" content="@a.Article.Title" />
         <meta property="og:description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")" />
         <meta name="description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")" />
         <meta property="og:published_time" content="@(a.Article.PublishedOn?.ToString("s"))Z" />
+        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Articles.First().Article.Slug" />
     }
     else
     {
@@ -29,8 +30,11 @@
         <meta property="og:title" content="@(vm.SiteSettings?.ODataTitle ?? GlobalConfiguration.Current?.FediverseUsername)" />
         <meta property="og:description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
         <meta name="description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
-        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Articles.First().Article.Slug" />
+        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname" />
+
     }
+    <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
+    <meta property="og:logo" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en" />
     <meta property="profile:username" content="@(GlobalConfiguration.Current?.FediverseUsername)@@@(GlobalConfiguration.Current?.PublicHostname)" />
