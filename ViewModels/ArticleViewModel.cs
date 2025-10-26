@@ -4,17 +4,11 @@ public class ArticleViewModel
 {
     public required Article Article { get; set; }
 
-    public Settings? SiteSettings { get; set; }
-
-    public required string BodyHtml { get; set; }
-
-    public required string AuthorUsername { get; set; }
-
-    public string? AuthorDisplayName { get; set; }
-
-    public string? AuthorAvatarB64 { get; set; }
-
-    public string? AuthorBio { get; set; }
-
-    public string? ThemeCss { get; set; }
+    public string BodyHtml => Article.BodyMode switch
+    {
+        BodyMode.Markdown => Markdown.ToHtml(Article.Body ?? ""),
+        BodyMode.HTML => Article.Body ?? "",
+        BodyMode.PlainText => Article.Body?.Replace("\r", "").Replace("\n", "<br />") ?? "",
+        _ => "oops, i think a stray neutron caused a bit flip..."
+    };
 }

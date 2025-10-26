@@ -291,14 +291,45 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound("User not found.");
         }
 
+        using var sr = new StreamReader(Request.Body);
+        var body = await sr.ReadToEndAsync();
+
+        var item = new Inbox
+        {
+            ID = "",
+            UID = Ulid.NewUlid().ToString(),
+            BodySize = body.Length,
+            BlobData = body,
+            Type = "",
+            ReceivedOn = DateTime.UtcNow,
+            ContentType = Request.ContentType?.ToString() ?? "no/type",
+            RemoteServer = Request.Headers["X-Forwarded-For"].ToString() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"
+        };
+
+        try
+        {
+            var json = await JsonNode.ParseAsync(new MemoryStream(Encoding.UTF8.GetBytes(body)));
+
+            if (json?.GetValueKind() == JsonValueKind.Object)
+            {
+                item.ID = json["id"]?.GetValue<string>() ?? "unknown-" + item.UID;
+                item.Type = json["type"]?.GetValue<string>() ?? "unknown-" + item.UID;
+            }
+            else
+            {
+                item.ID = "not-an-obj-" + item.UID;
+                item.Type = "not-an-obj-" + item.UID;
+            }
+        }
+        catch
+        {
+            item.ID = "err-" + item.UID;
+            item.Type = "err-" + item.UID;
+        }
+        
         if (Request.HasJsonContentType() || Request.ContentType?.ToLower() == Globals.JSON_LD_CONTENT_TYPE)
         {
-            if (!Directory.Exists("./inbox"))
-            {
-                Directory.CreateDirectory("./inbox");
-            }
-            using var sr = new StreamReader(Request.Body);
-            await System.IO.File.WriteAllTextAsync($"./inbox/{DateTime.UtcNow.ToFileTime()}.inbox", await sr.ReadToEndAsync());
+            // TBD
         }
         return Ok();
     }

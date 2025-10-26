@@ -1,0 +1,55 @@
+@{
+    Layout = "Public/_PublicLayout";
+}
+
+@model ArticleListViewModel
+
+<div class="articles">
+    @if (!Model.Articles.Any())
+    {
+        <h2>This Apagee instance currently doesn't have any published articles.</h2>
+    }
+    else
+    {
+        foreach (var article in Model.Articles)
+        {
+            <article>
+                <header>
+                    <a href="/@(article.Article.Slug)"><h1 class="title">@article.Article.Title</h1></a>
+
+                    <div class="published">
+                        <time datetime="@(article.Article.PublishedOn?.ToString("s"))Z">@(article.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
+                    </div>
+                </header>
+                
+                <section class="content">
+                    @Html.Raw(article.Article.ArticleSummary)
+                </section>
+            </article>
+        }
+    }
+</div>
+<aside class="ata mr-3">
+    <div class="ata-header">
+        Author
+    </div>
+    
+    @if (Model.SiteSettings?.AuthorAvatar is not null)
+    {
+        <img class="ata-avatar" alt="Profile picture for @(Model.AuthorDisplayName ?? Model.AuthorUsername)" src="/avatar.png" />
+    }
+
+    <div class="author">
+        @if (Model.AuthorDisplayName is string { Length: > 0 } displayName)
+        {
+            <span class="display">@displayName</span>
+        }
+        <span class="username">@@@(Model.AuthorUsername)</span>
+    </div>
+    @if (Model.AuthorBio is string { Length: > 0 } bio)
+    {
+        <div class="bio">
+            @bio
+        </div>
+    }
+</aside>

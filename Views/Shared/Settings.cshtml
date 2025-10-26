@@ -93,23 +93,30 @@
     <h2 class="subtitle is-3">Site Metadata (OData)</h2>
 
     <div class="field">
-        <label class="label" asp-for="ODataTitle">Title (og:title)</label>
+        <label class="label" asp-for="ODataTitle">Site Title (og:title)</label>
         <div class="control">
             <input class="input" asp-for="ODataTitle" placeholder="@(GlobalConfiguration.Current?.AuthorDisplayName)"
                 maxlength="100" />
         </div>
-        <span class="help">If not specified, uses your Author Display Name.</span>
+        <span class="help">If not specified, uses your Author Display Name or Fediverse username.</span>
     </div>
 
     <div class="field">
-        <label class="label" asp-for="ODataDescription">Description (og:description)</label>
+        <label class="label" asp-for="ODataDescription">Site Bio / Description (og:description)</label>
         <div class="control">
-            <input class="input" asp-for="ODataDescription" placeholder="@(GlobalConfiguration.Current?.FediverseBio)"
-                maxlength="255" />
+            <input class="input" asp-for="ODataDescription" placeholder="@(GlobalConfiguration.Current?.FediverseBio)" maxlength="255" />
         </div>
-        <span class="help">If not specified, uses your fediverse bio.</span>
+        <span class="help">If not specified, uses your Fediverse bio.</span>
     </div>
 
+    <div class="field">
+        <label class="label">
+            <input asp-for="ShowBioOnSite" class="checkbox" />
+            Show bio on articles?
+        </label>
+        <span class="help">If unchecked, your bio text will only be sent through the fediverse network, and not displayed on this site.</span>
+    </div>
+    
     <div class="field">
         <button class="button is-success" type="submit">
             <span class="icon">

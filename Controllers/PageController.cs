@@ -18,20 +18,13 @@ public class PageController(ArticleService articleService, GlobalConfiguration c
                 return NotFound("Sorry, can't find that!");
             }
 
-            return View("Public/ArticleView", new ArticleViewModel
+            return View("Public/ArticleView", new ArticleListViewModel
             {
-                Article = article,
+                Articles = [new ArticleViewModel { Article = article }],
                 AuthorUsername = Config.FediverseUsername,
                 AuthorDisplayName = Config.AuthorDisplayName,
-                AuthorBio = Config.ShowBioOnArticles ? Config.FediverseBio : null,
+                AuthorBio = Config.FediverseBio,
                 SiteSettings = SettingsService.Current,
-                BodyHtml = article.BodyMode switch
-                {
-                    BodyMode.Markdown => Markdig.Markdown.ToHtml(article.Body ?? ""),
-                    BodyMode.HTML => article.Body ?? "",
-                    BodyMode.PlainText => article.Body?.Replace("\r", "").Replace("\n", "<br />") ?? "",
-                    _ => "oops, i think a stray neutron caused a bit flip..."
-                },
                 ThemeCss = SettingsService.Current?.ThemeCss
             });
         }

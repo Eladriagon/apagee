@@ -1,22 +1,37 @@
+@using Microsoft.AspNetCore.Authentication
 @{
-    var vm = (ArticleViewModel)Model;
+    var vm = (ArticleListViewModel)Model;
+    var title = vm.Articles.Count() == 1
+        ? vm.Articles.Single().Article.Title
+        : "Articles";
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 <head>
-    <title>@vm.Article.Title</title>
+    <title>@title &ndash; @SettingsService.Current?.ODataTitle</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-    <meta property="og:title" content="@(vm.SiteSettings?.ODataTitle ?? GlobalConfiguration.Current?.FediverseUsername)" />
-    <meta property="og:description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
-    <meta name="description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
+    @if (vm.Articles.Count() == 1 && vm.Articles.Single() is ArticleViewModel a)
+    {
+        @* Article-specific meta properties *@
+        <meta property="og:title" content="@a.Article.Title" />
+        <meta property="og:description" content="@a.Article.ArticleSummary" />
+        <meta name="description" content="@a.Article.ArticleSummary" />
+        <meta property="og:published_time" content="@(a.Article.PublishedOn?.ToString("s"))Z" />
+    }
+    else
+    {
+        @* Site-wide meta properties *@
+        <meta property="og:title" content="@(vm.SiteSettings?.ODataTitle ?? GlobalConfiguration.Current?.FediverseUsername)" />
+        <meta property="og:description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
+        <meta name="description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
+        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Articles.First().Article.Slug" />
+    }
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Article.Slug" />
-    <meta property="og:published_time" content="@(vm.Article.PublishedOn?.ToString("s"))Z" />
     <meta property="og:locale" content="en" />
     <meta property="profile:username" content="@(GlobalConfiguration.Current?.FediverseUsername)@@@(GlobalConfiguration.Current?.PublicHostname)" />
     <meta name="initialPath" content="/" />

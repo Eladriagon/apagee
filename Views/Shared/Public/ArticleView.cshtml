@@ -1,23 +1,27 @@
+@model ArticleListViewModel
+
 @{
     Layout = "Public/_PublicLayout";
+    var article = Model.Articles.Single();
 }
 
-@model ArticleViewModel
-<article>
-    <header>
-        <h1 class="title">@Model.Article.Title</h1>
+<div class="article">
+    <article>
+        <header>
+            <h1 class="title">@article.Article.Title</h1>
 
-        <div class="published">
-            <time datetime="@(Model.Article.PublishedOn?.ToString("s"))Z">@(Model.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
+            <div class="published">
+                <time datetime="@(article.Article.PublishedOn?.ToString("s"))Z">@(article.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
+            </div>
+        </header>
+        
+        <section class="content">
+            @Html.Raw(article.BodyHtml)
         </div>
-    </header>
-    
-    <section class="content">
-        @Html.Raw(Model.BodyHtml)
-    </div>
-</article>
+    </article>
+</div>
 
-<aside class="ata mr-3">
+<aside class="ata">
     <div class="ata-header">
         Author
     </div>

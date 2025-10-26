@@ -24,5 +24,7 @@ public sealed class Settings
 
     public string? ODataDescription { get; set; }
 
+    public bool ShowBioOnSite { get; set; }
+
     public string? ClaimProfileUrl { get; set; }
 }

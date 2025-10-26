@@ -6,15 +6,29 @@ using Microsoft.AspNetCore.Identity;
 namespace Apagee.Controllers;
 
 [Route("")]
-public class SystemController(UserService userService, SettingsService settingsService, GlobalConfiguration config) 
+public class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, GlobalConfiguration config) 
     : BaseController
 {
     public UserService UserService { get; } = userService;
     public SettingsService SettingsService { get; } = settingsService;
+    public ArticleService ArticleService { get; } = articleService;
     public GlobalConfiguration Config { get; } = config;
 
     [Route("")]
-    public IActionResult Index() => Content("Hello Apagee!");
+    public async Task<IActionResult> Index()
+    {
+        var articles = await ArticleService.GetOlderThan(count: 10);
+
+        return View("Public/ListView", new ArticleListViewModel
+        {
+            Articles = articles.OrderByDescending(a => a.PublishedOn).Select(a => new ArticleViewModel { Article = a }),
+            AuthorUsername = Config.FediverseUsername,
+            AuthorDisplayName = Config.AuthorDisplayName,
+            AuthorBio = Config.FediverseBio,
+            SiteSettings = SettingsService.Current,
+            ThemeCss = SettingsService.Current?.ThemeCss
+        });
+    }
 
     [Route("@{user}")]
     public IActionResult ViewAuthor([FromRoute] string user)
@@ -24,8 +38,9 @@ public class SystemController(UserService userService, SettingsService settingsS
             return NotFound("User not found.");
         }
 
-        return View("Author");
+        return RedirectToAction("Index");
     }
+    
     [Route("404")]
     public IActionResult PageNotFound() => Content("Apagee -- 404 Not Found");
 
