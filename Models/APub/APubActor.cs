@@ -30,7 +30,8 @@ public class APubActor : APubObject
         var icon = SettingsService.Current?.AuthorAvatar;
         var config = ConfigManager.GetGlobalConfig();
 
-        var baseUrl = $"https://{config.PublicHostname}/api/users/{config.FediverseUsername}";
+        var rootUrl = $"https://{config.PublicHostname}";
+        var baseUrl = $"{rootUrl}/api/users/{config.FediverseUsername}";
 
         return new TActor
         {
@@ -39,7 +40,7 @@ public class APubActor : APubObject
             PreferredUsername = config.FediverseUsername,
             Icon = icon is null ? null : new()
             {
-                Url = $"{baseUrl}/avatar.png",
+                Url = $"{rootUrl}/avatar.png",
                 MediaType = Utils.IsPng(icon) ? "image/png" : "image/jpeg"
             },
             Inbox = $"{baseUrl}/inbox",
