@@ -38,6 +38,11 @@ public class SystemController(UserService userService, SettingsService settingsS
             return NotFound("User not found.");
         }
 
+        if (Request.Headers.Accept.ToString().ToLower().Contains("application/ld+json"))
+        {
+            return Redirect($"/api/users/{user}");
+        }
+
         return RedirectToAction("Index");
     }
     

@@ -18,6 +18,11 @@ public class PageController(ArticleService articleService, GlobalConfiguration c
                 return NotFound("Sorry, can't find that!");
             }
 
+            if (Request.Headers.Accept.ToString().ToLower().Contains("application/ld+json"))
+            {
+                return Redirect($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}/statuses/{article.Uid}");
+            }
+
             return View("Public/ArticleView", new ArticleListViewModel
             {
                 Articles = [new ArticleViewModel { Article = article }],
