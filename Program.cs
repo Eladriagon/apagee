@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Options;
+
 Output.WriteLine($"{Output.Ansi.Blue}Apagee Blog Server{Output.Ansi.Reset} - v{Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "?.?.?"}");
 
 GlobalConfiguration config = default!;
@@ -87,25 +90,31 @@ try
                         cookie.ExpireTimeSpan = TimeSpan.FromDays(1); // TODO: Allow configuration
                     });
 
+    builder.Services.AddHttpContextAccessor();
+
     builder.Services.AddAuthorization();
 
     builder.Services.AddRazorComponents();
 
-    var mvcBuilder = builder.Services.AddControllersWithViews();
+    var mvcBuilder = builder.Services.AddControllersWithViews(opt =>
+    {
+        // Injects @context
+        opt.Filters.Add<ContextResponseWrapperFilter>();
+    })
+    .AddJsonOptions(json =>
+    {
+        // Sets up serialization options
+        APubJsonOptions.OptionModifier(json.JsonSerializerOptions);
+    });
 
     if (builder.Environment.IsDevelopment())
     {
-        mvcBuilder = mvcBuilder.AddRazorRuntimeCompilation();                
+        mvcBuilder = mvcBuilder.AddRazorRuntimeCompilation();
     }
 
     builder.Services.AddHttpClient(Globals.HTTP_CLI_NAME_FED)
                     .AddHttpMessageHandler<FediverseSigningHandler>();
-
-    builder.Services.Configure<JsonOptions>(json =>
-    {
-        APubJsonOptions.OptionModifier(json.JsonSerializerOptions);
-    });
-
+    
     builder.Services.AddSingleton(config);
     builder.Services.AddSingleton(new FluidParser());
     builder.Services.AddSingleton(_ =>

@@ -4,7 +4,7 @@ public class SettingsService(StorageService storageService)
 {
     public StorageService StorageService { get; } = storageService;
 
-    public Settings? Current { get; private set; }
+    public static Settings? Current { get; private set; }
 
     public async Task RefreshSettings()
     {

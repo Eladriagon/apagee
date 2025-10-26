@@ -13,10 +13,14 @@ public static class APubJsonOptions
         opt.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
         opt.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         opt.WriteIndented = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") is not "Production";
-        opt.TypeInfoResolver = new DefaultJsonTypeInfoResolver();
 
-        // Runs only once per distinct type
-        opt.TypeInfoResolver = opt.TypeInfoResolver.WithAddedModifier(ti =>
+        opt.Converters.Add(new APubDateConverter());
+        opt.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        opt.Converters.Add(new APubConverterFactory());
+
+        opt.TypeInfoResolver ??= new DefaultJsonTypeInfoResolver();
+
+        opt.TypeInfoResolver.WithAddedModifier(ti =>
         {
             if (ti.Kind != JsonTypeInfoKind.Object) return;
 
@@ -68,12 +72,8 @@ public static class APubJsonOptions
                 }
             }
         });
-
-        opt.Converters.Add(new APubDateConverter());
-        opt.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-        opt.Converters.Add(new APubConverterFactory());
     });
-    
+   
     internal static void SerializeObject(Utf8JsonWriter writer, object? item, JsonSerializerOptions opts)
     {
         if (item is null) return;

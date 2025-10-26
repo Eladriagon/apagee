@@ -16,6 +16,7 @@ public static class APubConstants
     public const string TYPE_OBJ_ACTOR = "Actor";
     public const string TYPE_OBJ_ACTIVITY = "Activity";
     public const string TYPE_OBJ_ACTIVITY_INT = "IntransitiveActivity";
+    public const string TYPE_OBJ_IMAGE = "Image";
     public const string TYPE_OBJ_NOTE = "Note";
     public const string TYPE_OBJ_ARTICLE = "Article";
 

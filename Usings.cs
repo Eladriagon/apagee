@@ -10,16 +10,19 @@ global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Encodings.Web;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization;
 global using System.Text.Json.Serialization.Metadata;
 global using System.Text.RegularExpressions;
 
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.Filters;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.AspNetCore.HttpOverrides;
 global using Microsoft.AspNetCore.DataProtection;
 global using Microsoft.Data.Sqlite;
+global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Caching.Memory;
 
 global using Apagee;
