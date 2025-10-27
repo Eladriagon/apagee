@@ -27,7 +27,9 @@ public class APubActivity : APubObject
             Object = innerObject,
             Target = target,
             Result = result,
-            Origin = origin
+            Origin = origin,
+            To = innerObject.To,
+            Cc = innerObject.Cc
         };
     }
 }
