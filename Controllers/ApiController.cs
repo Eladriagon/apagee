@@ -1,20 +1,19 @@
-using System.Threading.Tasks;
-
 namespace Apagee.Controllers;
 
 [ApiController]
-public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService, IHttpClientFactory httpClientFactory, JsonSerializerOptions opts)
+public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService, FedClient client, JsonSerializerOptions opts)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
     public KeypairHelper KeypairHelper { get; } = keypairHelper;
     public IMemoryCache Cache { get; } = cache;
     public InboxService InboxService { get; } = inboxService;
-    public IHttpClientFactory HttpClientFactory { get; } = httpClientFactory;
+    public FedClient Client { get; } = client;
     public JsonSerializerOptions Opts { get; } = opts;
 
-    private string ActorId => $"https://{GlobalConfiguration.Current?.PublicHostname}/api/users/{GlobalConfiguration.Current!.FediverseUsername}";
-    private string CurrentPath => $"https://{GlobalConfiguration.Current?.PublicHostname}{Request.Path}";
+    private string RootUrl => $"https://{GlobalConfiguration.Current?.PublicHostname}";
+    private string ActorId => $"{RootUrl}/api/users/{GlobalConfiguration.Current!.FediverseUsername}";
+    private string CurrentPath => $"{RootUrl}{Request.Path}";
     private string AtomId => CurrentPath + Request.QueryString;
     private APubActor CurrentActor => APubActor.Create<Person>(KeypairHelper.KeyId, KeypairHelper.ActorPublicKeyPem ?? throw new ApageeException("Cannot create user: Actor public key PEM is null."));
 
@@ -395,13 +394,43 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                     case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonValue v:
                         if (v.GetValue<string>().ToUpper() == ActorId.ToUpper())
                         {
-                            await InboxService.CreateFollower(APubFollower.FromJson(json));
+                            var follower = APubFollower.FromJson(json);
+                            await InboxService.CreateFollower(follower);
+                            await Client.PostInboxFromActor(follower.FollowerId!, new Accept
+                            {
+                                Id = $"{RootUrl}/{Ulid.NewUlid()}",
+                                Actor = ActorId,
+                                Object =
+                                [
+                                    new Follow
+                                    {
+                                        Id = follower.Id,
+                                        Actor = follower.FollowerId,
+                                        Object = ActorId
+                                    }
+                                ]
+                            });
                         }
                         break;
                     case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonArray arr && arr[0] is JsonValue v:
                         if (v.GetValue<string>().ToUpper() == ActorId.ToUpper())
                         {
-                            await InboxService.CreateFollower(APubFollower.FromJson(json));
+                            var follower = APubFollower.FromJson(json);
+                            await InboxService.CreateFollower(follower);
+                            await Client.PostInboxFromActor(follower.FollowerId!, new Accept
+                            {
+                                Id = $"{RootUrl}/{Ulid.NewUlid()}",
+                                Actor = ActorId,
+                                Object =
+                                [
+                                    new Follow
+                                    {
+                                        Id = follower.Id,
+                                        Actor = follower.FollowerId,
+                                        Object = ActorId
+                                    }
+                                ]
+                            });
                         }
                         break;
                     case APubConstants.TYPE_ACT_UNDO when json["object"] is JsonObject obj 
@@ -410,7 +439,22 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                         && origId.GetValue<string>() is { Length: > 0 }:
                         if (origTarget.GetValue<string>().ToUpper() == ActorId.ToUpper())
                         {
+                            var follower = APubFollower.FromJson(json);
                             await InboxService.DeleteFollower(origId.GetValue<string>());
+                            await Client.PostInboxFromActor(follower.FollowerId!, new Accept
+                            {
+                                Id = $"{RootUrl}/{Ulid.NewUlid()}",
+                                Actor = ActorId,
+                                Object =
+                                [
+                                    new Undo
+                                    {
+                                        Id = follower.Id,
+                                        Actor = follower.FollowerId,
+                                        Object = ActorId
+                                    }
+                                ]
+                            });
                         }
                         break;
                 }
