@@ -216,7 +216,7 @@ public class SystemController(UserService userService, SettingsService settingsS
             return NotFound();
         }
 
-        var b64 = settings.AuthorAvatar;
+        var b64 = settings.BannerImage ?? settings.AuthorAvatar;
         if (string.IsNullOrWhiteSpace(b64))
             return NotFound();
 
