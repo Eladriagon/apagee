@@ -131,6 +131,7 @@ try
     builder.Services.AddSingleton<ArticleService>();
     builder.Services.AddSingleton<UserService>();
     builder.Services.AddSingleton<InboxService>();
+    builder.Services.AddSingleton<FedClient>();
     builder.Services.AddSingleton(provider =>
     {
         var opts = new JsonSerializerOptions(JsonSerializerDefaults.Web);
