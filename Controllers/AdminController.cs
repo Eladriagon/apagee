@@ -51,6 +51,7 @@ public class AdminController(UserService userService, ArticleService articleServ
             // Copy some non-persistent settings over
             newSettings.Favicon = settings?.Favicon;
             newSettings.AuthorAvatar = settings?.AuthorAvatar;
+            newSettings.BannerImage = settings?.BannerImage;
 
             if (newSettings.FaviconInput is not null)
             {
@@ -66,6 +67,14 @@ public class AdminController(UserService userService, ArticleService articleServ
                 if (b64avatar is { Length: > 0 } && Utils.IsJpeg(b64avatar) || Utils.IsPng(b64avatar))
                 {
                     newSettings.AuthorAvatar = b64avatar;
+                }
+            }            
+            if (newSettings.BannerImageInput is not null)
+            {
+                var b64banner = await newSettings.BannerImageInput.ReadToBase64();
+                if (b64banner is { Length: > 0 } && Utils.IsIco(b64banner) || Utils.IsPng(b64banner))
+                {
+                    newSettings.BannerImage = b64banner;
                 }
             }
 

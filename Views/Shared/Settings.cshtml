@@ -28,6 +28,8 @@
         <span class="help">This is the CSS style applied to your public posts. It does not affect the admin area. You can use @@imports and any other valid CSS here.</span>
     </div>
 
+    <h3 class="subtitle is-4">Images</h3>
+
     <div class="field">
         <label class="label" asp-for="Favicon">Favicon</label>
 
@@ -67,7 +69,7 @@
         </div>
         @if (Model.AuthorAvatar is not null)
         {
-            <img src="@Model.AuthorAvatar?.ToDataUri()" alt="Avatar for @(GlobalConfiguration.Current?.FediverseUsername)" style="width: 96px !important; height: 96px !important;" />
+            <img src="/avatar.png" alt="Avatar for @(GlobalConfiguration.Current?.FediverseUsername)" style="width: 96px !important; height: 96px !important;" />
         }
         <span class="help">This is your Fediverse and site avatar image. Must be square. 120x120 recommended.</span>
     </div>
@@ -89,7 +91,7 @@
         </div>
         @if (Model.BannerImage is not null)
         {
-            <img src="@Model.BannerImage?.ToDataUri()" alt="Banner for @(GlobalConfiguration.Current?.FediverseUsername)" style="width: 96px !important; height: 96px !important;" />
+            <img src="/banner.png" alt="Banner for @(GlobalConfiguration.Current?.FediverseUsername)" style="width: 200px !important; height: 100px !important;" />
         }
         <span class="help">This is your Fediverse and site banner. Appears in link previews and Fediverse profiles. Must be 2:1 aspect. 2000x1000 recommended.</span>
     </div>
@@ -100,6 +102,8 @@
             Enable Font Awesome?
         </label>
     </div>
+
+    <hr />
 
     <h2 class="subtitle is-3">Social</h2>
 
@@ -113,6 +117,8 @@
             verification.</span>
     </div>
 
+    <hr />
+    
     <h2 class="subtitle is-3">Site Metadata (OData)</h2>
 
     <div class="field">
