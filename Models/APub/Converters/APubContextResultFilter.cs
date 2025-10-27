@@ -17,6 +17,11 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
             await next(); return;
         }
 
+        if (context.HttpContext.Request.Path.Value?.Contains("webfinger") ?? false)
+        {
+            await next(); return;   
+        }
+
         if (r.Value is null)
         {
             await next(); return;

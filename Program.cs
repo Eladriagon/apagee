@@ -164,6 +164,28 @@ try
     // Article "permalink" view URL
     app.MapControllerRoute("page", "{*slug}", new { controller = "Page", action = "Get" });
 
+    app.Use(async (ctx, next) =>
+    {
+        await next(); // run endpoint first
+
+        if (ctx.Request.Path.StartsWithSegments("/.well-known/webfinger"))
+        {
+            ctx.Response.ContentType = Globals.JSON_RD_CONTENT_TYPE;
+        }
+        else if (ctx.Request.Path.StartsWithSegments("/users"))
+        {
+            if (!ctx.Response.Headers.ContainsKey("Vary"))
+                ctx.Response.Headers.Vary = "Accept";
+
+            // Fix content types that ASP.NET silently “helped”
+            if (ctx.Response.ContentType?.StartsWith("application/json") == true &&
+                ctx.Request.Headers.Accept.Any(a => a?.Contains("activity+json", StringComparison.OrdinalIgnoreCase) ?? false))
+            {
+                ctx.Response.ContentType = Globals.JSON_ACT_CONTENT_TYPE;
+            }
+        }
+    });
+
     //app.UseStatusCodePagesWithReExecute();
 
     app.MapFallback(() => Results.LocalRedirect("404"));

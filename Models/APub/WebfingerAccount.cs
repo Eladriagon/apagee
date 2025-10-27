@@ -23,7 +23,7 @@ public class WebfingerAccount
                 new()
                 {
                     Rel = "self",
-                    Type = "application/activity+json",
+                    Type = Globals.JSON_ACT_CONTENT_TYPE,
                     Href = $"https://{hostname}/api/users/{user}"
                 },
                 new()

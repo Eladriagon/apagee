@@ -41,6 +41,8 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound("Resource not found.");
         }
 
+        Response.ContentType = "application/jrd+json";
+
         return Ok(acct);
     }
 
