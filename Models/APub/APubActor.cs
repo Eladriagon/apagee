@@ -30,6 +30,7 @@ public class APubActor : APubObject
     public static APubActor Create<TActor>(string keyId, string keyPem) where TActor : APubActor, new()
     {
         var icon = SettingsService.Current?.AuthorAvatar;
+        var image = SettingsService.Current?.BannerImage;
         var config = ConfigManager.GetGlobalConfig();
 
         var rootUrl = $"https://{config.PublicHostname}";
@@ -43,6 +44,11 @@ public class APubActor : APubObject
             Icon = icon is null ? null : new()
             {
                 Url = $"{rootUrl}/avatar.png",
+                MediaType = Utils.IsPng(icon) ? "image/png" : "image/jpeg"
+            },
+            Image = image is null ? null : new()
+            {
+                Url = $"{rootUrl}/banner.png",
                 MediaType = Utils.IsPng(icon) ? "image/png" : "image/jpeg"
             },
             Inbox = $"{baseUrl}/inbox",

@@ -68,7 +68,7 @@ public class APubObject : APubBase
     public APubPolyBase? Url { get; set; }
     public APubPolyBase? Tag { get; set; }
     public APubPolyBase? Context { get; set; }
-    public APubPolyBase? Image { get; set; }
+    public APubImage? Image { get; set; }
     
     [AlwaysArray]
     public APubPolyBase? Attachment { get; set; }
