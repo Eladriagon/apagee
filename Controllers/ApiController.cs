@@ -227,7 +227,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             var ocp = new APubOrderedCollectionPage
             {
                 Id = $"{ActorId}/followers?after={after}",
-                TotalItems = 0,
+                TotalItems = total,
                 PartOf = new APubLink($"{ActorId}/followers"),
                 OrderedItems = followerIds
             };
