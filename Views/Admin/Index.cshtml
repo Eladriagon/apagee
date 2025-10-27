@@ -11,6 +11,12 @@
     <div class="level">
         <div class="level-item has-text-centered">
             <div>
+                <p class="title is-1">@Model.FollowerCount</p>
+                <p class="heading">follower@(@Model.FollowerCount == 1 ? "" : "s")</p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
                 <p class="title is-1">@Model.PostCount</p>
                 <p class="heading">article@(@Model.PostCount == 1 ? "" : "s")</p>
             </div>

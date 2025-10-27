@@ -21,6 +21,8 @@ public class APubActor : APubObject
 
     public bool Memorial { get; set; }
 
+    public bool ManuallyApprovesFollowers { get; set; }
+
     public PublicKey PublicKey { get; set; } = default!;
 
     public APubImage? Icon { get; set; }
@@ -64,6 +66,7 @@ public class APubActor : APubObject
             Discoverable = true,
             Indexable = true,
             Memorial = false,
+            ManuallyApprovesFollowers = false,
             PublicKey = new PublicKey
             {
                 Id = keyId,

@@ -4,12 +4,13 @@ namespace Apagee.Controllers;
 
 [Authorize]
 [Route("admin")]
-public class AdminController(UserService userService, ArticleService articleService, SettingsService settingsService)
+public class AdminController(UserService userService, ArticleService articleService, SettingsService settingsService, InboxService inboxService)
     : BaseController
 {
     public UserService UserService { get; } = userService;
     public ArticleService ArticleService { get; } = articleService;
     public SettingsService SettingsService { get; } = settingsService;
+    public InboxService InboxService { get; } = inboxService;
 
     [HttpGet]
     [Route("")]
@@ -17,11 +18,13 @@ public class AdminController(UserService userService, ArticleService articleServ
     {
         var articleCount = await ArticleService.GetCount();
         var recentArticles = await ArticleService.GetRecent(10);
+        var followerCount = await InboxService.GetFollowerCount();
 
         return View(new DashboardViewModel
         {
             PostCount = (int)articleCount,
-            RecentArticles = recentArticles
+            RecentArticles = recentArticles,
+            FollowerCount = followerCount
         });
     }
 
