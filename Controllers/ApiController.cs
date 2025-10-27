@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Routing.Tree;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Apagee.Controllers;
 
@@ -50,6 +52,13 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     }
 
     [HttpGet]
+    [Route("actor")]
+    public IActionResult SiteActor()
+    {
+        return Redirect($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}");
+    }
+
+    [HttpGet]
     [Route("api/users/{username}")]
     public IActionResult GetUser([FromRoute] string username)
     {
@@ -60,7 +69,11 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         }
 
         var user = CurrentActor;
-        
+
+        if (TryRedirectHtml(user, out var link))
+        {
+            return Redirect(link);
+        }
 
         return Ok(user);
     }
@@ -84,6 +97,10 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
         var aPubArticle = APubStatus.FromArticle(article);
 
+        if (TryRedirectHtml(aPubArticle, out var link))
+        {
+            return Redirect(link);
+        }
 
         return Ok(aPubArticle);
     }
@@ -110,6 +127,10 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
+        if (TryRedirectHtml(aPubArticle, out var link))
+        {
+            return Redirect(link);
+        }
 
         return Ok(act);
     }
@@ -133,6 +154,10 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
         var aPubArticle = APubArticle.FromArticle(article);
 
+        if (TryRedirectHtml(aPubArticle, out var link))
+        {
+            return Redirect(link);
+        }
 
         return Ok(aPubArticle);
     }
@@ -159,6 +184,10 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
+        if (TryRedirectHtml(aPubArticle, out var link))
+        {
+            return Redirect(link);
+        }
 
         return Ok(act);
     }
@@ -353,5 +382,28 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         }
 
         return Ok();
+    }
+
+    private bool TryRedirectHtml(object obj, out string redirect)
+    {
+        redirect = "";
+        if (Request.Headers.Accept.ToString().ToLower().Contains("text/html"))
+        {
+            var polyUrl = obj is APubObject o
+                ? o.Url
+                : obj is APubLink l
+                    ? l.Url
+                    : obj is APubPolyBase { Count: 1 } p
+                        ? (p[0].IsLink ? ((APubLink)p[0]).Url : p[0].IsObject ? ((APubObject)p[0]).Url : null)
+                        : null;
+
+            var target = polyUrl is { Count: 1 } && polyUrl[0].IsLink && ((APubLink)polyUrl[0]).Href is not null ? ((APubLink)polyUrl[0]).Href : null;
+            if (target is not null)
+            {
+                redirect = target.PathAndQuery;
+                return true;
+            }
+        }
+        return false;
     }
 }

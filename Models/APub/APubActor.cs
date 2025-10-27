@@ -48,7 +48,7 @@ public class APubActor : APubObject
             Followers = $"{baseUrl}/followers",
             Following = $"{baseUrl}/following",
             Summary = config.FediverseBio,
-            Url = [new APubLink(baseUrl)],
+            Url = [new APubLink($"{rootUrl}/@{config.FediverseUsername}")],
             Discoverable = true,
             Indexable = true,
             Memorial = false,
