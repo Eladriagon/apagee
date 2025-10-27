@@ -1,4 +1,4 @@
-# apagee
+# Apagee
 
 Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 
@@ -19,7 +19,7 @@ Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 
 ### ⚠️ THIS IS PRE-ALPHA! ⚠️
 
-You have been warned. 🙂
+You have been warned. 🙂 (It's not dangerous, just buggy.)
 
 ### Linux (Debian)
 
@@ -57,5 +57,6 @@ The releases contain precompiled binaries that should run on most Linux and Wind
 * [ ] Receive boosts/favorites from Fediverse
 * [x] Draft articles
 * [x] View article list
-* [x] Delete~~/unpublish~~ articles
-* [ ] Send Fediverse activities/replies to activities
+* [x] Delete articles
+* [x] Accept and track followers, and respond to follow requests
+* [ ] Send Fediverse activities
