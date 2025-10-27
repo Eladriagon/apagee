@@ -18,22 +18,15 @@ public class APubPolyBase : List<APubBase>
 
     public override string ToString()
     {
-        switch (this)
+        return this switch
         {
-            case APubPolyBase when Count == 0:
-                return $"[PolyBase] Count = 0";
-            case APubPolyBase when Count == 1 && this.First() is APubLink { IsOnlyLink: true } ol:
-                return $"[PolyBase] [Single] <Only>{this.First().Type}: {ol.Href}";
-            case APubPolyBase when Count == 1 && this.First() is APubLink l:
-                return $"[PolyBase] [Single] {this.First().Type}: {l.Name} -- {l.Href}";
-            case APubPolyBase when Count == 1 && this.First() is APubObject o:
-                return $"[PolyBase] [Single] {this.First().Type}: {o.Id}";
-            case APubPolyBase when Count == 1:
-                return $"[PolyBase] [Single] {this.First().Type}: {this.First()}";
-            case APubPolyBase when Count == this.GroupBy(a => a.Type).OrderByDescending(g => g.Count()).Count():
-                return $"[PolyBase] [SameArray={Count}] {this.First().Type}";
-            default:
-                return $"[PolyBase] [Other?]";
-        }
+            APubPolyBase when Count == 0 => $"[PolyBase] Count = 0",
+            APubPolyBase when Count == 1 && this.First() is APubLink { IsOnlyLink: true } ol => $"[PolyBase] [Single] <Only>{this.First().Type}: {ol.Href}",
+            APubPolyBase when Count == 1 && this.First() is APubLink l => $"[PolyBase] [Single] {this.First().Type}: {l.Name} -- {l.Href}",
+            APubPolyBase when Count == 1 && this.First() is APubObject o => $"[PolyBase] [Single] {this.First().Type}: {o.Id}",
+            APubPolyBase when Count == 1 => $"[PolyBase] [Single] {this.First().Type}: {this.First()}",
+            APubPolyBase when Count == this.GroupBy(a => a.Type).OrderByDescending(g => g.Count()).Count() => $"[PolyBase] [SameArray={Count}] {this.First().Type}",
+            _ => $"[PolyBase] [Other?]",
+        };
     }
 }

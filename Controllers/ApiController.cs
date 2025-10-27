@@ -1,16 +1,19 @@
-
+using System.Threading.Tasks;
 
 namespace Apagee.Controllers;
 
 [ApiController]
-public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService)
+public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService, IHttpClientFactory httpClientFactory, JsonSerializerOptions opts)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
     public KeypairHelper KeypairHelper { get; } = keypairHelper;
     public IMemoryCache Cache { get; } = cache;
     public InboxService InboxService { get; } = inboxService;
+    public IHttpClientFactory HttpClientFactory { get; } = httpClientFactory;
+    public JsonSerializerOptions Opts { get; } = opts;
 
+    private string ActorId => $"https://{GlobalConfiguration.Current?.PublicHostname}/api/users/{GlobalConfiguration.Current!.FediverseUsername}";
     private string CurrentPath => $"https://{GlobalConfiguration.Current?.PublicHostname}{Request.Path}";
     private string AtomId => CurrentPath + Request.QueryString;
     private APubActor CurrentActor => APubActor.Create<Person>(KeypairHelper.KeyId, KeypairHelper.ActorPublicKeyPem ?? throw new ApageeException("Cannot create user: Actor public key PEM is null."));
@@ -55,9 +58,9 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
     [HttpGet]
     [Route("actor")]
-    public IActionResult SiteActor()
+    public async Task<IActionResult> SiteActor()
     {
-        return Redirect($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}");
+        return Redirect(ActorId);
     }
 
     [HttpGet]
@@ -196,7 +199,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
     [HttpGet]
     [Route("api/users/{username}/followers")]
-    public IActionResult GetFollowers([FromRoute] string username, [FromQuery] int? after = null)
+    public async Task<IActionResult> GetFollowers([FromRoute] string username, [FromQuery] string? after = null)
     {
         // Single-user only
         if (username != GlobalConfiguration.Current?.FediverseUsername)
@@ -204,25 +207,29 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             return NotFound("User not found.");
         }
 
+        var total = await InboxService.GetFollowerCount();
 
         if (after is null)
         {
             var oc = new APubOrderedCollection
             {
-                Id = Request.GetDisplayUrl() + Request.QueryString,
-                TotalItems = 0,
-                First = Request.GetDisplayUrl() + "?after=0"
+                Id = $"{ActorId}/followers",
+                TotalItems = total,
+                First = $"{ActorId}/followers?after={Ulid.MaxValue}"
             };
             return Ok(oc);
         }
         else
         {
+            var followerList = await InboxService.GetFollowerList(after);
+            var followerIds = new APubPolyBase();
+            followerIds.AddRange(followerList.Select(f => new APubLink(f)));
             var ocp = new APubOrderedCollectionPage
             {
-                Id = Request.GetDisplayUrl() + Request.QueryString,
+                Id = $"{ActorId}/followers?after={after}",
                 TotalItems = 0,
-                PartOf = new APubLink(Request.GetDisplayUrl()),
-                OrderedItems = new APubOrderedCollection()
+                PartOf = new APubLink($"{ActorId}/followers"),
+                OrderedItems = followerIds
             };
             return Ok(ocp);
         }
@@ -232,14 +239,12 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     [Route("api/users/{username}/following")]
     public IActionResult GetFollowing([FromRoute] string username)
     {
-
         return Ok(new APubOrderedCollection
         {
             Id = AtomId,
             TotalItems = 0
         });
     }
-
 
     [HttpGet]
     [Route("api/users/{username}/outbox")]
@@ -357,10 +362,11 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             RemoteServer = Request.Headers["X-Forwarded-For"].ToString() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"
         };
 
+
+        JsonNode? json = default;
         try
         {
-            var json = await JsonNode.ParseAsync(new MemoryStream(Encoding.UTF8.GetBytes(body)));
-
+            json = await JsonNode.ParseAsync(new MemoryStream(Encoding.UTF8.GetBytes(body)));
             if (json?.GetValueKind() == JsonValueKind.Object)
             {
                 item.ID = json["id"]?.GetValue<string>() ?? "unknown-" + item.UID;
@@ -378,11 +384,37 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             item.Type = "err-" + item.UID;
         }
 
-        if (Request.HasJsonContentType()
-            || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_LD_CONTENT_TYPE)
-            || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_ACT_CONTENT_TYPE))
+        if (json is not null)
         {
-            // TBD
+            if (Request.HasJsonContentType()
+                || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_LD_CONTENT_TYPE)
+                || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_ACT_CONTENT_TYPE))
+            {
+                switch (item.Type)
+                {
+                    case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonValue v:
+                        if (v.GetValue<string>().ToUpper() == ActorId.ToUpper())
+                        {
+                            await InboxService.CreateFollower(APubFollower.FromJson(json));
+                        }
+                        break;
+                    case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonArray arr && arr[0] is JsonValue v:
+                        if (v.GetValue<string>().ToUpper() == ActorId.ToUpper())
+                        {
+                            await InboxService.CreateFollower(APubFollower.FromJson(json));
+                        }
+                        break;
+                    case APubConstants.TYPE_ACT_UNDO when json["object"] is JsonObject obj 
+                        && obj["id"] is JsonValue origId
+                        && obj["object"] is JsonValue origTarget
+                        && origId.GetValue<string>() is { Length: > 0 }:
+                        if (origTarget.GetValue<string>().ToUpper() == ActorId.ToUpper())
+                        {
+                            await InboxService.DeleteFollower(origId.GetValue<string>());
+                        }
+                        break;
+                }
+            }
         }
 
         await InboxService.Create(item);

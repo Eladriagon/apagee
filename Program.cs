@@ -131,7 +131,14 @@ try
     builder.Services.AddSingleton<ArticleService>();
     builder.Services.AddSingleton<UserService>();
     builder.Services.AddSingleton<InboxService>();
+    builder.Services.AddSingleton(provider =>
+    {
+        var opts = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        APubJsonOptions.OptionModifier(opts); // your existing modifier
+        return opts;
+    });
     
+    builder.Services.AddSingleton<FediverseSigningHandler>();
     builder.Services.AddSingleton<KeypairHelper>();
     builder.Services.AddSingleton<SecurityHelper>();
 

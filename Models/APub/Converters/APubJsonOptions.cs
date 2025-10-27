@@ -6,6 +6,16 @@ public static class APubJsonOptions
 
     public static IEnumerable<Type> CachedTypes { get; } = ThisAssembly.GetTypes();
 
+    public static JsonSerializerOptions GetOptions
+    {
+        get
+        {
+            var opts = new JsonSerializerOptions();
+            OptionModifier(opts);
+            return opts;
+        }
+    }
+
     public static Action<JsonSerializerOptions> OptionModifier => new(opt =>
     {
         opt.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

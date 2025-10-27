@@ -6,7 +6,7 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper) : DelegatingHa
     {
         // Include JSON-LD
         request.Headers.Accept.Clear();
-        request.Headers.TryAddWithoutValidation("Accept", Globals.JSON_LD_CONTENT_TYPE);
+        request.Headers.TryAddWithoutValidation("Accept", $"{Globals.JSON_LD_CONTENT_TYPE}, {Globals.JSON_ACT_CONTENT_TYPE}");
 
         if (request.Content is not null)
         {

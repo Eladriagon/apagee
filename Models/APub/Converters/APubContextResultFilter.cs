@@ -1,7 +1,31 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+namespace Apagee.Models.APub.Converters;
 
 public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
 {
+    internal static object[] APubGlobalContext = [
+        "https://www.w3.org/ns/activitystreams",
+        "https://w3id.org/security/v1",
+        new Dictionary<string, object> {
+            ["manuallyApprovesFollowers"] = "as:manuallyApprovesFollowers",
+            ["toot"] = "http://joinmastodon.org/ns#",
+            ["alsoKnownAs"] = new Dictionary<string, object> {
+                ["@id"] = "as:alsoKnownAs",
+                ["@type"] = "@id"
+            },
+            ["attributionDomains"] = new Dictionary<string, object> {
+                ["@id"] = "as:attributionDomains",
+                ["@type"] = "@id"
+            },
+            ["schema"] = "http://schema.org#",
+            ["PropertyValue"] = "schema:PropertyValue",
+            ["value"] = "schema:value",
+            ["discoverable"] = "toot:discoverable",
+            ["suspended"] = "toot:suspended",
+            ["memorial"] = "toot:memorial",
+            ["indexable"] = "toot:indexable",
+        }
+    ];
+
     private static bool IsJson(ObjectResult r)
         => r.ContentTypes.Count == 0 || r.ContentTypes.Contains("application/json");
 
@@ -19,7 +43,7 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
 
         if (context.HttpContext.Request.Path.Value?.Contains("webfinger") ?? false)
         {
-            await next(); return;   
+            await next(); return;
         }
 
         if (r.Value is null)
@@ -44,29 +68,7 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
         // Build new root with "context" + original properties (cloned!)
         var root = new JsonObject
         {
-            ["@context"] = JsonSerializer.SerializeToNode<object[]>([
-                "https://www.w3.org/ns/activitystreams",
-                "https://w3id.org/security/v1",
-                new Dictionary<string, object> {
-                    ["manuallyApprovesFollowers"] = "as:manuallyApprovesFollowers",
-                    ["toot"] = "http://joinmastodon.org/ns#",
-                    ["alsoKnownAs"] = new Dictionary<string, object> {
-                        ["@id"] = "as:alsoKnownAs",
-                        ["@type"] = "@id"
-                    },
-                    ["attributionDomains"] = new Dictionary<string, object> {
-                        ["@id"] = "as:attributionDomains",
-                        ["@type"] = "@id"
-                    },
-                    ["schema"] = "http://schema.org#",
-                    ["PropertyValue"] = "schema:PropertyValue",
-                    ["value"] = "schema:value",
-                    ["discoverable"] = "toot:discoverable",
-                    ["suspended"] = "toot:suspended",
-                    ["memorial"] = "toot:memorial",
-                    ["indexable"] = "toot:indexable",
-                }
-            ])
+            ["@context"] = JsonSerializer.SerializeToNode(APubGlobalContext)
         };
 
         foreach (var kvp in obj)

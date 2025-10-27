@@ -5,6 +5,10 @@ public class APubObject : APubBase
 {
     public override string Type => APubConstants.TYPE_OBJECT;
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
+    [JsonPropertyName("@context")]
+    public object[]? RootContext { get; set; }
+
     [JsonPropertyName("name")]
     public string? NameSingle { get; set; }
     public Dictionary<string, string?>? NameMap { get; set; }

@@ -10,5 +10,6 @@ public class APubOrderedCollectionPage : APubCollectionPage
     /// <summary>
     /// Can contain: <see cref="APubObject"/>, <see cref="APubLink"/>
     /// </summary>
-    public APubOrderedCollection? OrderedItems { get; set; }
+    [AlwaysArray]
+    public APubPolyBase? OrderedItems { get; set; }
 }
