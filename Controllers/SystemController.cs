@@ -64,9 +64,15 @@ public class SystemController(UserService userService, SettingsService settingsS
     [Route("403")]
     public IActionResult AccessDenied() => Content("Apagee -- 403 Access Denied");
 
+    [HttpGet]
     [Route("/admin/login")]
     public IActionResult LoginView()
     {
+        if (User.Identity is {IsAuthenticated: true })
+        {
+            return RedirectToAction("Index", "Admin");
+        }
+
         if (TempData["LoginFail"] is true)
         {
             ViewBag.LoginFailed = true;
@@ -85,11 +91,6 @@ public class SystemController(UserService userService, SettingsService settingsS
     {
         try
         {
-            if (HttpContext.User.Identity is { IsAuthenticated: true })
-            {
-                return RedirectToAction("Index", "Admin");
-            }
-
             if (await UserService.CheckUserLogin(username, password))
             {
                 var user = await UserService.GetUser() ?? throw new ApageeException("Unable to find user in database (check connection).");
