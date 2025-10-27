@@ -18,8 +18,8 @@ public class PageController(ArticleService articleService, GlobalConfiguration c
                 return NotFound("Sorry, can't find that!");
             }
 
-            if (Request.Headers.Accept.ToString().ToLower().Contains("application/ld+json")
-                || Request.Headers.Accept.ToString().ToLower().Contains("application/json"))
+            if (Request.Headers.Accept.ToString().ToLower().Contains(Globals.JSON_LD_CONTENT_TYPE_TRIM)
+                || Request.Headers.Accept.ToString().ToLower().Contains(Globals.JSON_ACT_CONTENT_TYPE))
             {
                 return Redirect($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}/statuses/{article.Uid}");
             }

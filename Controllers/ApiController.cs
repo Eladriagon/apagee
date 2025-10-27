@@ -1,18 +1,15 @@
-using System.Runtime.InteropServices;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Routing.Tree;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 
 namespace Apagee.Controllers;
 
 [ApiController]
-[Produces(Globals.JSON_ACT_CONTENT_TYPE)]
-public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache)
+public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
     public KeypairHelper KeypairHelper { get; } = keypairHelper;
     public IMemoryCache Cache { get; } = cache;
+    public InboxService InboxService { get; } = inboxService;
 
     private string CurrentPath => $"https://{GlobalConfiguration.Current?.PublicHostname}{Request.Path}";
     private string AtomId => CurrentPath + Request.QueryString;
@@ -31,19 +28,24 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             }
 
             // Single-user only, otherwise we'd have to parse the acct: subject.
-            var acct = WebfingerAccount.Create();
+            var acct = WebfingerAccount.CreateUser();
+            var app = WebfingerAccount.CreateApp();
 
             if (resource is null)
             {
                 return BadRequest("Missing resource parameter.");
             }
 
-            if (resource != acct.Subject)
+            if (resource == acct.Subject)
             {
-                return NotFound("Resource not found.");
+                return Ok(acct);
+            }
+            else if (resource == app.Subject)
+            {
+                return Ok(app);
             }
 
-            return Ok(acct);
+            return NotFound("Resource not found.");
         }
         catch
         {
@@ -348,7 +350,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             ID = "",
             UID = Ulid.NewUlid().ToString(),
             BodySize = body.Length,
-            BlobData = body,
+            BodyData = body,
             Type = "",
             ReceivedOn = DateTime.UtcNow,
             ContentType = Request.ContentType?.ToString() ?? "no/type",
@@ -376,12 +378,16 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             item.Type = "err-" + item.UID;
         }
 
-        if (Request.HasJsonContentType() || Request.ContentType?.ToLower() == Globals.JSON_LD_CONTENT_TYPE)
+        if (Request.HasJsonContentType()
+            || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_LD_CONTENT_TYPE)
+            || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_ACT_CONTENT_TYPE))
         {
             // TBD
         }
 
-        return Ok();
+        await InboxService.Create(item);
+
+        return Created();
     }
 
     private bool TryRedirectHtml(object obj, out string redirect)

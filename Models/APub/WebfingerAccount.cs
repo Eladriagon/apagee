@@ -8,7 +8,7 @@ public class WebfingerAccount
 
     public List<WebfingerLink> Links { get; set; } = [];
 
-    public static WebfingerAccount Create()
+    public static WebfingerAccount CreateUser()
     {
         var hostname = GlobalConfiguration.Current!.PublicHostname;
         var user = GlobalConfiguration.Current!.FediverseUsername;
@@ -33,6 +33,34 @@ public class WebfingerAccount
                     Rel = "http://webfinger.net/rel/profile-page",
                     Type = "text/html",
                     Href = $"https://{hostname}/@{user}"
+                }
+            ]
+        };
+    }
+
+    public static WebfingerAccount CreateApp()
+    {
+        var hostname = GlobalConfiguration.Current!.PublicHostname;
+        return new WebfingerAccount
+        {
+            Subject = $"acct:{hostname}@{hostname}",
+            Aliases =
+            [
+                $"https://{hostname}/actor"
+            ],
+            Links =
+            [
+                new()
+                {
+                    Rel = "self",
+                    Type = Globals.JSON_ACT_CONTENT_TYPE,
+                    Href = $"https://{hostname}/actor"
+                },
+                new()
+                {
+                    Rel = "about",
+                    Type = "text/html",
+                    Href = $"https://github.com/eladriagon/apagee"
                 }
             ]
         };

@@ -71,6 +71,29 @@
         }
         <span class="help">This is your Fediverse and site avatar image. Must be square. 120x120 recommended.</span>
     </div>
+
+    <div class="field">
+        <label class="label" asp-for="BannerImage">Banner Image</label>
+
+        <div class="file has-name is-boxed">
+            <label class="file-label">
+                <input asp-for="BannerImageInput" type="file" accept=".png,.jpg,.jpeg" class="file-input" />
+                <span class="file-cta">
+                    <span class="file-icon">
+                        <i class="fas fa-upload"></i>
+                    </span>
+                    <span class="file-label">Choose a file to upload...</span>
+                </span>
+                <span class="file-name mw100">No file selected.</span>
+            </label>
+        </div>
+        @if (Model.BannerImage is not null)
+        {
+            <img src="@Model.BannerImage?.ToDataUri()" alt="Banner for @(GlobalConfiguration.Current?.FediverseUsername)" style="width: 96px !important; height: 96px !important;" />
+        }
+        <span class="help">This is your Fediverse and site banner. Appears in link previews and Fediverse profiles. Must be 2:1 aspect. 2000x1000 recommended.</span>
+    </div>
+
     <div class="field">
         <label class="label">
             <input asp-for="EnableFontAwesome" class="checkbox" />

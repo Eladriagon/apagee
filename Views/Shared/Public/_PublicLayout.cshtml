@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-    @if (vm.Articles.Count() == 1 && vm.Articles.Single() is ArticleViewModel a && Context.Request.Path != "/")
+    @if (vm.Articles?.Count() == 1 && vm.Articles.Single() is ArticleViewModel a && Context.Request.Path != "/")
     {
         @* Article-specific meta properties *@
         <meta property="og:title" content="@a.Article.Title" />
@@ -33,8 +33,18 @@
         <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname" />
 
     }
-    <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
-    <meta property="og:logo" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
+    @if (SettingsService.Current?.BannerImage is not null)
+    {
+        <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/banner.png" />
+    }
+    else
+    {
+        <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
+    }
+    @if (SettingsService.Current?.AuthorAvatar is not null)
+    {
+        <meta property="og:logo" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
+    }
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en" />
     <meta property="profile:username" content="@(GlobalConfiguration.Current?.FediverseUsername)@@@(GlobalConfiguration.Current?.PublicHostname)" />

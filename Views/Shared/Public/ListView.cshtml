@@ -1,8 +1,14 @@
+@model ArticleListViewModel
+
 @{
     Layout = "Public/_PublicLayout";
 }
 
-@model ArticleListViewModel
+@section head
+{
+    <link rel="alternate" type="application/activity+json" href="https://@GlobalConfiguration.Current?.PublicHostname/api/users/@GlobalConfiguration.Current?.FediverseUsername">
+    <link rel="alternate" type="application/jrd+json" href="https://@GlobalConfiguration.Current?.PublicHostname/.well-known/webfinger?resource=acct:@GlobalConfiguration.Current?.FediverseUsername@@@GlobalConfiguration.Current?.PublicHostname" />
+}
 
 <div class="articles">
     @if (!Model.Articles.Any())

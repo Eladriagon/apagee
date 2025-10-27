@@ -20,6 +20,11 @@ public sealed class Settings
     [Write(false)]
     public IFormFile? AuthorAvatarInput { get; set; }
 
+    public string? BannerImage { get; set; }
+    
+    [Write(false)]
+    public IFormFile? BannerImageInput { get; set; }
+
     public string? ODataTitle { get; set; }
 
     public string? ODataDescription { get; set; }

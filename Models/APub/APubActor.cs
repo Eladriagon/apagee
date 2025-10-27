@@ -24,6 +24,8 @@ public class APubActor : APubObject
     public PublicKey PublicKey { get; set; } = default!;
 
     public APubImage? Icon { get; set; }
+    
+    public Dictionary<string,string>? Endpoints { get; set; }
 
     public static APubActor Create<TActor>(string keyId, string keyPem) where TActor : APubActor, new()
     {
@@ -49,6 +51,10 @@ public class APubActor : APubObject
             Following = $"{baseUrl}/following",
             Summary = config.FediverseBio,
             Url = [new APubLink($"{rootUrl}/@{config.FediverseUsername}")],
+            Endpoints = new()
+            {
+                ["sharedInbox"] = $"{rootUrl}/api/inbox"
+            },
             Discoverable = true,
             Indexable = true,
             Memorial = false,

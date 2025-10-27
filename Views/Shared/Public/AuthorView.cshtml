@@ -1,0 +1,36 @@
+@model ArticleListViewModel
+
+@{
+    Layout = "Public/_PublicLayout";
+    var config = GlobalConfiguration.Current;
+    var settings = SettingsService.Current;
+}
+
+@section head
+{
+    <link rel="alternate" type="application/activity+json" href="https://@config?.PublicHostname/api/users/@config?.FediverseUsername">
+}
+
+<h1>About the Author</h1>
+
+@if (settings?.BannerImage is not null)
+{
+    <div class="banner">
+        <img src="/banner.png" alt="Banner for @config?.FediverseUsername" />
+    </div>
+}
+<p>
+@if (settings?.AuthorAvatar is not null)
+{
+    <div class="avatar">
+        <img src="/avatar.png" alt="Avatar for @config?.FediverseUsername" />
+    </div>
+}
+    <b>@config?.AuthorDisplayName</b> @@@config?.FediverseUsername
+</p>
+@if (config?.FediverseBio is string { Length: > 0 } bio)
+{
+    <p>
+        @bio
+    </p>
+}

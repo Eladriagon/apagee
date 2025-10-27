@@ -1,5 +1,6 @@
 namespace Apagee.Models;
 
+[Table(nameof(Inbox))]
 public class Inbox
 {
     public required string ID { get; set; }
@@ -16,12 +17,12 @@ public class Inbox
 
     public required int BodySize { get; set; }
 
-    public byte[]? Blob { get; set; }
+    public byte[]? Body { get; set; }
 
     [Write(false)]
-    public string? BlobData
+    public string? BodyData
     {
-        get => Blob == null ? null : Encoding.UTF8.GetString(Blob);
-        set => Blob = value == null ? null : Encoding.UTF8.GetBytes(value);
+        get => Body == null ? null : Encoding.UTF8.GetString(Body);
+        set => Body = value == null ? null : Encoding.UTF8.GetBytes(value);
     }
 }

@@ -130,6 +130,7 @@ try
     builder.Services.AddSingleton<StorageService>();
     builder.Services.AddSingleton<ArticleService>();
     builder.Services.AddSingleton<UserService>();
+    builder.Services.AddSingleton<InboxService>();
     
     builder.Services.AddSingleton<KeypairHelper>();
     builder.Services.AddSingleton<SecurityHelper>();

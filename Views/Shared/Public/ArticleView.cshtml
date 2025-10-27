@@ -5,6 +5,11 @@
     var article = Model.Articles.Single();
 }
 
+@section head
+{
+    <link rel="alternate" type="application/activity+json" href="https://@GlobalConfiguration.Current?.PublicHostname/api/users/@GlobalConfiguration.Current?.FediverseUsername/statuses/@article.Article.Uid" />
+}
+
 <div class="article">
     <article>
         <header>
