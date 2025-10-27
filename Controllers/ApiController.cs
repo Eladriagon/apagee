@@ -1,11 +1,10 @@
-using System.Xml;
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.CodeAnalysis.Operations;
-using Microsoft.Extensions.Hosting.Internal;
 
 namespace Apagee.Controllers;
 
 [ApiController]
+[Produces(Globals.JSON_ACT_CONTENT_TYPE)]
 public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache)
     : BaseController
 {
@@ -19,31 +18,35 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
     [HttpGet]
     [Route(".well-known/webfinger")]
+    [Produces(Globals.JSON_RD_CONTENT_TYPE)]
     public IActionResult Webfinger([FromQuery] string resource)
     {
-        if (GlobalConfiguration.Current is not { FediverseUsername.Length: > 0, PublicHostname.Length: > 0 })
+        try
         {
-            return StatusCode(500, "Server has not been set up yet.");
+            if (GlobalConfiguration.Current is not { FediverseUsername.Length: > 0, PublicHostname.Length: > 0 })
+            {
+                return StatusCode(500, "Server has not been set up yet.");
+            }
+
+            // Single-user only, otherwise we'd have to parse the acct: subject.
+            var acct = WebfingerAccount.Create();
+
+            if (resource is null)
+            {
+                return BadRequest("Missing resource parameter.");
+            }
+
+            if (resource != acct.Subject)
+            {
+                return NotFound("Resource not found.");
+            }
+
+            return Ok(acct);
         }
-
-        var cfg = GlobalConfiguration.Current!;
-
-        // Single-user only, otherwise we'd have to parse the acct: subject.
-        var acct = WebfingerAccount.Create(cfg.PublicHostname, cfg.FediverseUsername);
-
-        if (resource is null)
+        catch
         {
-            return BadRequest("Missing resource parameter.");
+            return StatusCode(500, "Webfinger endpoint error.");
         }
-
-        if (resource != acct.Subject)
-        {
-            return NotFound("Resource not found.");
-        }
-
-        Response.ContentType = "application/jrd+json";
-
-        return Ok(acct);
     }
 
     [HttpGet]
@@ -57,6 +60,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         }
 
         var user = CurrentActor;
+        
 
         return Ok(user);
     }
@@ -79,6 +83,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         }
 
         var aPubArticle = APubStatus.FromArticle(article);
+
 
         return Ok(aPubArticle);
     }
@@ -105,6 +110,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
+
         return Ok(act);
     }
 
@@ -126,6 +132,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         }
 
         var aPubArticle = APubArticle.FromArticle(article);
+
 
         return Ok(aPubArticle);
     }
@@ -152,6 +159,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
+
         return Ok(act);
     }
 
@@ -164,6 +172,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         {
             return NotFound("User not found.");
         }
+
 
         if (after is null)
         {
@@ -192,6 +201,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     [Route("api/users/{username}/following")]
     public IActionResult GetFollowing([FromRoute] string username)
     {
+
         return Ok(new APubOrderedCollection
         {
             Id = AtomId,
@@ -224,6 +234,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             PartOf = new APubLink(CurrentActor.Outbox),
             Items = new()
         };
+
 
         if (!page)
         {
@@ -340,6 +351,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         {
             // TBD
         }
+
         return Ok();
     }
 }

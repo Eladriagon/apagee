@@ -8,8 +8,10 @@ public class WebfingerAccount
 
     public List<WebfingerLink> Links { get; set; } = [];
 
-    public static WebfingerAccount Create(string hostname, string user)
+    public static WebfingerAccount Create()
     {
+        var hostname = GlobalConfiguration.Current!.PublicHostname;
+        var user = GlobalConfiguration.Current!.FediverseUsername;
         return new WebfingerAccount
         {
             Subject = $"acct:{user}@{hostname}",
