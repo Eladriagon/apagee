@@ -364,7 +364,6 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
             RemoteServer = Request.Headers["X-Forwarded-For"].ToString() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"
         };
 
-
         JsonNode? json = default;
         try
         {
@@ -392,6 +391,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                 || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_LD_CONTENT_TYPE)
                 || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_ACT_CONTENT_TYPE))
             {
+                
                 switch (item.Type)
                 {
                     case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonValue v:
@@ -399,6 +399,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                         {
                             var follower = APubFollower.FromJson(json);
                             await InboxService.CreateFollower(follower);
+                            Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} from {follower.FollowerId}");
                             await Client.PostInboxFromActor(follower.FollowerId!, new Accept
                             {
                                 Id = $"{RootUrl}/{Ulid.NewUlid()}",
@@ -413,6 +414,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                     }
                                 ]
                             });
+                            Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_ACCEPT} of {APubConstants.TYPE_ACT_FOLLOW} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
 
                             if (SettingsService.Current?.AutoReciprocateFollows ?? false)
                             {
@@ -426,6 +428,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                         Actor = ActorId,
                                         Object = follower.FollowerId
                                     });
+                                Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_FOLLOW} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
                             }
                         }
                         break;
@@ -434,6 +437,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                         {
                             var follower = APubFollower.FromJson(json);
                             await InboxService.CreateFollower(follower);
+                            Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} from {follower.FollowerId}");
                             await Client.PostInboxFromActor(follower.FollowerId!, new Accept
                             {
                                 Id = NewActivityId,
@@ -448,6 +452,8 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                     }
                                 ]
                             });
+                            Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_ACCEPT} of {APubConstants.TYPE_ACT_FOLLOW} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
+
                             if (SettingsService.Current?.AutoReciprocateFollows ?? false)
                             {
                                 // Store the follow activity ID for later undo
@@ -460,6 +466,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                         Actor = ActorId,
                                         Object = follower.FollowerId
                                     });
+                                Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_FOLLOW} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
                             }
                         }
                         break;
@@ -471,6 +478,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                         {
                             var follower = APubFollower.FromJson(json);
                             await InboxService.DeleteFollower(origId.GetValue<string>());
+                            Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} from {follower.FollowerId}");
                             await Client.PostInboxFromActor(follower.FollowerId!, new Accept
                             {
                                 Id = NewActivityId,
@@ -485,6 +493,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                     }
                                 ]
                             });
+                            Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_ACCEPT} of {APubConstants.TYPE_ACT_UNDO} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
 
                             if (SettingsService.Current?.AutoReciprocateFollows ?? false)
                             {
@@ -503,9 +512,13 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                                 Object = follower.FollowerId
                                             }
                                         });
+                                    Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_UNDO} of {APubConstants.TYPE_ACT_FOLLOW} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
                                 }
                             }
                         }
+                        break;
+                    default:
+                        Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} (Not handled)");
                         break;
                 }
             }
