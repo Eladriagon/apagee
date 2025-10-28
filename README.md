@@ -59,4 +59,5 @@ The releases contain precompiled binaries that should run on most Linux and Wind
 * [x] View article list
 * [x] Delete articles
 * [x] Accept and track followers, and respond to follow requests
+* [x] Custom profile properties
 * [ ] Send Fediverse activities
