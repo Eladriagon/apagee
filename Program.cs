@@ -111,7 +111,8 @@ try
     {
         mvcBuilder = mvcBuilder.AddRazorRuntimeCompilation();
     }
-
+    
+    builder.Services.AddScoped<FediverseSigningHandler>();
     builder.Services.AddHttpClient(Globals.HTTP_CLI_NAME_FED)
                     .AddHttpMessageHandler<FediverseSigningHandler>();
     
@@ -140,7 +141,6 @@ try
         return opts;
     });
     
-    builder.Services.AddSingleton<FediverseSigningHandler>();
     builder.Services.AddSingleton<KeypairHelper>();
     builder.Services.AddSingleton<SecurityHelper>();
 
