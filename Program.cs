@@ -149,14 +149,54 @@ try
     // Custom app init code
     await app.InitApagee();
 
+    app.Use(async (context, next) =>
+    {
+        try
+        {
+            await next();
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"[UNHANDLED EXCEPTION] {ex}");
+            Console.ResetColor();
+
+            // Optional: prevent rethrowing so the app doesn’t kill the connection
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsync("Internal Server Error");
+        }
+    });
+
     // -----------------------
     // Request pipeline:
+    app.Use(async (context, next) =>
+    {
+        try
+        {
+            await next();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[UNHANDLED EXCEPTION] --- {ex}");
+            Console.WriteLine($"");
 
+            // Optional: prevent rethrowing so the app doesn’t kill the connection
+            try
+            {
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                await context.Response.WriteAsync("Unhandled server error in Apagee (check console).");
+            }
+            catch
+            {
+                // Skip - not required.
+            }
+        }
+    });
     if (config.UsesReverseProxy)
     {
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
-            ForwardedHeaders = ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto
+            ForwardedHeaders = ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
         });
     }
 
