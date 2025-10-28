@@ -103,7 +103,7 @@ public static class APubJsonOptions
             var name = pi.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
             writer.WritePropertyName(name ?? JsonNamingPolicy.CamelCase.ConvertName(pi.Name));
 
-            var requiresArray = pi.GetCustomAttribute<AlwaysArrayAttribute>(true) is not null && val is APubPolyBase a && a.Count > 0;
+            var requiresArray = pi.GetCustomAttribute<AlwaysArrayAttribute>(true) is not null && val is APubPolyBase { Count: 1 } a;
 
             if (requiresArray)
             {
