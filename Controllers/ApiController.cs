@@ -1,7 +1,7 @@
 namespace Apagee.Controllers;
 
 [ApiController]
-public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService, FedClient client, JsonSerializerOptions opts)
+public class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService, FedClient client, KeyValueService kvService, JsonSerializerOptions opts)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
@@ -9,8 +9,10 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     public IMemoryCache Cache { get; } = cache;
     public InboxService InboxService { get; } = inboxService;
     public FedClient Client { get; } = client;
+    public KeyValueService KvService { get; } = kvService;
     public JsonSerializerOptions Opts { get; } = opts;
 
+    private string NewActivityId => $"{RootUrl}/{Ulid.NewUlid()}";
     private string RootUrl => $"https://{GlobalConfiguration.Current?.PublicHostname}";
     private string ActorId => $"{RootUrl}/api/users/{GlobalConfiguration.Current!.FediverseUsername}";
     private string CurrentPath => $"{RootUrl}{Request.Path}";
@@ -59,7 +61,8 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     [Route("actor")]
     public async Task<IActionResult> SiteActor()
     {
-        return Redirect(ActorId);
+        var appActor = APubActor.CreateApplication<Application>(KeypairHelper.SiteKeyId, KeypairHelper.SiteActorPublicKeyPem ?? throw new ApageeException("Site actor has no public key."));
+        return Ok(appActor);
     }
 
     [HttpGet]
@@ -410,6 +413,20 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                     }
                                 ]
                             });
+
+                            if (SettingsService.Current?.AutoReciprocateFollows ?? false)
+                            {
+                                // Store the follow activity ID for later undo
+                                var newId = NewActivityId;
+                                await KvService.Set(follower.FollowerId ?? follower.FollowerName!, NewActivityId);
+                                await Client.PostInboxFromActor(follower.FollowerId!,
+                                    new Follow
+                                    {
+                                        Id = newId,
+                                        Actor = ActorId,
+                                        Object = follower.FollowerId
+                                    });
+                            }
                         }
                         break;
                     case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonArray arr && arr[0] is JsonValue v:
@@ -419,7 +436,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                             await InboxService.CreateFollower(follower);
                             await Client.PostInboxFromActor(follower.FollowerId!, new Accept
                             {
-                                Id = $"{RootUrl}/{Ulid.NewUlid()}",
+                                Id = NewActivityId,
                                 Actor = ActorId,
                                 Object =
                                 [
@@ -431,6 +448,19 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                     }
                                 ]
                             });
+                            if (SettingsService.Current?.AutoReciprocateFollows ?? false)
+                            {
+                                // Store the follow activity ID for later undo
+                                var newId = NewActivityId;
+                                await KvService.Set(follower.FollowerId ?? follower.FollowerName!, NewActivityId);
+                                await Client.PostInboxFromActor(follower.FollowerId!,
+                                    new Follow
+                                    {
+                                        Id = newId,
+                                        Actor = ActorId,
+                                        Object = follower.FollowerId
+                                    });
+                            }
                         }
                         break;
                     case APubConstants.TYPE_ACT_UNDO when json["object"] is JsonObject obj 
@@ -443,7 +473,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                             await InboxService.DeleteFollower(origId.GetValue<string>());
                             await Client.PostInboxFromActor(follower.FollowerId!, new Accept
                             {
-                                Id = $"{RootUrl}/{Ulid.NewUlid()}",
+                                Id = NewActivityId,
                                 Actor = ActorId,
                                 Object =
                                 [
@@ -455,6 +485,26 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
                                     }
                                 ]
                             });
+
+                            if (SettingsService.Current?.AutoReciprocateFollows ?? false)
+                            {
+                                var lastFollowActivityId = await KvService.Get(follower.FollowerId ?? follower.FollowerName!);
+                                if (lastFollowActivityId is not null)
+                                {
+                                    await Client.PostInboxFromActor(follower.FollowerId!,
+                                        new Undo
+                                        {
+                                            Id = NewActivityId,
+                                            Actor = ActorId,
+                                            Object = new Follow
+                                            {
+                                                Id = lastFollowActivityId,
+                                                Actor = ActorId,
+                                                Object = follower.FollowerId
+                                            }
+                                        });
+                                }
+                            }
                         }
                         break;
                 }

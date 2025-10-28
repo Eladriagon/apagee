@@ -20,10 +20,10 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
 
         if (json?["inbox"] is JsonValue v && v.GetValue<string>() is string { Length: > 0 } inb)
         {
-            Cache.Set($"ACT:INB:{actorUri}", inb);
+            Cache.Set($"ACT:INB:{actorUri}", inb, DateTimeOffset.UtcNow.AddDays(3));
             return inb;
         }
-        
+
         return null;
     }
 

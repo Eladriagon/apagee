@@ -128,6 +128,7 @@ try
 
     builder.Services.AddSingleton<SettingsService>();
     builder.Services.AddSingleton<StorageService>();
+    builder.Services.AddSingleton<KeyValueService>();
     builder.Services.AddSingleton<ArticleService>();
     builder.Services.AddSingleton<UserService>();
     builder.Services.AddSingleton<InboxService>();

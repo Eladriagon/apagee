@@ -19,7 +19,8 @@ public static class Init
     {
         var keypairHelper = app.Services.GetRequiredService<KeypairHelper>();
 
-        await keypairHelper.TryCreateActorKeypair();
+        await keypairHelper.TryCreateUserKeypair();
+        await keypairHelper.TryCreateSiteActorKeypair();
 
         if (keypairHelper.ActorRsaPrivateKey is null || keypairHelper.ActorRsaPublicKey is null)
         {
