@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace Apagee.Controllers;
 
 [Authorize]

@@ -1,0 +1,6 @@
+ALTER TABLE Settings ADD COLUMN Property1Key TEXT;
+ALTER TABLE Settings ADD COLUMN Property1Value TEXT;
+ALTER TABLE Settings ADD COLUMN Property2Key TEXT;
+ALTER TABLE Settings ADD COLUMN Property2Value TEXT;
+ALTER TABLE Settings ADD COLUMN Property3Key TEXT;
+ALTER TABLE Settings ADD COLUMN Property3Value TEXT;

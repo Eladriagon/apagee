@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Apagee.Controllers;
 
 [ApiController]
@@ -62,12 +64,13 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     public async Task<IActionResult> SiteActor()
     {
         var appActor = APubActor.CreateApplication<Application>(KeypairHelper.SiteKeyId, KeypairHelper.SiteActorPublicKeyPem ?? throw new ApageeException("Site actor has no public key."));
+        appActor.Published = await KvService.Get(Globals.APP_START_DATE_KEY) is string s ? DateTime.Parse(s) : null;
         return Ok(appActor);
     }
 
     [HttpGet]
     [Route("api/users/{username}")]
-    public IActionResult GetUser([FromRoute] string username)
+    public async Task<IActionResult> GetUser([FromRoute] string username)
     {
         // Single-user only
         if (username != GlobalConfiguration.Current?.FediverseUsername)
@@ -76,6 +79,26 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
         }
 
         var user = CurrentActor;
+
+        user.Published = await KvService.Get(Globals.APP_START_DATE_KEY) is string s ? DateTime.Parse(s) : null;
+
+        if (SettingsService.Current?.Property1Key is { Length: > 0 } k1
+            && SettingsService.Current?.Property1Value is { Length: > 0 } v1)
+        {
+            user.Attachment!.Add(new APubPropertyValue(k1, v1));
+        }
+
+        if (SettingsService.Current?.Property2Key is { Length: > 0 } k2
+            && SettingsService.Current?.Property2Value is { Length: > 0 } v2)
+        {
+            user.Attachment!.Add(new APubPropertyValue(k2, v2));
+        }
+
+        if (SettingsService.Current?.Property3Key is { Length: > 0 } k3
+            && SettingsService.Current?.Property3Value is { Length: > 0 } v3)
+        {
+            user.Attachment!.Add(new APubPropertyValue(k3, v3));
+        }
 
         if (TryRedirectHtml(user, out var link))
         {
@@ -131,7 +154,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
         var aPubArticle = APubArticle.FromArticle(article);
 
-        var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
+        var act = APubActivity.Wrap<Create>(aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
         if (TryRedirectHtml(aPubArticle, out var link))
@@ -188,7 +211,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
         var aPubArticle = APubArticle.FromArticle(article);
 
-        var act = APubActivity.Wrap<Create>((APubObject)aPubArticle, CurrentActor.Id, published: article.PublishedOn);
+        var act = APubActivity.Wrap<Create>(aPubArticle, CurrentActor.Id, published: article.PublishedOn);
         act.Published = article.PublishedOn;
 
         if (TryRedirectHtml(aPubArticle, out var link))
@@ -240,6 +263,28 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     [HttpGet]
     [Route("api/users/{username}/following")]
     public IActionResult GetFollowing([FromRoute] string username)
+    {
+        return Ok(new APubOrderedCollection
+        {
+            Id = AtomId,
+            TotalItems = 0
+        });
+    }
+
+    [HttpGet]
+    [Route("api/users/{username}/collections/featured")]
+    public IActionResult GetFeatured([FromRoute] string username)
+    {
+        return Ok(new APubOrderedCollection
+        {
+            Id = AtomId,
+            TotalItems = 0
+        });
+    }
+
+    [HttpGet]
+    [Route("api/users/{username}/collections/tags")]
+    public IActionResult GetTags([FromRoute] string username)
     {
         return Ok(new APubOrderedCollection
         {

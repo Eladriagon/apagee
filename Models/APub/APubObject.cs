@@ -11,6 +11,8 @@ public class APubObject : APubBase
 
     [JsonPropertyName("name")]
     public string? NameSingle { get; set; }
+
+    [JsonIgnore] // Not needed?
     public Dictionary<string, string?>? NameMap { get; set; }
 
     [JsonIgnore]
@@ -30,6 +32,7 @@ public class APubObject : APubBase
 
     [JsonPropertyName("content")]
     public string? ContentSingle { get; set; }
+
     public Dictionary<string, string?>? ContentMap { get; set; }
 
     [JsonIgnore]
@@ -49,6 +52,8 @@ public class APubObject : APubBase
 
     [JsonPropertyName("summary")]
     public string? SummarySingle { get; set; }
+    
+    [JsonIgnore] // Not needed?
     public Dictionary<string, string?>? SummaryMap { get; set; }
 
     [JsonIgnore]

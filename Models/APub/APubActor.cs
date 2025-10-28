@@ -15,6 +15,10 @@ public class APubActor : APubObject
 
     public string Following { get; set; } = default!;
 
+    public string Featured { get; set; } = default!;
+
+    public string Tags { get; set; } = default!;
+
     public bool Discoverable { get; set; }
 
     public bool Indexable { get; set; }
@@ -57,7 +61,11 @@ public class APubActor : APubObject
             Outbox = $"{baseUrl}/outbox",
             Followers = $"{baseUrl}/followers",
             Following = $"{baseUrl}/following",
+            Featured = $"{baseUrl}/collections/featured",
+            Tags = $"{baseUrl}/collections/tags",
+            Published = null,
             Summary = config.FediverseBio,
+            Attachment = [],
             Url = [new APubLink($"{rootUrl}/@{config.FediverseUsername}")],
             Endpoints = new()
             {
@@ -78,34 +86,22 @@ public class APubActor : APubObject
 
     public static APubActor CreateApplication<TActor>(string keyId, string keyPem) where TActor : APubActor, new()
     {
-        var icon = SettingsService.Current?.AuthorAvatar;
-        var image = SettingsService.Current?.BannerImage;
         var config = ConfigManager.GetGlobalConfig();
 
         var rootUrl = $"https://{config.PublicHostname}";
-        var baseUrl = $"{rootUrl}/api/users/{config.FediverseUsername}";
+        var baseUrl = $"{rootUrl}/actor";
 
         return new TActor
         {
             Id = $"{baseUrl}",
-            Name = config.AuthorDisplayName ?? config.FediverseUsername,
-            PreferredUsername = config.FediverseUsername,
-            Icon = icon is null ? null : new()
-            {
-                Url = $"{rootUrl}/avatar.png",
-                MediaType = Utils.IsPng(icon) ? "image/png" : "image/jpeg"
-            },
-            Image = image is null ? null : new()
-            {
-                Url = $"{rootUrl}/banner.png",
-                MediaType = Utils.IsPng(icon) ? "image/png" : "image/jpeg"
-            },
-            Inbox = $"{baseUrl}/inbox",
-            Outbox = $"{baseUrl}/outbox",
-            Followers = $"{baseUrl}/followers",
-            Following = $"{baseUrl}/following",
-            Summary = config.FediverseBio,
-            Url = [new APubLink($"{rootUrl}/@{config.FediverseUsername}")],
+            Name = "apagee",
+            PreferredUsername = "Apagee Application",
+            Inbox = $"{baseUrl}/api/inbox",
+            Outbox = $"{baseUrl}/api/outbox",
+            Followers = $"{baseUrl}/api/followers",
+            Following = $"{baseUrl}/api/following",
+            Summary = "Apagee is a lightweight fediverse-first FOSS blog app.",
+            Url = [new APubLink(baseUrl)],
             Endpoints = new()
             {
                 ["sharedInbox"] = $"{rootUrl}/api/inbox"

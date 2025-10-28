@@ -39,7 +39,6 @@ input.checkbox[type=checkbox] {
 }
 
 /* Stuff that should have been in Bulma in the first place... */
-
 .x100,
 .w100 {
     width: 100%;
@@ -66,4 +65,20 @@ input.checkbox[type=checkbox] {
 
 .is-line-height-small {
     line-height: 1.15;
+}
+
+.is-justify-self-flex-start {
+    justify-self: flex-start;
+}
+
+.is-justify-self-flex-end {
+    justify-self: flex-end;
+}
+
+.is-justify-self-center {
+    justify-self: center;
+}
+
+.hidden {
+  display: none !important;
 }

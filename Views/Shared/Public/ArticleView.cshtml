@@ -2,6 +2,7 @@
 
 @{
     Layout = "Public/_PublicLayout";
+    ViewBag.BodyClass = "article";
     var article = Model.Articles.Single();
 }
 
@@ -49,4 +50,19 @@
             @bio
         </div>
     }
+    <div class="properties">
+        @foreach (var prop in new[] {
+            new { key = Model.SiteSettings?.Property1Key, value = Model.SiteSettings?.Property1Value, valueFormatted = Model.SiteSettings?.Property1Formatted },
+            new { key = Model.SiteSettings?.Property2Key, value = Model.SiteSettings?.Property2Value, valueFormatted = Model.SiteSettings?.Property2Formatted },
+            new { key = Model.SiteSettings?.Property3Key, value = Model.SiteSettings?.Property3Value, valueFormatted = Model.SiteSettings?.Property3Formatted }
+        })
+        {
+            @if (prop.key is string { Length: > 0} k1
+                && prop.value is string { Length: > 0} v1)
+            {
+                <span class="key">@prop.key</span>   
+                <span class="value">@Html.Raw(prop.valueFormatted)</span>   
+            }
+        }
+    </div>
 </aside>

@@ -13,6 +13,7 @@ public partial class Globals
 
     // Warning: Don't change this or federation may break for some legacy clients.
     internal const int RSA_KEY_STRENGTH = 2048;
+    internal const string APP_START_DATE_KEY = "_apagee.pubDate";
 
     // Env Vars
     internal const string ENV_CONFIG_PATH = "APAGEE_CFG_PATH";

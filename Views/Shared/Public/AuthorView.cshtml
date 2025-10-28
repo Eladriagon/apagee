@@ -2,13 +2,14 @@
 
 @{
     Layout = "Public/_PublicLayout";
+    ViewBag.BodyClass = "author";
     var config = GlobalConfiguration.Current;
     var settings = SettingsService.Current;
 }
 
 @section head
 {
-    <link rel="alternate" type="application/activity+json" href="https://@config?.PublicHostname/api/users/@config?.FediverseUsername">
+    <link rel="alternate" type="application/activity+json" href="https://@config?.PublicHostname/api/users/@config?.FediverseUsername" />
 }
 
 <h1>About the Author</h1>
@@ -34,3 +35,18 @@
         @bio
     </p>
 }
+<div class="properties">
+        @foreach (var prop in new[] {
+            new { key = settings?.Property1Key, value = settings?.Property1Value, valueFormatted = settings?.Property1Formatted },
+            new { key = settings?.Property2Key, value = settings?.Property2Value, valueFormatted = settings?.Property2Formatted },
+            new { key = settings?.Property3Key, value = settings?.Property3Value, valueFormatted = settings?.Property3Formatted }
+        })
+        {
+            @if (prop.key is string { Length: > 0} k1
+                && prop.value is string { Length: > 0} v1)
+            {
+                <span class="key">@prop.key</span>   
+                <span class="value">@Html.Raw(prop.valueFormatted)</span>   
+            }
+        }
+</div>

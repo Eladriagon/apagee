@@ -53,8 +53,10 @@ public class SystemController(UserService userService, SettingsService settingsS
         {
             Articles = [],
             AuthorUsername = Config.FediverseUsername,
+            AuthorDisplayName = Config.AuthorDisplayName,
             AuthorBio = Config.FediverseBio,
-            AuthorDisplayName = Config.AuthorDisplayName
+            SiteSettings = SettingsService.Current,
+            ThemeCss = SettingsService.Current?.ThemeCss
         });
     }
     

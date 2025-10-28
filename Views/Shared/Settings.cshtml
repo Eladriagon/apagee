@@ -125,6 +125,55 @@
         <span class="help">If set, you will send a follow request to anyone that follows you first. (There is, at present, no other way to "follow" someone besides this.)</span>
     </div>
 
+    <h3 class="subtitle is-4">Profile Properties</h3>
+
+    <div class="field is-horizontal is-justify-self-flex-start">
+        <label class="field-label is-normal" asp-for="Property1Key">Property 1</label>
+        <div class="field-body">
+            <div class="field">
+                <div class="control">
+                    <input class="input" asp-for="Property1Key" placeholder="Pronouns" maxlength="100" />
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input class="input" asp-for="Property1Value" placeholder="they/them" maxlength="100" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="field is-horizontal is-justify-self-flex-start">
+        <label class="field-label is-normal" asp-for="Property2Key">Property 2</label>
+        <div class="field-body">
+            <div class="field">
+                <div class="control">
+                    <input class="input" asp-for="Property2Key" placeholder="Pronouns" maxlength="100" />
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input class="input" asp-for="Property2Value" placeholder="they/them" maxlength="100" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="field is-horizontal is-justify-self-flex-start">
+        <label class="field-label is-normal" asp-for="Property3Key">Property 3</label>
+        <div class="field-body">
+            <div class="field">
+                <div class="control">
+                    <input class="input" asp-for="Property3Key" placeholder="Pronouns" maxlength="100" />
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <input class="input" asp-for="Property3Value" placeholder="they/them" maxlength="100" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="help">Enter any property name and value, like your website, pronouns, or anything else you want!</div>
+
     <hr />
     
     <h2 class="subtitle is-3">Site Metadata (OData)</h2>

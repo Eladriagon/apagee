@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-
 namespace Apagee;
 
 public static class Init
@@ -9,8 +7,22 @@ public static class Init
         await app.InitDatabase();
         await app.CheckFirstTimeUserSetup();
         await app.InitKeypair();
+        await app.InitFirstTimeValues();
 
         await app.Services.GetRequiredService<SettingsService>().RefreshSettings();
+
+        return app;
+    }
+
+    public static async Task<WebApplication> InitFirstTimeValues(this WebApplication app)
+    {
+        var kvService = app.Services.GetRequiredService<KeyValueService>();
+
+        var val = await kvService.Get(Globals.APP_START_DATE_KEY);
+        if (val is null || (val is string s && !DateTime.TryParse(s, out _)))
+        {
+            await kvService.Set(Globals.APP_START_DATE_KEY, DateTime.UtcNow.ToString("O"));
+        }
 
         return app;
     }
