@@ -262,13 +262,55 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
 
     [HttpGet]
     [Route("api/users/{username}/following")]
-    public IActionResult GetFollowing([FromRoute] string username)
+    public async Task<IActionResult> GetFollowingAsync([FromRoute] string username, [FromQuery] string? after = null)
     {
-        return Ok(new APubOrderedCollection
+        // Currently, we don't track actors we're following, but we can assume
+        // that if we reciprocate followers, that our follower and followed
+        // lists would be identical.
+
+        if (SettingsService.Current!.AutoReciprocateFollows is not true)
         {
-            Id = AtomId,
-            TotalItems = 0
-        });
+            return Ok(new APubOrderedCollection
+            {
+                Id = AtomId,
+                TotalItems = 0
+            });
+        }
+        else
+        {
+            // Single-user only
+            if (username != GlobalConfiguration.Current?.FediverseUsername)
+            {
+                return NotFound("User not found.");
+            }
+
+            var total = await InboxService.GetFollowerCount();
+
+            if (after is null)
+            {
+                var oc = new APubOrderedCollection
+                {
+                    Id = $"{ActorId}/following",
+                    TotalItems = total,
+                    First = $"{ActorId}/following?after={Ulid.MaxValue}"
+                };
+                return Ok(oc);
+            }
+            else
+            {
+                var followerList = await InboxService.GetFollowerList(after);
+                var followerIds = new APubPolyBase();
+                followerIds.AddRange(followerList.Select(f => new APubLink(f)));
+                var ocp = new APubOrderedCollectionPage
+                {
+                    Id = $"{ActorId}/following?after={after}",
+                    TotalItems = total,
+                    PartOf = new APubLink($"{ActorId}/following"),
+                    OrderedItems = followerIds
+                };
+                return Ok(ocp);
+            }
+        }
     }
 
     [HttpGet]
