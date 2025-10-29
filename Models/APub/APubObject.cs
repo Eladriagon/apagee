@@ -107,7 +107,7 @@ public class APubObject : APubBase
     {
         var author = $"https://{GlobalConfiguration.Current?.PublicHostname}/api/users/{GlobalConfiguration.Current?.FediverseUsername}";
         var id = $"{author}/statuses/{article.Uid}";
-        var content = Markdown.ToHtml(article.Body ?? "");
+        var content = Utils.MarkdownToHtml(article.Body ?? "");
 
         return new TObj
         {

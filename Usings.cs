@@ -45,3 +45,5 @@ global using Dapper;
 global using Dapper.Contrib.Extensions;
 global using Fluid;
 global using Markdig;
+global using Markdown.ColorCode;
+

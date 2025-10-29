@@ -6,7 +6,7 @@ public class ArticleViewModel
 
     public string BodyHtml => Article.BodyMode switch
     {
-        BodyMode.Markdown => Markdown.ToHtml(Article.Body ?? ""),
+        BodyMode.Markdown => Utils.MarkdownToHtml(Article.Body ?? ""),
         BodyMode.HTML => Article.Body ?? "",
         BodyMode.PlainText => Article.Body?.Replace("\r", "").Replace("\n", "<br />") ?? "",
         _ => "oops, i think a stray neutron caused a bit flip..."

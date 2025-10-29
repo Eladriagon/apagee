@@ -1,7 +1,27 @@
+
 namespace Apagee.Utilities;
 
 public static class Utils
 {
+    private static MarkdownPipeline MarkdownConfig =>
+        new MarkdownPipelineBuilder()
+            .UseAlertBlocks()
+            .UsePipeTables()
+            .UseEmphasisExtras()
+            .UseGenericAttributes()
+            .UseAutoIdentifiers()
+            .UseFootnotes()
+            .UseAutoLinks()
+            .UseMediaLinks()
+            .UseDiagrams()
+            .UseColorCode()
+            .Build();
+
+    public static string MarkdownToHtml(string md)
+    {
+        return Markdig.Markdown.ToHtml(md, MarkdownConfig);
+    }
+
     public static bool IsPng(string? b64)
     {
         if (string.IsNullOrWhiteSpace(b64))
