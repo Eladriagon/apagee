@@ -1,0 +1,52 @@
+@model ArticleListViewModel
+
+<aside class="ata">    
+
+    @if (@Model.SiteSettings?.ODataTitle is string title)
+    {
+        <div class="site-header">
+            <span class="title">
+                <a href="/">@title</a>
+            </span>
+        </div>
+    }
+    
+    <div class="ata-header">
+        Author
+    </div>
+    
+    @if (Model.SiteSettings?.AuthorAvatar is not null)
+    {
+        <img class="ata-avatar" alt="Profile picture for @(Model.AuthorDisplayName ?? Model.AuthorUsername)" src="/avatar.png" />
+    }
+
+    <div class="author">
+        @if (Model.AuthorDisplayName is string { Length: > 0 } displayName)
+        {
+            <span class="display">@displayName</span>
+        }
+        <span class="username">@@@(Model.AuthorUsername)</span>
+    </div>
+    @if (Model.AuthorBio is string { Length: > 0 } bio)
+    {
+        <div class="bio">
+            @bio
+        </div>
+    }
+    <div class="properties">
+        @foreach (var prop in new[] {
+            new { key = Model.SiteSettings?.Property1Key, value = Model.SiteSettings?.Property1Value, valueFormatted = Model.SiteSettings?.Property1Formatted },
+            new { key = Model.SiteSettings?.Property2Key, value = Model.SiteSettings?.Property2Value, valueFormatted = Model.SiteSettings?.Property2Formatted },
+            new { key = Model.SiteSettings?.Property3Key, value = Model.SiteSettings?.Property3Value, valueFormatted = Model.SiteSettings?.Property3Formatted }
+        })
+        {
+            @if (prop.key is string { Length: > 0} && prop.value is string { Length: > 0})
+            {
+                <div class="prop">
+                    <span class="key">@prop.key</span>
+                    <span class="value">@Html.Raw(prop.valueFormatted)</span>
+                </div>
+            }
+        }
+    </div>
+</aside>
