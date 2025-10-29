@@ -20,21 +20,22 @@
         <img src="/banner.png" alt="Banner for @config?.FediverseUsername" />
     </div>
 }
-<p>
+
 @if (settings?.AuthorAvatar is not null)
 {
     <div class="avatar">
         <img src="/avatar.png" alt="Avatar for @config?.FediverseUsername" />
     </div>
 }
+<div class="info">
     <b>@config?.AuthorDisplayName</b> @@@config?.FediverseUsername
-</p>
-@if (config?.FediverseBio is string { Length: > 0 } bio)
-{
-    <p>
-        @bio
-    </p>
-}
+    @if (config?.FediverseBio is string { Length: > 0 } bio)
+    {
+        <p class="bio">
+            @bio
+        </p>
+    }
+</div>
 <div class="properties">
         @foreach (var prop in new[] {
             new { key = settings?.Property1Key, value = settings?.Property1Value, valueFormatted = settings?.Property1Formatted },
@@ -45,8 +46,10 @@
             @if (prop.key is string { Length: > 0} k1
                 && prop.value is string { Length: > 0} v1)
             {
-                <span class="key">@prop.key</span>   
-                <span class="value">@Html.Raw(prop.valueFormatted)</span>   
+                <div class="prop">
+                    <span class="key">@prop.key</span>   
+                    <span class="value">@Html.Raw(prop.valueFormatted)</span>
+                </div>
             }
         }
 </div>
