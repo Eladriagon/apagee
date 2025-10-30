@@ -2,13 +2,17 @@ namespace Apagee.Controllers;
 
 [Authorize]
 [Route("admin")]
-public class AdminController(UserService userService, ArticleService articleService, SettingsService settingsService, InboxService inboxService)
+public class AdminController(UserService userService, ArticleService articleService, SettingsService settingsService, InboxService inboxService, FedClient client)
     : BaseController
 {
     public UserService UserService { get; } = userService;
     public ArticleService ArticleService { get; } = articleService;
     public SettingsService SettingsService { get; } = settingsService;
     public InboxService InboxService { get; } = inboxService;
+    public FedClient Client { get; } = client;
+
+    public Settings? SiteSettings => SettingsService.Current;
+    public GlobalConfiguration? SiteConfig => GlobalConfiguration.Current;
 
     [HttpGet]
     [Route("")]
@@ -141,7 +145,7 @@ public class AdminController(UserService userService, ArticleService articleServ
     [HttpPost]
     [Route("articles/save/{id?}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SaveArticle([FromForm] ArticleEditViewModel formArticle, [FromRoute] string? id = null, [FromQuery] bool isDraft = false)
+    public async Task<IActionResult> SaveArticle([FromForm] ArticleEditViewModel formArticle, [FromRoute] string? id = null, [FromQuery] bool? isDraft = false)
     {
         Article? article;
 
@@ -184,11 +188,13 @@ public class AdminController(UserService userService, ArticleService articleServ
             return View("ArticleEditor");
         }
 
+        var sendToFollowers = article.PublishedOn is null && isDraft is not true;
+
         // Compute extra properties
         article.Slug = article.Title.ToUrlSlug();
         article.BodyMode = BodyMode.Markdown;
-        article.Status = isDraft ? ArticleStatus.Draft : ArticleStatus.Published;
-        article.PublishedOn = isDraft ? null : DateTime.UtcNow;
+        article.Status = isDraft is true ? ArticleStatus.Draft : ArticleStatus.Published;
+        article.PublishedOn = isDraft is true ? null : DateTime.UtcNow;
 
         if (id is null)
         {
@@ -199,6 +205,28 @@ public class AdminController(UserService userService, ArticleService articleServ
         {
             await ArticleService.Update(article);
             TempData["EditSuccess"] = true;
+        }
+
+        if (sendToFollowers)
+        {
+            // TODO: Extremely very super not performant.
+            // Involves adding a background worker/thread
+            // so this is here as a test/proof of concept
+            // only.
+            var followers = await InboxService.GetFollowerList();
+            foreach (var f in followers)
+            {
+                var actArticle = APubStatus.FromArticle(article);
+                await Client.PostInboxFromActor(f, new Create()
+                {
+                    Id = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}/statuses/{article.Uid}/activity",
+                    Actor = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}",
+                    Published = article.PublishedOn,
+                    To = actArticle.To,
+                    Cc = actArticle.Cc,
+                    Object = actArticle
+                });
+            }
         }
         
         return RedirectToAction("Articles");

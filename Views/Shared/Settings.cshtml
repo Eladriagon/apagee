@@ -108,13 +108,22 @@
     <h2 class="subtitle is-3">Social</h2>
 
     <div class="field">
-        <label class="label" asp-for="ClaimProfileUrl">Claim Profile (rel=me) URL</label>
+        <label class="label" asp-for="ClaimProfileUrl">Verified Site (rel=me) URL</label>
         <div class="control">
             <input class="input" asp-for="ClaimProfileUrl"
                 placeholder="https://fediverse.social.example/@@yourUsername" />
         </div>
         <span class="help">This is the URL to your profile on another fediverse server that supports site
             verification.</span>
+    </div>
+
+    <div class="field">
+        <label class="label" asp-for="AuthorAttribTag">Author Attribution Tag</label>
+        <div class="control">
+            <input class="input" asp-for="AuthorAttribTag"
+                placeholder="@@yourUsername@@fediverse.social.example" />
+        </div>
+        <span class="help">Your full Fediverse handle (beginning with @@) to include as fediverse:creator metadata.</span>
     </div>
 
     <div class="field">

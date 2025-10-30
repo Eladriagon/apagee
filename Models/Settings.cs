@@ -37,6 +37,8 @@ public sealed class Settings
 
     public string? ClaimProfileUrl { get; set; }
 
+    public string? AuthorAttribTag { get; set; }
+
     public string? Property1Key { get; set; }
 
     public string? Property1Value { get; set; }

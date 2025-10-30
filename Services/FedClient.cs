@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Apagee.Services;
 
 public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptions opts, IMemoryCache cache)

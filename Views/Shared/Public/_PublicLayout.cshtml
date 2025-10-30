@@ -18,41 +18,45 @@
     @if (vm.Articles?.Count() == 1 && vm.Articles.Single() is ArticleViewModel a && Context.Request.Path != "/")
     {
         @* Article-specific meta properties *@
-        <meta property="og:title" content="@a.Article.Title" />
-        <meta property="og:description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")" />
-        <meta name="description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")" />
-        <meta property="og:published_time" content="@(a.Article.PublishedOn?.ToString("s"))Z" />
-        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Articles.First().Article.Slug" />
+        <meta property="og:title" content="@a.Article.Title">
+        <meta property="og:description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")">
+        <meta name="description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")">
+        <meta property="og:published_time" content="@(a.Article.PublishedOn?.ToString("s"))Z">
+        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Articles.First().Article.Slug">
     }
     else
     {
         @* Site-wide meta properties *@
-        <meta property="og:title" content="@(vm.SiteSettings?.ODataTitle ?? GlobalConfiguration.Current?.FediverseUsername)" />
-        <meta property="og:description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
-        <meta name="description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)" />
-        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname" />
-
+        <meta property="og:title" content="@(vm.SiteSettings?.ODataTitle ?? GlobalConfiguration.Current?.FediverseUsername)">
+        <meta property="og:description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)">
+        <meta name="description" content="@(vm.SiteSettings?.ODataDescription ?? GlobalConfiguration.Current?.FediverseBio)">
+        <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname">
     }
+    @if (SettingsService.Current?.AuthorAttribTag is not null)
+    {
+        <meta name="fediverse:creator" content="@SettingsService.Current?.AuthorAttribTag">
+    }
+
     @if (SettingsService.Current?.BannerImage is not null)
     {
-        <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/banner.png" />
+        <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/banner.png">
     }
     else
     {
-        <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
+        <meta property="og:image" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png">
     }
     @if (SettingsService.Current?.AuthorAvatar is not null)
     {
-        <meta property="og:logo" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png" />
+        <meta property="og:logo" content="https://@GlobalConfiguration.Current?.PublicHostname/avatar.png">
     }
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="en" />
-    <meta property="profile:username" content="@(GlobalConfiguration.Current?.FediverseUsername)@@@(GlobalConfiguration.Current?.PublicHostname)" />
-    <meta name="initialPath" content="/" />
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en">
+    <meta property="profile:username" content="@(GlobalConfiguration.Current?.FediverseUsername)@@@(GlobalConfiguration.Current?.PublicHostname)">
+    <meta name="initialPath" content="/">
 
     @if (vm.SiteSettings?.Favicon is not null)
     {
-        <link rel="icon" type="@(Utils.IsIco(vm.SiteSettings.Favicon) ? "image/x-icon" : "image/png")" href="/favicon.ico" />
+        <link rel="icon" type="@(Utils.IsIco(vm.SiteSettings.Favicon) ? "image/x-icon" : "image/png")" href="/favicon.ico">
     }
 
     <link rel="stylesheet" href="/css/site.css" asp-append-version="true" />
