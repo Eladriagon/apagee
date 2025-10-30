@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Apagee.Services;
 
 public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptions opts, IMemoryCache cache)
@@ -7,6 +9,54 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
     public IMemoryCache Cache { get; } = cache;
 
     private HttpClient Client => HttpClientFactory.CreateClient(Globals.HTTP_CLI_NAME_FED);
+
+    public async Task<JsonObject?> GetWebfinger(string domain, string? account = null)
+    {
+        domain = domain.ToLower().Trim().TrimEnd('/');
+        if (domain.StartsWith("https://"))
+        {
+            domain = domain.Replace("https://", "");
+        }
+        if (account?.Trim() is { Length: 0 })
+        {
+            account = domain;
+        }
+
+        var client = Client;
+
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", Globals.JSON_RD_CONTENT_TYPE);
+
+        var target = $"https://{domain}/{Globals.WEBFINGER_PATH}?resource=acct:{account}@{domain}";
+        var resp = await client.GetAsync(target);
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            throw new ApageeException($"Webfinger request failed: {target} > HTTP {(int)resp.StatusCode} {resp.StatusCode} - {resp.ReasonPhrase}");
+        }
+
+        return await JsonNode.ParseAsync(await resp.Content.ReadAsStreamAsync()) is JsonObject j ? j : null;
+    }
+
+    public async Task<string?> GetSubscribeRedirect(string domain, string? account = null)
+    {
+        JsonObject wf;
+        try
+        {
+            wf = await GetWebfinger(domain, account) ?? throw new("Null response from GetWebfinger()");
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Unable to get subscribe redirect URL from webfinger for {account}@{domain}.", ex);
+        }
+
+        if (wf["links"] is JsonArray { Count: > 0 } links)
+        {
+            var subLink = links.FirstOrDefault(s => s?["rel"] is JsonValue v && v.GetValue<string>() == Globals.OSTATUS_SUBSCRIBE_REL);
+            return subLink?["template"] is JsonValue tpl && Uri.TryCreate(tpl.GetValue<string>(), UriKind.Absolute, out _) ? tpl.GetValue<string>() : null;
+        }
+        return null;
+    }
 
     public async Task<string?> GetActorInboxAsync(string actorUri)
     {

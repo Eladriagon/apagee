@@ -1,13 +1,14 @@
 namespace Apagee.Controllers;
 
 [Route("")]
-public class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, GlobalConfiguration config) 
+public class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, GlobalConfiguration config, FedClient client) 
     : BaseController
 {
     public UserService UserService { get; } = userService;
     public SettingsService SettingsService { get; } = settingsService;
     public ArticleService ArticleService { get; } = articleService;
     public GlobalConfiguration Config { get; } = config;
+    public FedClient Client { get; } = client;
 
     [Route("")]
     public async Task<IActionResult> Index()
@@ -65,6 +66,66 @@ public class SystemController(UserService userService, SettingsService settingsS
 
     [Route("403")]
     public IActionResult AccessDenied() => Content("Apagee -- 403 Access Denied");
+
+    [HttpGet]
+    [Route("/follow_authorize")]
+    public IActionResult FollowAuthorize([FromQuery] string? uri)
+    {
+        return Redirect("/");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Route("/follow/out")]
+    public async Task<IActionResult> Follow([FromForm] string? followTarget)
+    {
+        try
+        {
+            followTarget = followTarget?.Trim().ToLower().TrimEnd('/');
+            if (followTarget is not { Length: > 0 } t || !t.Contains("."))
+            {
+                throw new("Invalid follow target.");
+            }
+
+            if (followTarget.Count(c => c is '@') > 1)
+            {
+                throw new("Too many ats! (No AT-ATs allowed! 🌑)");
+            }
+
+            var account = followTarget.IndexOf('@') > -1
+                ? followTarget.Split('@')[0].Trim()
+                : null;
+
+            var domain = followTarget.IndexOf('@') > -1
+                ? followTarget.Split('@')[1].Trim()
+                : followTarget;
+
+            var subRedirect = await Client.GetSubscribeRedirect(domain, account);
+
+            if (subRedirect is not { Length: > 0 })
+            {
+                throw new($"Webfinger is missing subscribe authorize target URL property!");
+            }
+            if (!subRedirect.ToLower().Contains("{uri}"))
+            {
+                throw new($"Unexpected subscribe authorize target URL: {subRedirect}");
+            }
+
+            var redir = subRedirect.Replace("{uri}", $"https://{Config.PublicHostname}/api/users/{Config.FediverseUsername}");
+
+            return Redirect(redir);
+        }
+        catch (Exception ex)
+        {
+            #if DEBUG
+            Console.WriteLine("Follow forward error: ");
+            Console.WriteLine(ex);
+            #endif
+            // Fall back to homepage, we don't have a way to display a UI error.
+            return Redirect("/");
+        }
+
+    }
 
     [HttpGet]
     [Route("/admin/login")]

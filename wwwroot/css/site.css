@@ -39,6 +39,9 @@
 
     --inline-code-color: #9551a1;
     --inline-code-font-family: monospace;
+
+    --page-background-color: #1a1822;
+    --page-color: #FCFCFC;
 }
 
 *, ::before, ::after {
@@ -58,11 +61,10 @@
   color-scheme: light dark;
 }
 
-html, body {
-  height: 100%;
-}
-
-body {
+html {
+  background-color: var(--page-background-color);
+  min-height: 100vh;
+  color: var(--page-color);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -71,6 +73,13 @@ body {
 img, picture, video, canvas, svg {
   display: block;
   max-width: 100%;
+}
+
+hr {
+  display: block;
+  border: none !important;
+  height: 1px;
+  background-color: linear-gradient(0deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
 }
 
 img, video {

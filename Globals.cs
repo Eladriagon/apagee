@@ -6,6 +6,9 @@ public partial class Globals
     internal const string KEYRING_NAME = "Keys";
     internal const string ENC_KEY_ID = "Apagee.v1.key";
     internal const string HTTP_CLI_NAME_FED = "Fediverse";
+    internal const string WEBFINGER_PATH = ".well-known/webfinger";
+    internal const string WEBFINGER_AVATAR_REL = "http://webfinger.net/rel/avatar";
+    internal const string OSTATUS_SUBSCRIBE_REL = "http://ostatus.org/schema/1.0/subscribe";
     internal const string JSON_LD_CONTENT_TYPE = @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""";
     internal const string JSON_LD_CONTENT_TYPE_TRIM = @"application/ld+json";
     internal const string JSON_RD_CONTENT_TYPE = @"application/jrd+json";

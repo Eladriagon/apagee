@@ -17,13 +17,22 @@
     
     @if (Model.SiteSettings?.AuthorAvatar is not null)
     {
-        <img class="ata-avatar" alt="Profile picture for @(Model.AuthorDisplayName ?? Model.AuthorUsername)" src="/avatar.png" />
+        <a href="/@@@(GlobalConfiguration.Current!.FediverseUsername)">
+            <img class="ata-avatar" alt="Profile picture for @(Model.AuthorDisplayName ?? Model.AuthorUsername)" src="/avatar.png" />
+        </a>
     }
 
     <div class="author">
         @if (Model.AuthorDisplayName is string { Length: > 0 } displayName)
         {
-            <span class="display">@displayName</span>
+            @if (Model.SiteSettings?.AuthorAvatar is null)
+            {
+                <a href="/@@@(GlobalConfiguration.Current!.FediverseUsername)" class="display">@displayName</a>
+            }
+            else
+            {
+                <span class="display">@displayName</span>
+            }   
         }
         <span class="username">@@@(Model.AuthorUsername)</span>
     </div>

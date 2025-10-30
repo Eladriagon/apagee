@@ -22,7 +22,7 @@ public class ApiController(ArticleService articleService, KeypairHelper keypairH
     private APubActor CurrentActor => APubActor.Create<Person>(KeypairHelper.KeyId, KeypairHelper.ActorPublicKeyPem ?? throw new ApageeException("Cannot create user: Actor public key PEM is null."));
 
     [HttpGet]
-    [Route(".well-known/webfinger")]
+    [Route(Globals.WEBFINGER_PATH)]
     [Produces(Globals.JSON_RD_CONTENT_TYPE)]
     public IActionResult Webfinger([FromQuery] string resource)
     {
