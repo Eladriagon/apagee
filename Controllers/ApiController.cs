@@ -192,31 +192,43 @@ public partial class ApiController(ArticleService articleService, KeypairHelper 
             return NotFound("User not found.");
         }
 
-        var total = await InboxService.GetFollowerCount();
+        var total = await InboxService.GetFollowerCount(domain);
 
-        if (after is null)
+        if (domain is not null)
         {
+            var domainFollowers = await InboxService.GetFollowerList(after, domain, 1000);
             var oc = new APubOrderedCollection
             {
-                Id = $"{ActorId}/followers",
+                Id = $"{ActorId}/followers?domain={domain}",
                 TotalItems = total,
-                First = $"{ActorId}/followers?after={Ulid.MaxValue}"
+                OrderedItems = domainFollowers.ToArray()
             };
             return Ok(oc);
         }
         else
         {
-            var followerList = await InboxService.GetFollowerList(after);
-            var followerIds = new APubPolyBase();
-            followerIds.AddRange(followerList.Select(f => new APubLink(f)));
-            var ocp = new APubOrderedCollectionPage
+            if (after is null)
             {
-                Id = $"{ActorId}/followers?after={after}",
-                TotalItems = total,
-                PartOf = new APubLink($"{ActorId}/followers"),
-                OrderedItems = followerIds
-            };
-            return Ok(ocp);
+                var oc = new APubOrderedCollection
+                {
+                    Id = $"{ActorId}/followers",
+                    TotalItems = total,
+                    First = $"{ActorId}/followers?after={Ulid.MaxValue}"
+                };
+                return Ok(oc);
+            }
+            else
+            {
+                var followerList = await InboxService.GetFollowerList(after);
+                var ocp = new APubOrderedCollectionPage
+                {
+                    Id = $"{ActorId}/followers?after={after}",
+                    TotalItems = total,
+                    PartOf = new APubLink($"{ActorId}/followers"),
+                    OrderedItems = followerList.ToArray()
+                };
+                return Ok(ocp);
+            }
         }
     }
 

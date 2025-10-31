@@ -13,6 +13,8 @@ public class APubPolyBase : List<APubBase>
 
     public static implicit operator APubPolyBase(APubBase[] other) => [.. other];
 
+    public static implicit operator APubPolyBase(string[] other) => other.Select(o => new APubLink(o)).ToArray();
+
     [JsonIgnore]
     public bool HasOneOnlyLink => Count == 1 && this.First() is APubLink { IsOnlyLink: true };
 

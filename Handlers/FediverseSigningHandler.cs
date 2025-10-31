@@ -89,7 +89,7 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
                 return;
             }
 
-            var followerSyncId = new Uri($"https://{GlobalConfiguration.Current!.PublicHostname}/api/users/{GlobalConfiguration.Current!.FediverseUsername}/followers?after={Ulid.MaxValue}&domain={new Uri(followers.First()).Host}");
+            var followerSyncId = new Uri($"https://{GlobalConfiguration.Current!.PublicHostname}/api/users/{GlobalConfiguration.Current!.FediverseUsername}/followers?domain={new Uri(followers.First()).Host}");
 
             // digest = XOR of SHA-256(identifier UTF-8) for each identifier, hex-encoded
             var xor = XorSha256Digests(followers ?? []);

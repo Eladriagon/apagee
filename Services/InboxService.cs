@@ -34,11 +34,11 @@ public class InboxService(StorageService storageService)
         return await conn.ExecuteAsync("DELETE FROM APubFollowers WHERE ID = @id", new { id = followerId }) == 1;
     }
     
-    public async Task<uint> GetFollowerCount()
+    public async Task<uint> GetFollowerCount(string? domain = null)
     {
         using var conn = await StorageService.Conn();
 
-        return await conn.ExecuteScalarAsync<uint>("SELECT COUNT(*) FROM APubFollowers;");
+        return await conn.ExecuteScalarAsync<uint>($"SELECT COUNT(*) FROM APubFollowers {(domain is string { Length: > 0 } d ? $"WHERE FollowerId LIKE '%{d}%'" : "")};");
     }
     
     public async Task<IEnumerable<string>> GetFollowerList(string? olderThan = null, string? domain = null, int count = 100)
