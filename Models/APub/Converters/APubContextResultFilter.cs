@@ -8,6 +8,7 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
         new Dictionary<string, object> {
             ["manuallyApprovesFollowers"] = "as:manuallyApprovesFollowers",
             ["toot"] = "http://joinmastodon.org/ns#",
+            ["Hashtag"] = "https://www.w3.org/ns/activitystreams#Hashtag",
             ["alsoKnownAs"] = new Dictionary<string, object> {
                 ["@id"] = "as:alsoKnownAs",
                 ["@type"] = "@id"
@@ -16,6 +17,15 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
                 ["@id"] = "as:attributionDomains",
                 ["@type"] = "@id"
             },
+            ["featured"] = new Dictionary<string, object> {
+                ["@id"] = "toot:featured",
+                ["@type"] = "@id"
+            },
+            ["featuredTags"] = new Dictionary<string, object> {
+                ["@id"] = "toot:featuredTags",
+                ["@type"] = "@id"
+            },
+            ["Emoji"] = "toot:Emoji",
             ["schema"] = "http://schema.org#",
             ["PropertyValue"] = "schema:PropertyValue",
             ["value"] = "schema:value",

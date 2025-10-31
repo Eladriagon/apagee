@@ -41,7 +41,7 @@ public class InboxService(StorageService storageService)
         return await conn.ExecuteScalarAsync<uint>("SELECT COUNT(*) FROM APubFollowers;");
     }
     
-    public async Task<IEnumerable<string>> GetFollowerList(string? olderThan = null, int count = 100)
+    public async Task<IEnumerable<string>> GetFollowerList(string? olderThan = null, string? domain = null, int count = 100)
     {
         using var conn = await StorageService.Conn();
 
@@ -50,6 +50,15 @@ public class InboxService(StorageService storageService)
             throw new ApageeException("Validation error on follower list.");
         }
 
-        return await conn.QueryAsync<string>($"SELECT FollowerId FROM APubFollowers {(olderThan is string {Length: > 0 } ot ? $"WHERE UID < '{ot}'" : "")} ORDER BY UID DESC LIMIT {count};");
+        var where = "";
+        where += olderThan is string { Length: > 0 } ot
+            ? $" UID < '{ot}'"
+            : "";
+
+        where += domain is string { Length: > 0 } d
+            ? $" {(where is { Length: > 0 } ? "AND " : "" )}FollowerId LIKE '%{d}%'"
+            : "";
+
+        return await conn.QueryAsync<string>($"SELECT FollowerId FROM APubFollowers {(where is {  Length: > 0 } ? "WHERE" + where : "")} ORDER BY UID DESC LIMIT {count};");
     }
 }

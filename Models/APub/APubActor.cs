@@ -17,13 +17,15 @@ public class APubActor : APubObject
 
     public string Featured { get; set; } = default!;
 
-    public string Tags { get; set; } = default!;
+    public string FeaturedTags { get; set; } = default!;
 
     public bool Discoverable { get; set; }
 
     public bool Indexable { get; set; }
 
     public bool Memorial { get; set; }
+
+    public bool Suspended { get; set; }
 
     public bool ManuallyApprovesFollowers { get; set; }
 
@@ -47,6 +49,7 @@ public class APubActor : APubObject
             Id = $"{baseUrl}",
             Name = config.AuthorDisplayName ?? config.FediverseUsername,
             PreferredUsername = config.FediverseUsername,
+            Summary = config.FediverseBio,
             Icon = icon is null ? null : new()
             {
                 Url = $"{rootUrl}/avatar.png",
@@ -62,9 +65,8 @@ public class APubActor : APubObject
             Followers = $"{baseUrl}/followers",
             Following = $"{baseUrl}/following",
             Featured = $"{baseUrl}/collections/featured",
-            Tags = $"{baseUrl}/collections/tags",
+            FeaturedTags = $"{baseUrl}/collections/tags",
             Published = null,
-            Summary = config.FediverseBio,
             Attachment = [],
             Url = [new APubLink($"{rootUrl}/@{config.FediverseUsername}")],
             Endpoints = new()
@@ -106,10 +108,11 @@ public class APubActor : APubObject
             {
                 ["sharedInbox"] = $"{rootUrl}/api/inbox"
             },
+            ManuallyApprovesFollowers = false,
             Discoverable = true,
             Indexable = true,
             Memorial = false,
-            ManuallyApprovesFollowers = false,
+            Suspended = false,
             PublicKey = new PublicKey
             {
                 Id = keyId,

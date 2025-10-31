@@ -1,7 +1,7 @@
 namespace Apagee.Controllers;
 
 [Route("")]
-public class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, GlobalConfiguration config, FedClient client) 
+public partial class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, GlobalConfiguration config, FedClient client) 
     : BaseController
 {
     public UserService UserService { get; } = userService;

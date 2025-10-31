@@ -158,7 +158,14 @@ try
         catch (Exception ex)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"[UNHANDLED EXCEPTION] {ex}");
+            if (ex is ApageeException aex)
+            {
+                Console.WriteLine($" ⚠ Apagee Error: {ex.Message}\n{ex.StackTrace}");
+            }
+            else
+            {
+                Console.WriteLine($"[UNHANDLED EXCEPTION] {ex}");
+            }
             Console.ResetColor();
 
             // Optional: prevent rethrowing so the app doesn’t kill the connection

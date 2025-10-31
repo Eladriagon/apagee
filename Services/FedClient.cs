@@ -77,7 +77,12 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
 
     public async Task<bool> PostInbox<TObj>(string inboxUri, TObj item) where TObj : APubObject
     {
-        var resp = await Client.PostAsJsonAsync(inboxUri, item, Opts);
+        var client = Client;
+
+        // Triggers a signature compute in the FediverseSigningHandler.
+        // TODO: This header is expensive to compute. Cache follower lists somewhere.
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Collection-Synchronization", "pending");
+        var resp = await client.PostAsJsonAsync(inboxUri, item, Opts);
 
         return resp.IsSuccessStatusCode;
     }
@@ -87,6 +92,12 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
         var actorInbox = await GetActorInboxAsync(actorUri);
 
         if (actorInbox is null) return false;
+
+        var client = Client;
+
+        // Triggers a signature compute in the FediverseSigningHandler.
+        // TODO: This header is expensive to compute. Cache follower lists somewhere.
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Collection-Synchronization", "pending");
 
         var resp = await Client.PostAsJsonAsync(actorInbox, item, Opts);
 

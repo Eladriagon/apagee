@@ -36,6 +36,7 @@ global using Apagee.Models;
 global using Apagee.Models.APub;
 global using Apagee.Models.APub.Attributes;
 global using Apagee.Models.APub.Converters;
+global using  Apagee.Models.NodeInfo;
 global using Apagee.Services;
 global using Apagee.Storage;
 global using Apagee.Utilities;
