@@ -47,7 +47,6 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
             var bodyHash = Convert.ToBase64String(SHA256.HashData(bodyBytes));
             digest = $"SHA-256={bodyHash}";
 
-            Console.WriteLine($"DBG: Digest: {digest}");
             request.Headers.TryAddWithoutValidation("Digest", digest);
         }
 
@@ -71,7 +70,6 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
         var signatureHeader =
             $"keyId=\"{keyId}\",algorithm=\"rsa-sha256\",headers=\"{headers}\",signature=\"{signature}\"";
 
-        Console.WriteLine($"DBG: Signature: {signatureHeader}");
         request.Headers.TryAddWithoutValidation("Signature", signatureHeader);
 
         // Optional: Collection-Synchronization
@@ -101,9 +99,22 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
                 $"digest=\"{xorHex}\"";
 
             request.Headers.TryAddWithoutValidation("Collection-Synchronization", collectionSyncHeader);
-
-            Console.WriteLine($"DBG: Collection-Synchronization: {collectionSyncHeader}");
         }
+
+        // Temporary
+        Console.WriteLine("");
+        Console.WriteLine($"[[[ DBG ]]]");
+        Console.WriteLine("");
+        Console.WriteLine($"{request.Method.Method} {request.RequestUri} HTTP/1.1");
+        foreach (var h in request.Headers)
+        {
+            Console.WriteLine($"{h.Key}: {string.Join(", ", h.Value)}");
+        }
+        Console.WriteLine("");
+        Console.WriteLine($"{(request.Content is not null ? await request.Content.ReadAsStringAsync() : "### Body has no content. ###")}");
+        Console.WriteLine("");
+        Console.WriteLine($"[[[ /DBG ]]]");
+        Console.WriteLine("");
     }
 
     private static string ToHex(ReadOnlySpan<byte> bytes)
