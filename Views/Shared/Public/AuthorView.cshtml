@@ -60,3 +60,12 @@
         }
     }
 </div>
+@if (Model.FollowerCount is not null)
+{
+    <div class="stats">
+        <div class="stat">
+            <span class="value">@Model.FollowerCount</span>
+            <span class="label">follower@(Model.FollowerCount is 1 ? "" : "s")</span>
+        </div>
+    </div>
+}

@@ -323,4 +323,22 @@ public class AdminController(UserService userService, ArticleService articleServ
         TempData["PassSuccess"] = true;
         return RedirectToAction();
     }
+
+    [HttpGet]
+    [Route("SignOut")]
+    public async Task<IActionResult> SignMeOut()
+    {
+        try
+        {
+            await HttpContext.SignOutAsync();
+            HttpContext.Session.Clear();
+        }
+        catch
+        {
+
+        }
+
+        // Should bounce to the login screen as a sanity check / confirmation of logout.
+        return Redirect("/admin");
+    }
 }

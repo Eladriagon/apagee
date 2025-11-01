@@ -1,0 +1,1 @@
+ALTER TABLE Settings ADD COLUMN DisplayFollowerCount BIT NOT NULL DEFAULT(0);

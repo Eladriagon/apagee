@@ -6,6 +6,8 @@ public class ArticleListViewModel
 
     public Settings? SiteSettings { get; set; }
 
+    public uint? FollowerCount { get; set; }
+
     public required string AuthorUsername { get; set; }
 
     public string? AuthorDisplayName { get; set; }

@@ -1,12 +1,15 @@
+using System.Threading.Tasks;
+
 namespace Apagee.Controllers;
 
 [Route("")]
-public partial class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, GlobalConfiguration config, FedClient client) 
+public partial class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, InboxService inboxService, GlobalConfiguration config, FedClient client) 
     : BaseController
 {
     public UserService UserService { get; } = userService;
     public SettingsService SettingsService { get; } = settingsService;
     public ArticleService ArticleService { get; } = articleService;
+    public InboxService InboxService { get; } = inboxService;
     public GlobalConfiguration Config { get; } = config;
     public FedClient Client { get; } = client;
 
@@ -25,6 +28,12 @@ public partial class SystemController(UserService userService, SettingsService s
 
         var articles = await ArticleService.GetOlderThan(count: 10);
 
+        uint? fcount = null;
+        if (SettingsService.Current?.DisplayFollowerCount is true)
+        {
+            fcount = await InboxService.GetFollowerCount();
+        }
+
         return View("Public/ListView", new ArticleListViewModel
         {
             Articles = articles.OrderByDescending(a => a.PublishedOn).Select(a => new ArticleViewModel { Article = a }),
@@ -32,12 +41,13 @@ public partial class SystemController(UserService userService, SettingsService s
             AuthorDisplayName = Config.AuthorDisplayName,
             AuthorBio = Config.FediverseBio,
             SiteSettings = SettingsService.Current,
+            FollowerCount = fcount,
             ThemeCss = SettingsService.Current?.ThemeCss
         });
     }
 
     [Route("@{user}")]
-    public IActionResult ViewAuthor([FromRoute] string user)
+    public async Task<IActionResult> ViewAuthor([FromRoute] string user)
     {
         if (user != Config.FediverseUsername)
         {
@@ -50,6 +60,12 @@ public partial class SystemController(UserService userService, SettingsService s
             return Redirect($"/api/users/{user}");
         }
 
+        uint? fcount = null;
+        if (SettingsService.Current?.DisplayFollowerCount is true)
+        {
+            fcount = await InboxService.GetFollowerCount();
+        }
+
         return View("Public/AuthorView", new ArticleListViewModel
         {
             Articles = [],
@@ -57,6 +73,7 @@ public partial class SystemController(UserService userService, SettingsService s
             AuthorDisplayName = Config.AuthorDisplayName,
             AuthorBio = Config.FediverseBio,
             SiteSettings = SettingsService.Current,
+            FollowerCount = fcount,
             ThemeCss = SettingsService.Current?.ThemeCss
         });
     }

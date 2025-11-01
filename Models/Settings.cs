@@ -35,6 +35,8 @@ public sealed class Settings
 
     public bool AutoReciprocateFollows { get; set; }
 
+    public bool DisplayFollowerCount { get; set; }
+
     public string? ClaimProfileUrl { get; set; }
 
     public string? AuthorAttribTag { get; set; }

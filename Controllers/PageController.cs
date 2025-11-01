@@ -1,9 +1,10 @@
 namespace Apagee.Controllers;
 
-public class PageController(ArticleService articleService, GlobalConfiguration config, SettingsService settingsService)
+public class PageController(ArticleService articleService, InboxService inboxService, GlobalConfiguration config, SettingsService settingsService)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
+    public InboxService InboxService { get; } = inboxService;
     public GlobalConfiguration Config { get; } = config;
     public SettingsService SettingsService { get; } = settingsService;
 
@@ -24,12 +25,19 @@ public class PageController(ArticleService articleService, GlobalConfiguration c
                 return Redirect($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}/statuses/{article.Uid}");
             }
 
+            uint? fcount = null;
+            if (SettingsService.Current?.DisplayFollowerCount is true)
+            {
+                fcount = await InboxService.GetFollowerCount();
+            }
+        
             return View("Public/ArticleView", new ArticleListViewModel
             {
                 Articles = [new ArticleViewModel { Article = article }],
                 AuthorUsername = Config.FediverseUsername,
                 AuthorDisplayName = Config.AuthorDisplayName,
                 AuthorBio = Config.FediverseBio,
+                FollowerCount = fcount,
                 SiteSettings = SettingsService.Current,
                 ThemeCss = SettingsService.Current?.ThemeCss
             });

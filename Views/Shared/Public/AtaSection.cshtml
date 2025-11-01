@@ -58,4 +58,14 @@
             }
         }
     </div>
+    @* TODO: Add support for more, only display div.stats if we have any stats to show. *@
+    @if (Model.FollowerCount is not null)
+    {
+        <div class="stats">
+            <div class="stat">
+                <span class="value">@Model.FollowerCount</span>
+                <span class="label">follower@(Model.FollowerCount is 1 ? "" : "s")</span>
+            </div>
+        </div>
+    }
 </aside>
