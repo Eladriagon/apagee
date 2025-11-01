@@ -171,7 +171,7 @@ public class AdminController(UserService userService, ArticleService articleServ
         // Also check the IDs match
         if (article is null || (id is not null && formArticle.Uid != id))
         {
-            return BadRequest("Invalid article ID for editing.");
+            return StatusCode(StatusCodes.Status400BadRequest, new { error = "Invalid article ID for editing." });
         }
 
         if (string.IsNullOrWhiteSpace(article.Title))

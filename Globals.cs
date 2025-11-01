@@ -16,6 +16,7 @@ public partial class Globals
     internal const string JSON_LD_CONTENT_TYPE_TRIM = @"application/ld+json";
     internal const string JSON_RD_CONTENT_TYPE = @"application/jrd+json";
     internal const string JSON_ACT_CONTENT_TYPE = @"application/activity+json";
+    internal const string JSON_NODEINFO_CONTENT_TYPE = @"application/json; profile=""http://nodeinfo.diaspora.software/ns/schema/2.0#""";
 
     // Warning: Don't change this or federation may break for some legacy clients.
     internal const int RSA_KEY_STRENGTH = 2048;

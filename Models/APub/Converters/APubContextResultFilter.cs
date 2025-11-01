@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc.Formatters;
+
 namespace Apagee.Models.APub.Converters;
 
 public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
@@ -36,33 +38,49 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
         }
     ];
 
-    private static bool IsJson(ObjectResult r)
-        => r.ContentTypes.Count == 0 || r.ContentTypes.Contains("application/json");
-
-    private readonly JsonSerializerOptions _json;
+    private readonly JsonSerializerOptions SerializerOptions;
 
     public ContextResponseWrapperFilter(IOptions<JsonOptions> jsonOptions)
-        => _json = jsonOptions.Value.JsonSerializerOptions;
+    {
+        SerializerOptions = jsonOptions.Value.JsonSerializerOptions;
+    }
 
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        if (context.Result is not ObjectResult r || !IsJson(r))
+        // Note: Only works on responses using "Ok(...)".
+
+        if (context.Result is not OkObjectResult { Value: not null } ok)
         {
             await next(); return;
         }
 
-        if (context.HttpContext.Request.Path.Value?.Contains("webfinger") ?? false)
+        // Most specific/rare ones first.
+        ok.ContentTypes.Clear();
+        if (GetCurrentCustomAttributeWithClass<ExplicitContentTypeAttribute>(context.ActionDescriptor) is ExplicitContentTypeAttribute ect)
         {
-            await next(); return;
+            ok.ContentTypes.Add(ect.Name);
+        }
+        else if (GetCurrentCustomAttributeWithClass<JrdContentTypeAttribute>(context.ActionDescriptor) is not null)
+        {
+            ok.ContentTypes.Add(Globals.JSON_RD_CONTENT_TYPE);
+        }
+        else if (GetCurrentCustomAttributeWithClass<NodeInfoContentTypeAttribute>(context.ActionDescriptor) is not null)
+        {
+            ok.ContentTypes.Add(Globals.JSON_NODEINFO_CONTENT_TYPE);
+        }
+        else if (GetCurrentCustomAttributeWithClass<ActivityContentTypeAttribute>(context.ActionDescriptor) is not null)
+        {
+            ok.ContentTypes.Add(WithUtf8(Globals.JSON_ACT_CONTENT_TYPE));
+        }
+        else
+        {
+            ok.ContentTypes.Add(WithUtf8("application/json"));
         }
 
-        if (r.Value is null)
-        {
-            await next(); return;
-        }
-
-        var declared = r.DeclaredType ?? r.Value.GetType();
-        var node = JsonSerializer.SerializeToNode(r.Value, declared, _json);
+        // Not some sort of Json* type but still an object?
+        // Serialize it now so we can manipulate it.
+        var declared = ok.Value.GetType();
+        var node = JsonSerializer.SerializeToNode(ok.Value, declared, SerializerOptions);
 
         if (node is not JsonObject obj)
         {
@@ -70,33 +88,64 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
             await next(); return;
         }
 
-        if (node["@context"] is not null)
+        JsonObject root;
+        if (GetCurrentCustomAttributeWithClass<NoContextAttribute>(context.ActionDescriptor) is not null)
         {
-            await next(); return;
+            root = obj;
+        }
+        else
+        {
+            if (node["@context"] is not null)
+            {
+                await next(); return;
+            }
+
+            // Build new root with "context" + original properties (cloned!)
+            root = new JsonObject
+            {
+                ["@context"] = JsonSerializer.SerializeToNode(APubGlobalContext)
+            };
+
+            foreach (var kvp in obj)
+            {
+                // Avoid re-parenting: clone the node before adding
+                root[kvp.Key] = kvp.Value?.DeepClone();
+            }
         }
 
-        // Build new root with "context" + original properties (cloned!)
-        var root = new JsonObject
+        // This bypasses any other dumb output formatting that happens, like adding "; charset=utf-8" everywhere or checking the `Accept` header.
+        context.Result = new ContentResult
         {
-            ["@context"] = JsonSerializer.SerializeToNode(APubGlobalContext)
+            Content = JsonSerializer.Serialize(root, SerializerOptions),
+            ContentType = ok.ContentTypes.First(),
+            StatusCode = ok.StatusCode
         };
-
-        foreach (var kvp in obj)
-        {
-            // Avoid re-parenting: clone the node before adding
-            root[kvp.Key] = kvp.Value?.DeepClone();
-        }
-
-        r.Value = root;
-        r.DeclaredType = typeof(JsonObject); // helps STJ avoid reflecting the old type
-        r.ContentTypes.Clear();
-        r.ContentTypes.Add("application/json");
 
         await next();
     }
+
+    private string WithUtf8(string contentType) => $"{contentType}; charset=utf-8";
+
+    private static bool IsJson(ObjectResult r)
+        => r.ContentTypes.Count == 0 || r.ContentTypes.Contains("application/json");
 
     private static JsonSerializerOptions GetJsonOptions(FilterContext ctx)
         => ctx.HttpContext.RequestServices
             .GetRequiredService<IOptions<JsonOptions>>()
             .Value.JsonSerializerOptions;
+
+    private IEnumerable<Attribute>? GetCurrentCustomAttributes(ActionDescriptor ad) =>
+        ad is ControllerActionDescriptor cad ? cad.MethodInfo.GetCustomAttributes(true).OfType<Attribute>() : null;
+
+    private IEnumerable<(Attribute attr, int priority)>? GetCurrentCustomAttributesWithClass(ActionDescriptor ad) =>
+        ad is ControllerActionDescriptor cad
+            ? cad.MethodInfo.GetCustomAttributes(true).OfType<Attribute>().Select(a => (a, 2))
+                .Union(cad.MethodInfo.DeclaringType?.GetCustomAttributes(true).OfType<Attribute>().Select(a => (a, 1)) ?? [])
+            : null;
+
+    private T? GetCurrentCustomAttribute<T>(ActionDescriptor ad) where T : Attribute =>
+        (T?)GetCurrentCustomAttributes(ad)?.FirstOrDefault(a => a is T);
+
+    private T? GetCurrentCustomAttributeWithClass<T>(ActionDescriptor ad) where T : Attribute =>
+        (T?)GetCurrentCustomAttributesWithClass(ad)?.OrderByDescending(a => a.priority).FirstOrDefault(a => a.attr is T).attr;
 }

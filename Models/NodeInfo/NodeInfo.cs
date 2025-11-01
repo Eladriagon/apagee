@@ -1,6 +1,6 @@
 namespace Apagee.Models.NodeInfo;
 
-public class NodeInfo
+public class NodeInfoResult
 {
     public required string Version { get; set; }
     public required NodeInfoSoftware Software { get; set; }

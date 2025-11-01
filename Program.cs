@@ -101,6 +101,21 @@ try
         // Injects @context
         opt.Filters.Add<ContextResponseWrapperFilter>();
     })
+    .AddMvcOptions(opts =>
+    {
+        var jsonFormatter = opts.OutputFormatters.FirstOrDefault(f => f is SystemTextJsonOutputFormatter);
+
+        if (jsonFormatter is SystemTextJsonOutputFormatter jf)
+        {
+            jf.SupportedMediaTypes.Clear();
+            jf.SupportedMediaTypes.Add("application/json");
+            jf.SupportedMediaTypes.Add(Globals.JSON_ACT_CONTENT_TYPE);
+            jf.SupportedMediaTypes.Add(Globals.JSON_LD_CONTENT_TYPE);
+            jf.SupportedMediaTypes.Add(Globals.JSON_LD_CONTENT_TYPE_TRIM);
+            jf.SupportedMediaTypes.Add(Globals.JSON_NODEINFO_CONTENT_TYPE);
+            jf.SupportedMediaTypes.Add(Globals.JSON_RD_CONTENT_TYPE);
+        }
+    })
     .AddJsonOptions(json =>
     {
         // Sets up serialization options

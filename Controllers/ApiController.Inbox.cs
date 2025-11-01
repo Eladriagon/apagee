@@ -9,20 +9,20 @@ public partial class ApiController : BaseController
         // Single-user only
         if (username != GlobalConfiguration.Current?.FediverseUsername)
         {
-            return NotFound("User not found.");
+            return NotFound404(message: "User not found.");
         }
 
         var basePathPaged = $"{CurrentPath}?page=true";
 
         var oc = new APubOrderedCollection
         {
-            Id = AtomId,
+            Id = CurrentPathAndQuery,
             TotalItems = await ArticleService.GetCount(true)
         };
 
         var ocp = new APubOrderedCollectionPage
         {
-            Id = AtomId,
+            Id = CurrentPathAndQuery,
             PartOf = new APubLink(CurrentActor.Outbox),
             Items = new()
         };
@@ -67,7 +67,7 @@ public partial class ApiController : BaseController
             }
             else
             {
-                return StatusCode(400, "Cannot specify both min and max.");
+                return BadRequest400(message: "Cannot specify both min and max.");
             }
 
             ocp.Items.AddRange(articles.SelectMany(a => new[] {
@@ -83,7 +83,7 @@ public partial class ApiController : BaseController
     [Route("api/users/{username}/inbox")]
     public async Task<IActionResult> GetInbox([FromRoute] string username)
     {
-        return NotFound();
+        return NotFound404();
     }
 
     [HttpPost]
@@ -100,7 +100,7 @@ public partial class ApiController : BaseController
         // Single-user only
         if (username != GlobalConfiguration.Current?.FediverseUsername)
         {
-            return NotFound("User not found.");
+            return NotFound404(message: "User not found.");
         }
 
         using var sr = new StreamReader(Request.Body);
