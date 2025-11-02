@@ -27,7 +27,7 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
         var target = $"https://{domain}/{Globals.WEBFINGER_PATH}?resource=acct:{account}@{domain}";
         var request = new HttpRequestMessage(HttpMethod.Get, target);
         request.Headers.TryAddWithoutValidation("X-Use-Jrd", "1");
-        
+
         var resp = await client.SendAsync(request);
 
         if (!resp.IsSuccessStatusCode)
@@ -85,7 +85,7 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
         // TODO: This header is expensive to compute. Cache follower lists somewhere.
         var request = new HttpRequestMessage(HttpMethod.Post, inboxUri);
         request.Headers.TryAddWithoutValidation("Collection-Synchronization", "pending");
-        request.Content = JsonContent.Create(item);
+        request.Content = JsonContent.Create(item, options: Opts);
 
         var resp = await client.SendAsync(request);
 
