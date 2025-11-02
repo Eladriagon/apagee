@@ -87,14 +87,19 @@
                         }
                     </td>
                     <td class="is-vcentered">
-                        <a asp-action="EditArticle" asp-route-id="@article.Uid" class="button is-outline is-small is-warning">
+                        <a asp-action="EditArticle" asp-route-id="@article.Uid" title="Edit Article" class="button is-outline is-small is-warning">
                             <span class="icon">
                                 <i class="fas fa-edit"></i>
                             </span>
                         </a>
-                        <a asp-action="DeleteArticle" asp-route-id="@article.Uid" class="button is-outline is-small is-danger">
+                        <a asp-action="DeleteArticle" asp-route-id="@article.Uid" title="Delete Article" class="button is-outline is-small is-danger">
                             <span class="icon">
                                 <i class="fas fa-trash"></i>
+                            </span>
+                        </a>
+                        <a disabled="@((article.PublishedOn is null || article.Status != ArticleStatus.Published ? (bool?)true : null))" asp-action="RedeliverArticle" asp-route-id="@article.Uid" title="Redeliver Article to Followers" class="button is-outline is-small is-primary">
+                            <span class="icon">
+                                <i class="fas fa-hexagon-nodes-bolt"></i>
                             </span>
                         </a>
                     </td>

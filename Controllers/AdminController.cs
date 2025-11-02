@@ -209,24 +209,7 @@ public class AdminController(UserService userService, ArticleService articleServ
 
         if (sendToFollowers)
         {
-            // TODO: Extremely very super not performant.
-            // Involves adding a background worker/thread
-            // so this is here as a test/proof of concept
-            // only.
-            var followers = await InboxService.GetFollowerList();
-            foreach (var f in followers)
-            {
-                var actArticle = APubStatus.FromArticle(article);
-                await Client.PostInboxFromActor(f, new Create()
-                {
-                    Id = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}/statuses/{article.Uid}/activity",
-                    Actor = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}",
-                    Published = article.PublishedOn,
-                    To = actArticle.To,
-                    Cc = actArticle.Cc,
-                    Object = actArticle
-                });
-            }
+            await PublishToFediverse(article);
         }
         
         return RedirectToAction("Articles");
@@ -245,6 +228,27 @@ public class AdminController(UserService userService, ArticleService articleServ
         catch (Exception ex)
         {
             throw new ApageeException($"Error fetching article \"{id}\" to preview delete - {ex.Message}", ex);
+        }
+    }
+
+    [HttpGet]
+    [Route("redeliver")]
+    public async Task<IActionResult> RedeliverArticle(string id)
+    {
+        try
+        {
+            var article = await ArticleService.GetByUid(id);
+
+            if (article is { PublishedOn: not null, Status: ArticleStatus.Published })
+            {
+                await PublishToFediverse(article);
+            }
+
+        return RedirectToAction("Articles");
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Error redelivering article \"{id}\" - {ex.Message}", ex);
         }
     }
 
@@ -340,5 +344,27 @@ public class AdminController(UserService userService, ArticleService articleServ
 
         // Should bounce to the login screen as a sanity check / confirmation of logout.
         return Redirect("/admin");
+    }
+
+    private async Task PublishToFediverse(Article article)
+    {
+        // TODO: Extremely very super not performant.
+        // Involves adding a background worker/thread
+        // so this is here as a test/proof of concept
+        // only.
+        var followers = await InboxService.GetFollowerList();
+        foreach (var f in followers)
+        {
+            var actArticle = APubStatus.FromArticle(article);
+            await Client.PostInboxFromActor(f, new Create()
+            {
+                Id = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}/statuses/{article.Uid}/activity",
+                Actor = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}",
+                Published = article.PublishedOn,
+                To = actArticle.To,
+                Cc = actArticle.Cc,
+                Object = actArticle
+            });
+        }
     }
 }
