@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace Apagee.Services;
 
 public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptions opts, IMemoryCache cache)
@@ -22,11 +24,11 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
 
         var client = Client;
 
-        client.DefaultRequestHeaders.Accept.Clear();
-        client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", Globals.JSON_RD_CONTENT_TYPE);
-
         var target = $"https://{domain}/{Globals.WEBFINGER_PATH}?resource=acct:{account}@{domain}";
-        var resp = await client.GetAsync(target);
+        var request = new HttpRequestMessage(HttpMethod.Get, target);
+        request.Headers.TryAddWithoutValidation("X-Use-Jrd", "1");
+        
+        var resp = await client.SendAsync(request);
 
         if (!resp.IsSuccessStatusCode)
         {
@@ -81,8 +83,11 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
 
         // Triggers a signature compute in the FediverseSigningHandler.
         // TODO: This header is expensive to compute. Cache follower lists somewhere.
-        client.DefaultRequestHeaders.TryAddWithoutValidation("Collection-Synchronization", "pending");
-        var resp = await client.PostAsJsonAsync(inboxUri, item, Opts);
+        var request = new HttpRequestMessage(HttpMethod.Post, inboxUri);
+        request.Headers.TryAddWithoutValidation("Collection-Synchronization", "pending");
+        request.Content = JsonContent.Create(item);
+
+        var resp = await client.SendAsync(request);
 
         return resp.IsSuccessStatusCode;
     }
@@ -93,14 +98,6 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
 
         if (actorInbox is null) return false;
 
-        var client = Client;
-
-        // Triggers a signature compute in the FediverseSigningHandler.
-        // TODO: This header is expensive to compute. Cache follower lists somewhere.
-        client.DefaultRequestHeaders.TryAddWithoutValidation("Collection-Synchronization", "pending");
-
-        var resp = await Client.PostAsJsonAsync(actorInbox, item, Opts);
-
-        return resp.IsSuccessStatusCode;
+        return await PostInbox(actorInbox, item);
     }
 }
