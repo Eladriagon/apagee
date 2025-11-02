@@ -4,21 +4,34 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
 {
     public InboxService InboxService { get; } = inboxService;
 
+    // Handler for outgoing HTTP requests made with FedClient
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // Include JSON-LD
         request.Headers.Accept.Clear();
-        request.Headers.TryAddWithoutValidation("Accept", $"{Globals.JSON_LD_CONTENT_TYPE}, {Globals.JSON_ACT_CONTENT_TYPE}");
-
-        if (request.Content is not null)
+        request.Content?.Headers.Remove("Content-Type");
+        if (request.Headers.TryGetValues("X-Use-Jrd", out _))
         {
-            request.Content.Headers.Remove("Content-Type");
-            request.Content.Headers.TryAddWithoutValidation("Content-Type", Globals.JSON_LD_CONTENT_TYPE);
+            // Include JRD JSON
+            request.Headers.TryAddWithoutValidation("Accept", $"{Globals.JSON_RD_CONTENT_TYPE}");
+            if (request.Content is not null)
+            {
+                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Globals.JSON_RD_CONTENT_TYPE);
+            }
+            request.Headers.Remove("X-Use-Jrd");
+        }
+        else
+        {
+            // Include Activity JSON
+            request.Headers.TryAddWithoutValidation("Accept", $"{Globals.JSON_ACT_CONTENT_TYPE}");
+            if (request.Content is not null)
+            {
+                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Globals.JSON_ACT_CONTENT_TYPE);
+            }
         }
 
         // Good internet citizenry
         request.Headers.UserAgent.Clear();
-        request.Headers.TryAddWithoutValidation("User-Agent", $"Apagee/{Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "1.0"} (+https://github.com/eladriagon/apagee)");
+        request.Headers.UserAgent.ParseAdd($"Apagee/{Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "1.0"} (+https://github.com/eladriagon/apagee)");
 
         // And sign it
         var privKey = keypairHelper.ActorRsaPrivateKey
@@ -77,7 +90,6 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
         {
             request.Headers.Remove("Collection-Synchronization");
 
-
             var followersCollectionId = new Uri($"https://{GlobalConfiguration.Current!.PublicHostname}/api/users/{GlobalConfiguration.Current!.FediverseUsername}/followers");
 
             var followers = (IReadOnlyCollection<string>)await InboxService.GetFollowerList(count: 1000, domain: host);
@@ -104,15 +116,15 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
         // Temporary
         Console.WriteLine("");
         Console.WriteLine($"[[[ DBG ]]]");
-        Console.WriteLine("");
+        Console.WriteLine(" ");
         Console.WriteLine($"{request.Method.Method} {request.RequestUri} HTTP/1.1");
         foreach (var h in request.Headers)
         {
             Console.WriteLine($"{h.Key}: {string.Join(", ", h.Value)}");
         }
-        Console.WriteLine("");
+        Console.WriteLine(" ");
         Console.WriteLine($"{(request.Content is not null ? await request.Content.ReadAsStringAsync() : "### Body has no content. ###")}");
-        Console.WriteLine("");
+        Console.WriteLine(" ");
         Console.WriteLine($"[[[ /DBG ]]]");
         Console.WriteLine("");
     }
