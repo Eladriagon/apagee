@@ -45,9 +45,9 @@ public class InboxService(StorageService storageService)
     {
         using var conn = await StorageService.Conn();
 
-        if (count is < 1 or > 200 || olderThan is null || (olderThan is not null && !Ulid.TryParse(olderThan, out var _)))
+        if (count is < 1 or > 200 || (olderThan is not null && !Ulid.TryParse(olderThan, out var _)))
         {
-            throw new ApageeException("Validation error on follower list.");
+            throw new ApageeException($"Validation error on follower list. olderThan={olderThan ?? "NULL"}, domain={domain ?? "NULL"}, count={count}");
         }
 
         var where = "";
