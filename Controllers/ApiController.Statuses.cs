@@ -125,7 +125,7 @@ public partial class ApiController : BaseController
     {
         return Ok(new APubOrderedCollection
         {
-            Id = CurrentPathAndQuery,
+            Id = CurrentAtomId,
             TotalItems = 0
         });
     }

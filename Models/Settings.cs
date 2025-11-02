@@ -46,10 +46,10 @@ public sealed class Settings
     public string? Property1Value { get; set; }
 
     [Write(false)]
-    public string Property1Formatted =>
+    public string? Property1Formatted =>
         Property1Value is { Length: > 0 } p1v && p1v.Trim().ToUpper().StartsWith("HTTPS://")
-            ? @$"<a href=""{p1v}"" rel=""nofollow noopener"" translate=""no"" target=""_blank""><span class=""hidden"" aria-hidden=""true"">https://</span><span class=""url"">{p1v[8..]}</span>{(p1v.EndsWith('/') ? @"<span class=""hidden"" aria-hidden=""true"">/</span>" : "")}</a>"
-            : HtmlEncoder.Default.Encode(Property1Value ?? "");
+            ? @$"<a href=""{p1v}"" rel=""nofollow noopener"" translate=""no"" target=""_blank""><span class=""invisible"" aria-hidden=""true"">https://</span><span class=""url"">{p1v[8..]}</span>{(p1v.EndsWith('/') ? @"<span class=""invisible"" aria-hidden=""true"">/</span>" : "")}</a>"
+            : Property1Value is null ? null : HtmlEncoder.Default.Encode(Property1Value);
 
     public string? Property2Key { get; set; }
 
@@ -58,8 +58,8 @@ public sealed class Settings
     [Write(false)]
     public string? Property2Formatted =>
         Property2Value is { Length: > 0 } p2v && p2v.Trim().ToUpper().StartsWith("HTTPS://")
-            ? @$"<a href=""{p2v}"" rel=""nofollow noopener"" translate=""no"" target=""_blank""><span class=""hidden"" aria-hidden=""true"">https://</span><span class=""url"">{p2v[8..]}</span>{(p2v.EndsWith('/') ? @"<span class=""hidden"" aria-hidden=""true"">/</span>" : "")}</a>"
-            : HtmlEncoder.Default.Encode(Property2Value ?? "");
+            ? @$"<a href=""{p2v}"" rel=""nofollow noopener "" translate=""no"" target=""_blank""><span class=""invisible"" aria-hidden=""true"">https://</span><span class=""url"">{p2v[8..]}</span>{(p2v.EndsWith('/') ? @"<span class=""invisible"" aria-hidden=""true"">/</span>" : "")}</a>"
+            : Property2Value is null ? null : HtmlEncoder.Default.Encode(Property2Value);
 
     public string? Property3Key { get; set; }
 
@@ -68,6 +68,6 @@ public sealed class Settings
     [Write(false)]
     public string? Property3Formatted =>
         Property3Value is { Length: > 0 } p3v && p3v.Trim().ToUpper().StartsWith("HTTPS://")
-            ? @$"<a href=""{p3v}"" rel=""nofollow noopener"" translate=""no"" target=""_blank""><span class=""hidden"" aria-hidden=""true"">https://</span><span class=""url"">{p3v[8..]}</span>{(p3v.EndsWith('/') ? @"<span class=""hidden"" aria-hidden=""true"">/</span>" : "")}</a>"
-            : HtmlEncoder.Default.Encode(Property3Value ?? "");
+            ? @$"<a href=""{p3v}"" rel=""nofollow noopener"" translate=""no"" target=""_blank"" translate=""no""><span class=""invisible"" aria-hidden=""true"">https://</span><span class=""url"">{p3v[8..]}</span>{(p3v.EndsWith('/') ? @"<span class=""invisible"" aria-hidden=""true"">/</span>" : "")}</a>"
+            : Property3Value is null ? null : HtmlEncoder.Default.Encode(Property3Value);
 }

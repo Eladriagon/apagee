@@ -26,19 +26,19 @@ public partial class ApiController : BaseController
         user.Published = await KvService.Get(Globals.APP_START_DATE_KEY) is string s ? DateTime.Parse(s) : null;
 
         if (SettingsService.Current?.Property1Key is { Length: > 0 } k1
-            && SettingsService.Current?.Property1Value is { Length: > 0 } v1)
+            && SettingsService.Current?.Property1Formatted is { Length: > 0 } v1)
         {
             user.Attachment!.Add(new APubPropertyValue(k1, v1));
         }
 
         if (SettingsService.Current?.Property2Key is { Length: > 0 } k2
-            && SettingsService.Current?.Property2Value is { Length: > 0 } v2)
+            && SettingsService.Current?.Property2Formatted is { Length: > 0 } v2)
         {
             user.Attachment!.Add(new APubPropertyValue(k2, v2));
         }
 
         if (SettingsService.Current?.Property3Key is { Length: > 0 } k3
-            && SettingsService.Current?.Property3Value is { Length: > 0 } v3)
+            && SettingsService.Current?.Property3Formatted is { Length: > 0 } v3)
         {
             user.Attachment!.Add(new APubPropertyValue(k3, v3));
         }
@@ -113,7 +113,7 @@ public partial class ApiController : BaseController
         {
             return Ok(new APubOrderedCollection
             {
-                Id = CurrentPathAndQuery,
+                Id = CurrentAtomId,
                 TotalItems = 0
             });
         }
@@ -160,7 +160,7 @@ public partial class ApiController : BaseController
     {
         return Ok(new APubOrderedCollection
         {
-            Id = CurrentPathAndQuery,
+            Id = CurrentAtomId,
             TotalItems = 0
         });
     }
@@ -171,7 +171,7 @@ public partial class ApiController : BaseController
     {
         return Ok(new APubOrderedCollection
         {
-            Id = CurrentPathAndQuery,
+            Id = CurrentAtomId,
             TotalItems = 0
         });
     }

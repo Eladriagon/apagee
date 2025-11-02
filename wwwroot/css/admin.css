@@ -79,6 +79,6 @@ input.checkbox[type=checkbox] {
     justify-self: center;
 }
 
-.hidden {
+.invisible {
   display: none !important;
 }

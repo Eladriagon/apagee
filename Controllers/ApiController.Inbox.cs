@@ -16,13 +16,13 @@ public partial class ApiController : BaseController
 
         var oc = new APubOrderedCollection
         {
-            Id = CurrentPathAndQuery,
+            Id = CurrentAtomId,
             TotalItems = await ArticleService.GetCount(true)
         };
 
         var ocp = new APubOrderedCollectionPage
         {
-            Id = CurrentPathAndQuery,
+            Id = CurrentAtomId,
             PartOf = new APubLink(CurrentActor.Outbox),
             Items = new()
         };

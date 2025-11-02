@@ -17,6 +17,6 @@ public partial class ApiController(ArticleService articleService, KeypairHelper 
     private string RootUrl => $"https://{GlobalConfiguration.Current?.PublicHostname}";
     private string ActorId => $"{RootUrl}/api/users/{GlobalConfiguration.Current!.FediverseUsername}";
     private string CurrentPath => $"{RootUrl}{Request.Path}";
-    private string CurrentPathAndQuery => CurrentPath + Request.QueryString;
+    private string CurrentAtomId => CurrentPath + Request.QueryString;
     private APubActor CurrentActor => APubActor.Create<Person>(KeypairHelper.KeyId, KeypairHelper.ActorPublicKeyPem ?? throw new ApageeException("Cannot create user: Actor public key PEM is null."));
 }
