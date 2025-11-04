@@ -33,10 +33,14 @@ public class AdminController(UserService userService,
         return View(new DashboardViewModel
         {
             PostCount = (int)articleCount,
+            FollowerCount = followerCount,
+            BoostCount = interactions.Count(i => i.Type == InteractionType.Announce),
+            FavoriteCount = interactions.Count(i => i.Type == InteractionType.Like),
             RecentArticles = new ArticleListViewModel
             {
                 AuthorUsername = GlobalConfiguration.Current!.FediverseUsername,
                 AuthorDisplayName = GlobalConfiguration.Current!.AuthorDisplayName,
+                FollowerCount = followerCount,
                 Articles = articles
                     .GroupJoin(interactions, k1 => k1.Uid, k2 => k2.ArticleUID, (art, inter) => new ArticleViewModel
                     {
@@ -45,7 +49,6 @@ public class AdminController(UserService userService,
                         Shares = (uint)inter.Count(i => i.Type == InteractionType.Announce),
                     })
             },
-            FollowerCount = followerCount
         });
     }
 

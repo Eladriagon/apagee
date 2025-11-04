@@ -136,8 +136,6 @@ public partial class SystemController(UserService userService,
                 throw new($"Unexpected subscribe authorize target URL: {subRedirect}");
             }
 
-            // TODO: Can we "push" our profile to the server first, so it doesn't 404?
-
             var redir = subRedirect.Replace("{uri}", $"https://{Config.PublicHostname}/api/users/{Config.FediverseUsername}");
 
             return Redirect(redir);

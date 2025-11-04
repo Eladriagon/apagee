@@ -12,7 +12,7 @@
             </div>
             <div class="level-right">
                 <div class="level-item">
-                    <button disabled="@(Model?.WasEverPublished ?? false)" title="@(Model?.WasEverPublished is true ? "Cannot save a draft once it's been published." : "Saves the article as a draft.")" class="button is-secondary is-outline" asp-route-isDraft="@(true)">
+                    <button disabled="@(Model?.WasEverPublished ?? false)" title="@(Model?.WasEverPublished is true ? "Cannot save a draft once it's been published." : "Saves the article as a draft.")" class="button is-secondary is-outline" asp-action="SaveArticle" asp-route-id="@Model?.Uid" asp-route-isDraft="@(true)">
                         <span class="icon-text">
                             <span class="icon">
                                 <i class="fas fa-pen-to-square"></i>

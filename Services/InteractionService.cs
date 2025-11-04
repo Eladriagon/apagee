@@ -26,8 +26,8 @@ public class InteractionService(StorageService storageService)
         using var conn = await StorageService.Conn();
 
         return new() {
-            [InteractionType.Like] = await conn.ExecuteScalarAsync<uint>("SELECT COUNT(*) FROM Interaction WHERE ArticleUID = @uid AND Type = @type", new { uid, InteractionType.Like }),
-            [InteractionType.Announce] = await conn.ExecuteScalarAsync<uint>("SELECT COUNT(*) FROM Interaction WHERE ArticleUID = @uid AND Type = @type", new { uid, InteractionType.Announce })
+            [InteractionType.Like] = await conn.ExecuteScalarAsync<uint>("SELECT COUNT(*) FROM Interaction WHERE ArticleUID = @uid AND Type = @type", new { uid, type = InteractionType.Like }),
+            [InteractionType.Announce] = await conn.ExecuteScalarAsync<uint>("SELECT COUNT(*) FROM Interaction WHERE ArticleUID = @uid AND Type = @type", new { uid, type = InteractionType.Announce })
         };
     }
 
