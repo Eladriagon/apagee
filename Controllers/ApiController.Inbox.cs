@@ -258,7 +258,7 @@ public partial class ApiController : BaseController
                         if (ann is null) break;
 
                         var postPath = new PathString(new Uri(ann).AbsolutePath);
-                        var postId = postPath.StartsWithSegments($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}", out var nextPath)
+                        var postId = postPath.StartsWithSegments($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}/statuses", out var nextPath)
                             ? nextPath.Value?.Trim('/')
                             : null;
 
