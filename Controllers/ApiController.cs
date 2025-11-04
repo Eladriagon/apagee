@@ -4,7 +4,7 @@ namespace Apagee.Controllers;
 [ActivityContentType]
 public partial class ApiController(ArticleService articleService,
                                    KeypairHelper keypairHelper,
-                                   MemoryCache cache,
+                                   IMemoryCache cache,
                                    InboxService inboxService,
                                    InteractionService interactionService,
                                    FedClient client,
