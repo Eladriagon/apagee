@@ -84,41 +84,7 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
             ok.ContentTypes.Add(WithUtf8("application/json"));
         }
 
-        // Not some sort of Json* type but still an object?
-        // Serialize it now so we can manipulate it.
-        var declared = ok.Value.GetType();
-        var node = JsonSerializer.SerializeToNode(ok.Value, declared, SerializerOptions);
-
-        if (node is not JsonObject obj)
-        {
-            // Non-object roots: do nothing
-            await next(); return;
-        }
-
-        JsonObject root;
-        if (GetCurrentCustomAttributeWithClass<NoContextAttribute>(context.ActionDescriptor) is not null)
-        {
-            root = obj;
-        }
-        else
-        {
-            if (node["@context"] is not null)
-            {
-                await next(); return;
-            }
-
-            // Build new root with "context" + original properties (cloned!)
-            root = new JsonObject
-            {
-                ["@context"] = JsonSerializer.SerializeToNode(APubGlobalContext)
-            };
-
-            foreach (var kvp in obj)
-            {
-                // Avoid re-parenting: clone the node before adding
-                root[kvp.Key] = kvp.Value?.DeepClone();
-            }
-        }
+        var root = JsonUtils.ConvertWithContext(ok.Value, GetCurrentCustomAttributeWithClass<NoContextAttribute>(context.ActionDescriptor) is not null);
 
         // This bypasses any other dumb output formatting that happens, like adding "; charset=utf-8" everywhere or checking the `Accept` header.
         context.Result = new ContentResult

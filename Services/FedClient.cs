@@ -85,7 +85,7 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
         // TODO: This header is expensive to compute. Cache follower lists somewhere.
         var request = new HttpRequestMessage(HttpMethod.Post, inboxUri);
         request.Headers.TryAddWithoutValidation("Collection-Synchronization", "pending");
-        request.Content = JsonContent.Create(Prepare(item), options: Opts);
+        request.Content = JsonContent.Create(JsonUtils.ConvertWithContext(item), options: Opts);
 
         var resp = await client.SendAsync(request);
 
@@ -98,12 +98,6 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
 
         if (actorInbox is null) return false;
 
-        return await PostInbox(actorInbox, Prepare(item));
-    }
-
-    private TItem Prepare<TItem>(TItem item) where TItem : APubObject
-    {
-        item.RootContext ??= ContextResponseWrapperFilter.APubGlobalContext;
-        return item;
+        return await PostInbox(actorInbox, item);
     }
 }

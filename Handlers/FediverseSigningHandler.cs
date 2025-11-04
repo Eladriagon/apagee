@@ -87,7 +87,7 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
         var digest = "";
         if (request.Content != null)
         {
-            var bodyBytes = request.Content.ReadAsByteArrayAsync().Result;
+            var bodyBytes = await request.Content.ReadAsByteArrayAsync();
             var bodyHash = Convert.ToBase64String(SHA256.HashData(bodyBytes));
             digest = $"SHA-256={bodyHash}";
 
