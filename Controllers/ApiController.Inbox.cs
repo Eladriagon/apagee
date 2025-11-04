@@ -148,12 +148,20 @@ public partial class ApiController : BaseController
                 
                 switch (item.Type)
                 {
-                    case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonValue v:
+                    // Receive: Follow
+                    case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonValue
+                        || json["object"] is JsonArray arr && arr[0] is JsonValue:
+
+                        var v = json["object"] as JsonValue ?? (json["object"] as JsonArray)?[0] as JsonValue;
+                        if (v is null) break;
+
                         if (v.GetValue<string>().ToUpper() == ActorId.ToUpper())
                         {
                             var follower = APubFollower.FromJson(json);
                             await InboxService.CreateFollower(follower);
                             Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} from {follower.FollowerId}");
+
+                            // Send: Accept{Follow}
                             await Client.PostInboxFromActor(follower.FollowerId!, new Accept
                             {
                                 Id = $"{RootUrl}/{Ulid.NewUlid()}",
@@ -172,47 +180,14 @@ public partial class ApiController : BaseController
 
                             if (SettingsService.Current?.AutoReciprocateFollows ?? false)
                             {
-                                // Store the follow activity ID for later undo
-                                var newId = NewActivityId;
-                                await KvService.Set(follower.FollowerId ?? follower.FollowerName!, NewActivityId);
-                                await Client.PostInboxFromActor(follower.FollowerId!,
-                                    new Follow
-                                    {
-                                        Id = newId,
-                                        Actor = ActorId,
-                                        Object = follower.FollowerId
-                                    });
-                                Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_FOLLOW} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
-                            }
-                        }
-                        break;
-                    case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonArray arr && arr[0] is JsonValue v:
-                        if (v.GetValue<string>().ToUpper() == ActorId.ToUpper())
-                        {
-                            var follower = APubFollower.FromJson(json);
-                            await InboxService.CreateFollower(follower);
-                            Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} from {follower.FollowerId}");
-                            await Client.PostInboxFromActor(follower.FollowerId!, new Accept
-                            {
-                                Id = NewActivityId,
-                                Actor = ActorId,
-                                Object =
-                                [
-                                    new Follow
-                                    {
-                                        Id = follower.Id,
-                                        Actor = follower.FollowerId,
-                                        Object = ActorId
-                                    }
-                                ]
-                            });
-                            Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_ACCEPT} of {APubConstants.TYPE_ACT_FOLLOW} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
+                                // Testing to see if a delay is needed for the other server to process this before we follow back.
+                                await Task.Delay(10_000);
 
-                            if (SettingsService.Current?.AutoReciprocateFollows ?? false)
-                            {
                                 // Store the follow activity ID for later undo
                                 var newId = NewActivityId;
                                 await KvService.Set(follower.FollowerId ?? follower.FollowerName!, NewActivityId);
+
+                                // Send: Follow (back)
                                 await Client.PostInboxFromActor(follower.FollowerId!,
                                     new Follow
                                     {
@@ -224,7 +199,9 @@ public partial class ApiController : BaseController
                             }
                         }
                         break;
-                    case APubConstants.TYPE_ACT_UNDO when json["object"] is JsonObject obj 
+
+                    // Receive: Undo{Follow}
+                    case APubConstants.TYPE_ACT_UNDO when json["object"] is JsonObject obj
                         && obj["id"] is JsonValue origId
                         && obj["object"] is JsonValue origTarget
                         && origId.GetValue<string>() is { Length: > 0 }:
@@ -233,6 +210,8 @@ public partial class ApiController : BaseController
                             var follower = APubFollower.FromJson(json);
                             await InboxService.DeleteFollower(origId.GetValue<string>());
                             Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} from {follower.FollowerId}");
+
+                            // Send: Accept{Undo}
                             await Client.PostInboxFromActor(follower.FollowerId!, new Accept
                             {
                                 Id = NewActivityId,
@@ -249,6 +228,7 @@ public partial class ApiController : BaseController
                             });
                             Console.WriteLine($"[⁂] » <{item.ID}> {APubConstants.TYPE_ACT_ACCEPT} of {APubConstants.TYPE_ACT_UNDO} to {follower.FollowerId} via {await Client.GetActorInboxAsync(follower.FollowerId!)}");
 
+                            // Send: Undo{Follow} (back)
                             if (SettingsService.Current?.AutoReciprocateFollows ?? false)
                             {
                                 var lastFollowActivityId = await KvService.Get(follower.FollowerId ?? follower.FollowerName!);
@@ -280,6 +260,6 @@ public partial class ApiController : BaseController
 
         await InboxService.Create(item);
 
-        return Created();
+        return Accepted();
     }
 }

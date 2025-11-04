@@ -54,10 +54,13 @@ The releases contain precompiled binaries that should run on most Linux and Wind
 * [x] Automatic admin login creation with UI for password change
 * [x] Auto-generated Fediverse signing keys stored locally
 * [x] Author articles in Markdown
-* [ ] Receive boosts/favorites from Fediverse
 * [x] Draft articles
 * [x] View article list
 * [x] Delete articles
 * [x] Accept and track followers, and respond to follow requests
 * [x] Custom profile properties
-* [ ] Send Fediverse activities
+* [x] Send Fediverse activities
+* [ ] Receive boosts/favorites from Fediverse
+* [ ] Tags
+* [ ] Media (paste from clipboard)
+* [ ] Dockerize and publish image
