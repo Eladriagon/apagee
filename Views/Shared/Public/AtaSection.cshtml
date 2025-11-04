@@ -1,8 +1,8 @@
-@model ArticleListViewModel
+@model (ArticleListViewModel vm, string context)
 
-<aside class="ata">    
+<aside class="ata">
 
-    @if (@Model.SiteSettings?.ODataTitle is string title)
+    @if (@Model.vm.SiteSettings?.ODataTitle is string title)
     {
         <div class="site-header">
             <span class="title">
@@ -15,17 +15,17 @@
         Author
     </div>
     
-    @if (Model.SiteSettings?.AuthorAvatar is not null)
+    @if (Model.vm.SiteSettings?.AuthorAvatar is not null)
     {
         <a href="/@@@(GlobalConfiguration.Current!.FediverseUsername)">
-            <img class="ata-avatar" alt="Profile picture for @(Model.AuthorDisplayName ?? Model.AuthorUsername)" src="/avatar.png" />
+            <img class="ata-avatar" alt="Profile picture for @(Model.vm.AuthorDisplayName ?? Model.vm.AuthorUsername)" src="/avatar.png" />
         </a>
     }
 
     <div class="author">
-        @if (Model.AuthorDisplayName is string { Length: > 0 } displayName)
+        @if (Model.vm.AuthorDisplayName is string { Length: > 0 } displayName)
         {
-            @if (Model.SiteSettings?.AuthorAvatar is null)
+            @if (Model.vm.SiteSettings?.AuthorAvatar is null)
             {
                 <a href="/@@@(GlobalConfiguration.Current!.FediverseUsername)" class="display">@displayName</a>
             }
@@ -34,9 +34,9 @@
                 <span class="display">@displayName</span>
             }   
         }
-        <span class="username">@@@(Model.AuthorUsername)</span>
+        <span class="username">@@@(Model.vm.AuthorUsername)</span>
     </div>
-    @if (Model.AuthorBio is string { Length: > 0 } bio)
+    @if (Model.vm.AuthorBio is string { Length: > 0 } bio)
     {
         <div class="bio">
             @bio
@@ -44,9 +44,9 @@
     }
     <div class="properties">
         @foreach (var prop in new[] {
-            new { key = Model.SiteSettings?.Property1Key, value = Model.SiteSettings?.Property1Value, valueFormatted = Model.SiteSettings?.Property1Formatted },
-            new { key = Model.SiteSettings?.Property2Key, value = Model.SiteSettings?.Property2Value, valueFormatted = Model.SiteSettings?.Property2Formatted },
-            new { key = Model.SiteSettings?.Property3Key, value = Model.SiteSettings?.Property3Value, valueFormatted = Model.SiteSettings?.Property3Formatted }
+            new { key = Model.vm.SiteSettings?.Property1Key, value = Model.vm.SiteSettings?.Property1Value, valueFormatted = Model.vm.SiteSettings?.Property1Formatted },
+            new { key = Model.vm.SiteSettings?.Property2Key, value = Model.vm.SiteSettings?.Property2Value, valueFormatted = Model.vm.SiteSettings?.Property2Formatted },
+            new { key = Model.vm.SiteSettings?.Property3Key, value = Model.vm.SiteSettings?.Property3Value, valueFormatted = Model.vm.SiteSettings?.Property3Formatted }
         })
         {
             @if (prop.key is string { Length: > 0} && prop.value is string { Length: > 0})
@@ -58,14 +58,24 @@
             }
         }
     </div>
-    @* TODO: Add support for more, only display div.stats if we have any stats to show. *@
-    @if (Model.FollowerCount is not null)
+    @if (Model.vm.FollowerCount is not null)
     {
         <div class="stats">
             <div class="stat">
-                <span class="value">@Model.FollowerCount</span>
-                <span class="label">follower@(Model.FollowerCount is 1 ? "" : "s")</span>
+                <span class="value">@Model.vm.FollowerCount</span>
+                <span class="label">follower@(Model.vm.FollowerCount is 1 ? "" : "s")</span>
             </div>
+            @if (Model.context == "single")
+            {
+                <div class="stat">
+                    <span class="value">@Model.vm.Articles.First().Likes</span>
+                    <span class="label">like@(Model.vm.Articles.First().Likes is 1 ? "" : "s")</span>
+                </div>
+                <div class="stat">
+                    <span class="value">@Model.vm.Articles.First().Shares</span>
+                    <span class="label">boost@(Model.vm.Articles.First().Shares is 1 ? "" : "s")</span>
+                </div>
+            }
         </div>
     }
 </aside>

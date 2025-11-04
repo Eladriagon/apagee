@@ -2,11 +2,17 @@ namespace Apagee.Controllers;
 
 [Authorize]
 [Route("admin")]
-public class AdminController(UserService userService, ArticleService articleService, SettingsService settingsService, InboxService inboxService, FedClient client)
+public class AdminController(UserService userService,
+                             ArticleService articleService,
+                             InteractionService interactionService,
+                             SettingsService settingsService,
+                             InboxService inboxService,
+                             FedClient client)
     : BaseController
 {
     public UserService UserService { get; } = userService;
     public ArticleService ArticleService { get; } = articleService;
+    public InteractionService InteractionService { get; } = interactionService;
     public SettingsService SettingsService { get; } = settingsService;
     public InboxService InboxService { get; } = inboxService;
     public FedClient Client { get; } = client;
@@ -21,11 +27,24 @@ public class AdminController(UserService userService, ArticleService articleServ
         var articleCount = await ArticleService.GetCount();
         var recentArticles = await ArticleService.GetRecent(10);
         var followerCount = await InboxService.GetFollowerCount();
+        var articles = await ArticleService.GetRecent(10);
+        var interactions = await InteractionService.GetAllInteractions();
 
         return View(new DashboardViewModel
         {
             PostCount = (int)articleCount,
-            RecentArticles = recentArticles,
+            RecentArticles = new ArticleListViewModel
+            {
+                AuthorUsername = GlobalConfiguration.Current!.FediverseUsername,
+                AuthorDisplayName = GlobalConfiguration.Current!.AuthorDisplayName,
+                Articles = articles
+                    .GroupJoin(interactions, k1 => k1.Uid, k2 => k2.ArticleUID, (art, inter) => new ArticleViewModel
+                    {
+                        Article = art,
+                        Likes = (uint)inter.Count(i => i.Type == InteractionType.Like),
+                        Shares = (uint)inter.Count(i => i.Type == InteractionType.Announce),
+                    })
+            },
             FollowerCount = followerCount
         });
     }
@@ -103,7 +122,20 @@ public class AdminController(UserService userService, ArticleService articleServ
         ViewBag.EditSuccess = TempData["EditSuccess"];
         ViewBag.DelSuccess = TempData["DelSuccess"];
         var articles = await ArticleService.GetAll();
-        return View(articles);
+        var interactions = await InteractionService.GetAllInteractions();
+
+        return View(new ArticleListViewModel
+        {
+            AuthorUsername = GlobalConfiguration.Current!.FediverseUsername,
+            AuthorDisplayName = GlobalConfiguration.Current!.AuthorDisplayName,
+            Articles = articles
+                .GroupJoin(interactions, k1 => k1.Uid, k2 => k2.ArticleUID, (art, inter) => new ArticleViewModel
+                {
+                    Article = art,
+                    Likes = (uint)inter.Count(i => i.Type == InteractionType.Like),
+                    Shares = (uint)inter.Count(i => i.Type == InteractionType.Announce),
+                })
+        });
     }
 
     [HttpGet]

@@ -4,6 +4,10 @@ public class ArticleViewModel
 {
     public required Article Article { get; set; }
 
+    public uint? Likes { get; set; }
+    public uint? Shares { get; set; }
+    public uint? Replies { get; set; }
+
     public string BodyHtml => Article.BodyMode switch
     {
         BodyMode.Markdown => Utils.MarkdownToHtml(Article.Body ?? ""),

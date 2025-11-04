@@ -2,13 +2,21 @@ namespace Apagee.Controllers;
 
 [ApiController]
 [ActivityContentType]
-public partial class ApiController(ArticleService articleService, KeypairHelper keypairHelper, IMemoryCache cache, InboxService inboxService, FedClient client, KeyValueService kvService, JsonSerializerOptions opts)
+public partial class ApiController(ArticleService articleService,
+                                   KeypairHelper keypairHelper,
+                                   MemoryCache cache,
+                                   InboxService inboxService,
+                                   InteractionService interactionService,
+                                   FedClient client,
+                                   KeyValueService kvService,
+                                   JsonSerializerOptions opts)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
     public KeypairHelper KeypairHelper { get; } = keypairHelper;
     public IMemoryCache Cache { get; } = cache;
     public InboxService InboxService { get; } = inboxService;
+    public InteractionService InteractionService { get; } = interactionService;
     public FedClient Client { get; } = client;
     public KeyValueService KvService { get; } = kvService;
     public JsonSerializerOptions Opts { get; } = opts;

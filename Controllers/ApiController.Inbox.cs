@@ -118,14 +118,14 @@ public partial class ApiController : BaseController
             RemoteServer = Request.Headers["X-Forwarded-For"].ToString() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"
         };
 
-        JsonNode? json = default;
+        JsonNode? jNode = default;
         try
         {
-            json = await JsonNode.ParseAsync(new MemoryStream(Encoding.UTF8.GetBytes(body)));
-            if (json?.GetValueKind() == JsonValueKind.Object)
+            jNode = await JsonNode.ParseAsync(new MemoryStream(Encoding.UTF8.GetBytes(body)));
+            if (jNode?.GetValueKind() == JsonValueKind.Object)
             {
-                item.ID = json["id"]?.GetValue<string>() ?? "unknown-" + item.UID;
-                item.Type = json["type"]?.GetValue<string>() ?? "unknown-" + item.UID;
+                item.ID = jNode["id"]?.GetValue<string>() ?? "unknown-" + item.UID;
+                item.Type = jNode["type"]?.GetValue<string>() ?? "unknown-" + item.UID;
             }
             else
             {
@@ -139,7 +139,7 @@ public partial class ApiController : BaseController
             item.Type = "err-" + item.UID;
         }
 
-        if (json is not null)
+        if (jNode is JsonObject json)
         {
             if (Request.HasJsonContentType()
                 || Request.Headers.ContentType.ToString().ToLower().Contains(Globals.JSON_LD_CONTENT_TYPE)
@@ -248,6 +248,54 @@ public partial class ApiController : BaseController
                             }
                         }
                         break;
+
+                    case APubConstants.TYPE_ACT_ANNOUNCE when json["object"] is JsonValue
+                        || json["object"] is JsonArray arr && arr[0] is JsonValue:
+                    case APubConstants.TYPE_ACT_LIKE when json["object"] is JsonValue
+                        || json["object"] is JsonArray arr2 && arr2[0] is JsonValue:
+
+                        var ann = (json["object"] as JsonValue ?? (json["object"] as JsonArray)?[0] as JsonValue)?.GetValue<string>();
+                        if (ann is null) break;
+
+                        var postPath = new PathString(new Uri(ann).AbsolutePath);
+                        var postId = postPath.StartsWithSegments($"/api/users/{GlobalConfiguration.Current!.FediverseUsername}", out var nextPath)
+                            ? nextPath.Value?.Trim('/')
+                            : null;
+
+                        if (postId is null || !Ulid.TryParse(postId, out _))
+                        {
+                            Console.WriteLine($"[⁂] × <{item.ID}> {APubConstants.TYPE_ACT_ANNOUNCE} with ID {postId} and object URI {ann} is not in the expected format.");
+                            break;
+                        }
+
+                        var article = await ArticleService.GetByUid(postId);
+                        if (article is null)
+                        {
+                            Console.WriteLine($"[⁂] × <{item.ID}> {APubConstants.TYPE_ACT_ANNOUNCE} with referenced article {postId} was not found in the database.");
+                            break;
+                        }
+
+                        var interaction = Interaction.FromJson(json, article);
+
+                        if (interaction is null)
+                        {
+                            Console.WriteLine($"[⁂] × <{item.ID}> {APubConstants.TYPE_ACT_ANNOUNCE} could not be converted to an interaction object.");
+                            break;
+                        }
+
+                        if (!await InteractionService.InteractionExists(interaction))
+                        {
+                            await InteractionService.CreateInteraction(interaction);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[⁂] × <{item.ID}> {APubConstants.TYPE_ACT_ANNOUNCE} Interaction already exists.");
+                            break;
+                        }
+
+                        break;
+
+
                     default:
                         Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} (Not handled)\r\n[⁂] ----\r\n{JsonSerializer.Serialize(item)}\r\n[⁂] ----\r\n");
                         break;

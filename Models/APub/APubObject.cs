@@ -73,6 +73,7 @@ public class APubObject : APubBase
 
     public APubCollection? Likes { get; set; }
     public APubCollection? Shares { get; set; }
+    public APubCollection? Replies { get; set; }
 
     public APubPolyBase? Url { get; set; }
     public APubPolyBase? Tag { get; set; }
@@ -133,6 +134,17 @@ public class APubObject : APubBase
             {
                 Id = $"{id}/shares",
                 TotalItems = 0
+            },
+            Replies = new()
+            {
+                Id = $"{id}/replies",
+                First = new APubCollectionPage
+                {
+                    PartOf = new APubLink($"{id}/replies"),
+                    Next = new APubLink($"{id}/replies?olderThan={Ulid.MaxValue}"),
+                    Items = []
+                }
+
             }
         };
     }

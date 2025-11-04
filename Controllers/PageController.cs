@@ -1,9 +1,10 @@
 namespace Apagee.Controllers;
 
-public class PageController(ArticleService articleService, InboxService inboxService, GlobalConfiguration config, SettingsService settingsService)
+public class PageController(ArticleService articleService, InteractionService interactionService, InboxService inboxService, GlobalConfiguration config, SettingsService settingsService)
     : BaseController
 {
     public ArticleService ArticleService { get; } = articleService;
+    public InteractionService InteractionService { get; } = interactionService;
     public InboxService InboxService { get; } = inboxService;
     public GlobalConfiguration Config { get; } = config;
     public SettingsService SettingsService { get; } = settingsService;
@@ -30,10 +31,17 @@ public class PageController(ArticleService articleService, InboxService inboxSer
             {
                 fcount = await InboxService.GetFollowerCount();
             }
+
+            var interactions = await InteractionService.GetInteractionCounts(article);
         
             return View("Public/ArticleView", new ArticleListViewModel
             {
-                Articles = [new ArticleViewModel { Article = article }],
+                Articles = [new ArticleViewModel
+                {
+                    Article = article,
+                    Likes = interactions[InteractionType.Like],
+                    Shares = interactions[InteractionType.Announce]
+                }],
                 AuthorUsername = Config.FediverseUsername,
                 AuthorDisplayName = Config.AuthorDisplayName,
                 AuthorBio = Config.FediverseBio,

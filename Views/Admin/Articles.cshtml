@@ -1,4 +1,4 @@
-@model IEnumerable<Article>
+@model ArticleListViewModel
 
 <h1 class="title is-2">Articles</h1>
 
@@ -54,7 +54,7 @@
         </tr>
     </thead>
     <tbody>
-        @if (!Model.Any())
+        @if (!Model.Articles.Any())
         {
             <tr>
                 <td colspan="4" class="has-text-centered pt-6">
@@ -65,18 +65,18 @@
         }
         else
         {
-            @foreach (var article in Model)
+            @foreach (var article in Model.Articles)
             {
-                <tr class="@(article.Status == ArticleStatus.Draft ? "is-dark" : "")">
-                    <td class="is-line-height-small is-vcentered" title="UID: @(article.Uid)">
-                        <span>@article.Title</span><br />
+                <tr class="@(article.Article.Status == ArticleStatus.Draft ? "is-dark" : "")">
+                    <td class="is-line-height-small is-vcentered" title="UID: @(article.Article.Uid)">
+                        <span>@article.Article.Title</span><br />
                         <small class="is-size-7 mt-0">
-                            <a href="/@article.Slug" target="_blank">/@article.Slug</a>
+                            <a href="/@article.Article.Slug" target="_blank">/@article.Article.Slug</a>
                         </small>
                     </td>
-                    <td class="is-vcentered"><partial name="DateDisplay" model="@(((DateTime?)article.CreatedOn, false))" /></td>
+                    <td class="is-vcentered"><partial name="DateDisplay" model="@(((DateTime?)article.Article.CreatedOn, false))" /></td>
                     <td class="is-vcentered">
-                        @switch (article.Status)
+                        @switch (article.Article.Status)
                         {
                             case ArticleStatus.Draft:
                                 <span class="tag is-warning">Draft</span>
@@ -87,17 +87,17 @@
                         }
                     </td>
                     <td class="is-vcentered">
-                        <a asp-action="EditArticle" asp-route-id="@article.Uid" title="Edit Article" class="button is-outline is-small is-warning">
+                        <a asp-action="EditArticle" asp-route-id="@article.Article.Uid" title="Edit Article" class="button is-outline is-small is-warning">
                             <span class="icon">
                                 <i class="fas fa-edit"></i>
                             </span>
                         </a>
-                        <a asp-action="DeleteArticle" asp-route-id="@article.Uid" title="Delete Article" class="button is-outline is-small is-danger">
+                        <a asp-action="DeleteArticle" asp-route-id="@article.Article.Uid" title="Delete Article" class="button is-outline is-small is-danger">
                             <span class="icon">
                                 <i class="fas fa-trash"></i>
                             </span>
                         </a>
-                        <a disabled="@((article.PublishedOn is null || article.Status != ArticleStatus.Published ? (bool?)true : null))" asp-action="RedeliverArticle" asp-route-id="@article.Uid" title="Redeliver Article to Followers" class="button is-outline is-small is-primary">
+                        <a disabled="@((article.Article.PublishedOn is null || article.Article.Status != ArticleStatus.Published ? (bool?)true : null))" asp-action="RedeliverArticle" asp-route-id="@article.Article.Uid" title="Redeliver Article to Followers" class="button is-outline is-small is-primary">
                             <span class="icon">
                                 <i class="fas fa-hexagon-nodes-bolt"></i>
                             </span>

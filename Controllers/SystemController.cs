@@ -3,12 +3,19 @@ using System.Threading.Tasks;
 namespace Apagee.Controllers;
 
 [Route("")]
-public partial class SystemController(UserService userService, SettingsService settingsService, ArticleService articleService, InboxService inboxService, GlobalConfiguration config, FedClient client) 
+public partial class SystemController(UserService userService,
+                                      SettingsService settingsService,
+                                      ArticleService articleService,
+                                      InteractionService interactionService,
+                                      InboxService inboxService,
+                                      GlobalConfiguration config,
+                                      FedClient client) 
     : BaseController
 {
     public UserService UserService { get; } = userService;
     public SettingsService SettingsService { get; } = settingsService;
     public ArticleService ArticleService { get; } = articleService;
+    public InteractionService InteractionService { get; } = interactionService;
     public InboxService InboxService { get; } = inboxService;
     public GlobalConfiguration Config { get; } = config;
     public FedClient Client { get; } = client;
@@ -27,6 +34,7 @@ public partial class SystemController(UserService userService, SettingsService s
         }
 
         var articles = await ArticleService.GetOlderThan(count: 10);
+        var interactions = await InteractionService.GetAllInteractions();
 
         uint? fcount = null;
         if (SettingsService.Current?.DisplayFollowerCount is true)
