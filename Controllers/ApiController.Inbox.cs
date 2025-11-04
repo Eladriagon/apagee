@@ -180,9 +180,6 @@ public partial class ApiController : BaseController
 
                             if (SettingsService.Current?.AutoReciprocateFollows ?? false)
                             {
-                                // Testing to see if a delay is needed for the other server to process this before we follow back.
-                                await Task.Delay(10_000);
-
                                 // Store the follow activity ID for later undo
                                 var newId = NewActivityId;
                                 await KvService.Set(follower.FollowerId ?? follower.FollowerName!, NewActivityId);

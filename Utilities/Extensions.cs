@@ -7,7 +7,7 @@ public static class ApageeExtensions
     /// Mostly because "StringComparison.InvariantCultureIgnoreCase" is way too long.
     /// </summary>
     public static bool IEquals(this string str, string other, bool noTrim = false) =>
-        (noTrim ? str : str.Trim()).Equals((noTrim ? other : other.Trim()), StringComparison.InvariantCultureIgnoreCase);
+        (noTrim ? str : str.Trim()).Equals(noTrim ? other : other.Trim(), StringComparison.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// Truncates a string and optionally adds a suffix, such as "..." to the end if it was truncated.

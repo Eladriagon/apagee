@@ -15,5 +15,6 @@ public class Article
 
     // If we end up having a <!-- more --> or something similar, add support for that here.
     [Write(false)]
-    public string? ArticleSummary => Utils.MarkdownToHtml($"{(Body is not null ? "\n\n" + Body.Replace("\r", "").Split("\n\n")[0].Truncate(400) : "")}").Trim();
+    public string? ArticleSummary => Utils.MarkdownToHtml($"{(Body is not null ? "\n\n" + Body.Replace("\r", "").Split("\n\n")[0].Truncate(400) : "")}").Trim()
+        + Utils.MarkdownToHtml($"[Read more at {GlobalConfiguration.Current!.PublicHostname}...](https://{GlobalConfiguration.Current!.PublicHostname}/{Slug})");
 }
