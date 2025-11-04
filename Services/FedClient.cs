@@ -12,12 +12,12 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
 
     public async Task<JsonObject?> GetWebfinger(string domain, string? account = null)
     {
-        domain = domain.ToLower().Trim().TrimEnd('/');
+        domain = domain.ToLower().Trim().Replace("@", "").TrimEnd('/');
         if (domain.StartsWith("https://"))
         {
             domain = domain.Replace("https://", "");
         }
-        if (account?.Trim() is { Length: 0 })
+        if (account is not { Length: > 0 })
         {
             account = domain;
         }

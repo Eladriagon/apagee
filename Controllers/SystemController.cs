@@ -109,11 +109,11 @@ public partial class SystemController(UserService userService, SettingsService s
                 throw new("Too many ats! (No AT-ATs allowed! 🌑)");
             }
 
-            var account = followTarget.IndexOf('@') > -1
+            var account = followTarget.Contains('@')
                 ? followTarget.Split('@')[0].Trim()
                 : null;
 
-            var domain = followTarget.IndexOf('@') > -1
+            var domain = followTarget.Contains('@')
                 ? followTarget.Split('@')[1].Trim()
                 : followTarget;
 
@@ -127,6 +127,8 @@ public partial class SystemController(UserService userService, SettingsService s
             {
                 throw new($"Unexpected subscribe authorize target URL: {subRedirect}");
             }
+
+            // TODO: Can we "push" our profile to the server first, so it doesn't 404?
 
             var redir = subRedirect.Replace("{uri}", $"https://{Config.PublicHostname}/api/users/{Config.FediverseUsername}");
 

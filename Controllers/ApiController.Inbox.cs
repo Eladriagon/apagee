@@ -249,7 +249,7 @@ public partial class ApiController : BaseController
                         }
                         break;
                     default:
-                        Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} (Not handled)");
+                        Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} (Not handled)\r\n[⁂] ----\r\n{JsonSerializer.Serialize(item)}\r\n[⁂] ----\r\n");
                         break;
                 }
             }

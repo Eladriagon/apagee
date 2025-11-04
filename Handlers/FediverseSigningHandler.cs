@@ -47,28 +47,7 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
 
         var resp = await base.SendAsync(request, cancellationToken);
 
-        try
-        {
-            Console.WriteLine($"""
-                [DBG-RESP]
-                HTTP {(int)resp.StatusCode} {resp.StatusCode}
-                {string.Join("\r\n", resp.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"))}
-
-                """);
-            if ((await resp.Content.ReadAsStringAsync(cancellationToken)) is { Length: > 0 } body)
-            {
-                Console.WriteLine(body);
-            }
-            else
-            {
-                Console.WriteLine("[[[ NO RESP BODY ]]]");
-            }
-            Console.WriteLine("\r\n[/DBG-RESP]");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[DBG-ERR] Error in debug block: {ex.GetType().FullName}: {ex.Message}\r\n{ex.StackTrace}\r\n");
-        }
+        await DebugHelper.LogResponse(resp);
 
         return resp;
     }
@@ -144,20 +123,7 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
             request.Headers.TryAddWithoutValidation("Collection-Synchronization", collectionSyncHeader);
         }
 
-        // Temporary
-        Console.WriteLine("");
-        Console.WriteLine($"[[[ DBG ]]]");
-        Console.WriteLine(" ");
-        Console.WriteLine($"{request.Method.Method} {request.RequestUri} HTTP/1.1");
-        foreach (var h in request.Headers)
-        {
-            Console.WriteLine($"{h.Key}: {string.Join(", ", h.Value)}");
-        }
-        Console.WriteLine(" ");
-        Console.WriteLine($"{(request.Content is not null ? await request.Content.ReadAsStringAsync() : "### Body has no content. ###")}");
-        Console.WriteLine(" ");
-        Console.WriteLine($"[[[ /DBG ]]]");
-        Console.WriteLine("");
+        await DebugHelper.LogRequest(request);
     }
 
     private static string ToHex(ReadOnlySpan<byte> bytes)
