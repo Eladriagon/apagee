@@ -297,7 +297,8 @@ public partial class ApiController : BaseController
 
 
                     default:
-                        Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} (Not handled)\r\n[⁂] ----\r\n{JsonSerializer.Serialize(item)}\r\n[⁂] ----\r\n");
+                        Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} (Unknown type, ignored)");
+                        DebugHelper.LogInboxActivity(item);
                         break;
                 }
             }

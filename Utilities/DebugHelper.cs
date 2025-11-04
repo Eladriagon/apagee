@@ -57,4 +57,11 @@ public static class DebugHelper
             Console.WriteLine($"[DBG-ERR] Error in debug block: {ex.GetType().FullName}: {ex.Message}\r\n{ex.StackTrace}\r\n");
         }
     }
+
+    public static void LogInboxActivity(Inbox? item)
+    {
+        if (!IS_DEBUG_CONSOLE_ENABLED) return;
+
+        Console.WriteLine($"[⁂] ----\r\n{JsonSerializer.Serialize(item)}\r\n[⁂] ----\r\n");
+    }
 }
