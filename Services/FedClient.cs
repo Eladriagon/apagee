@@ -104,5 +104,6 @@ public class FedClient(IHttpClientFactory httpClientFactory, JsonSerializerOptio
     private TItem Prepare<TItem>(TItem item) where TItem : APubObject
     {
         item.RootContext ??= ContextResponseWrapperFilter.APubGlobalContext;
+        return item;
     }
 }
