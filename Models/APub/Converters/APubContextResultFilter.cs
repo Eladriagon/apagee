@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Formatters;
-
 namespace Apagee.Models.APub.Converters;
 
 public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
@@ -45,6 +43,7 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
         SerializerOptions = jsonOptions.Value.JsonSerializerOptions;
     }
 
+    // Executed on controller result processing (e.g. return Ok(...);).
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
         // Note: Only works on responses using "Ok(...)".
@@ -52,6 +51,14 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
         if (context.Result is not OkObjectResult { Value: not null } ok)
         {
             await next(); return;
+        }
+
+        // Add content caching headers - no API requests should be cached (for now)
+        if (!context.HttpContext.Response.HasStarted)
+        {
+            context.HttpContext.Response.Headers.CacheControl = new StringValues(["no-store", "no-cache", "must-revalidate"]);
+            context.HttpContext.Response.Headers.Pragma = "no-cache";
+            context.HttpContext.Response.Headers.Expires = "0";
         }
 
         // Most specific/rare ones first.

@@ -5,6 +5,7 @@ global using System.Globalization;
 global using System.IO;
 global using System.Linq;
 global using System.Net.Http;
+global using System.Net.Http.Headers;
 global using System.Reflection;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
@@ -27,8 +28,9 @@ global using Microsoft.AspNetCore.Mvc.Abstractions;
 global using Microsoft.AspNetCore.Mvc.Controllers;
 global using Microsoft.AspNetCore.Mvc.Filters;
 global using Microsoft.Data.Sqlite;
-global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Caching.Memory;
+global using Microsoft.Extensions.Options;
+global using Microsoft.Extensions.Primitives;
 
 global using Apagee;
 global using Apagee.Configuration;

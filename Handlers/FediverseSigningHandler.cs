@@ -1,12 +1,18 @@
+using System.Net.Cache;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 namespace Apagee.Handlers;
 
 public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService inboxService) : DelegatingHandler
 {
     public InboxService InboxService { get; } = inboxService;
 
-    // Handler for outgoing HTTP requests made with FedClient
+    // Handler for outgoing HTTP client requests made with FedClient
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        // No caching
+        request.Headers.CacheControl = new CacheControlHeaderValue() { NoCache = true, MaxAge = TimeSpan.Zero };
+
         request.Headers.Accept.Clear();
         request.Content?.Headers.Remove("Content-Type");
         if (request.Headers.TryGetValues("X-Use-Jrd", out _))
@@ -15,7 +21,7 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
             request.Headers.TryAddWithoutValidation("Accept", $"{Globals.JSON_RD_CONTENT_TYPE}");
             if (request.Content is not null)
             {
-                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Globals.JSON_RD_CONTENT_TYPE);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue(Globals.JSON_RD_CONTENT_TYPE);
             }
             request.Headers.Remove("X-Use-Jrd");
         }
@@ -25,13 +31,13 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
             request.Headers.TryAddWithoutValidation("Accept", $"{Globals.JSON_ACT_CONTENT_TYPE}");
             if (request.Content is not null)
             {
-                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Globals.JSON_ACT_CONTENT_TYPE);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue(Globals.JSON_ACT_CONTENT_TYPE);
             }
         }
 
         // Good internet citizenry
         request.Headers.UserAgent.Clear();
-        request.Headers.UserAgent.ParseAdd($"Apagee/{Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "1.0"} (+https://github.com/eladriagon/apagee)");
+        request.Headers.TryAddWithoutValidation("User-Agent", $"Apagee/{Assembly.GetExecutingAssembly().GetName().Version?.ToString(2) ?? "1.0"} (+https://github.com/eladriagon/apagee)");
 
         // And sign it
         var privKey = keypairHelper.ActorRsaPrivateKey
@@ -39,7 +45,32 @@ public class FediverseSigningHandler(KeypairHelper keypairHelper, InboxService i
 
         await SignRequest(request, privKey, keypairHelper.KeyId);
 
-        return await base.SendAsync(request, cancellationToken);
+        var resp = await base.SendAsync(request, cancellationToken);
+
+        try
+        {
+            Console.WriteLine($"""
+                [DBG-RESP]
+                HTTP {(int)resp.StatusCode} {resp.StatusCode}
+                {string.Join("\r\n", resp.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"))}
+
+                """);
+            if ((await resp.Content.ReadAsStringAsync(cancellationToken)) is { Length: > 0 } body)
+            {
+                Console.WriteLine(body);
+            }
+            else
+            {
+                Console.WriteLine("[[[ NO RESP BODY ]]]");
+            }
+            Console.WriteLine("\r\n[/DBG-RESP]");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DBG-ERR] Error in debug block: {ex.GetType().FullName}: {ex.Message}\r\n{ex.StackTrace}\r\n");
+        }
+
+        return resp;
     }
 
     private async Task SignRequest(HttpRequestMessage request, RSA privateKey, string keyId)
