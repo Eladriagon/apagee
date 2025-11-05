@@ -11,14 +11,61 @@
     <link rel="alternate" type="application/activity+json" href="https://@GlobalConfiguration.Current?.PublicHostname/api/users/@GlobalConfiguration.Current?.FediverseUsername/statuses/@article.Article.Uid" />
 }
 
+@if (ViewBag.PreviewMode is true)
+{
+    <style type="text/css">
+        div#preview-mode-message > i {
+            line-height: 1;
+            vertical-align: middle;
+            margin-bottom: 4px;
+            padding-top: 3px;
+        }
+        div#preview-mode-message {
+            position: absolute;
+            background-color: #e1872a;
+            vertical-align: middle;
+            font-size: 1.5rem;
+            line-height: 1;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid #ffc49a;
+            border-radius: 6px;
+            top: 1rem;
+            left: calc(50% - 75px);
+            text-align: center;
+        }
+        div#preview-mode-message a
+        {
+            color: #893818;
+            font-variation-settings: "wght" 650;
+        }
+    </style>
+    <div id="preview-mode-message">
+        <i class="fas fa-eye fa-fw fa-2x"></i>
+        <span>
+            You're seeing a private preview of this article.
+            <a href="/admin/articles">Go back.</a>
+        </span>
+    </div>
+}
+
 <div class="article">
     <article>
         <header>
             <h1 class="title">@article.Article.Title</h1>
 
-            <div class="published">
-                <time datetime="@(article.Article.PublishedOn?.ToString("s"))Z">@(article.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
-            </div>
+            @if (ViewBag.PreviewMode is true)
+            {
+                <div title="Don't worry — this is just a placeholder date!" class="published">
+                    @{ var sample = new DateTime(1985, 10, 21); }
+                    <time datetime="@(sample.ToString("s"))Z">@(sample.ToString("MMMM d, yyyy"))</time>
+                </div>
+            }
+            else
+            {
+                <div class="published">
+                    <time datetime="@(article.Article.PublishedOn?.ToString("s"))Z">@(article.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
+                </div>
+            }
         </header>
         
         <section class="content">

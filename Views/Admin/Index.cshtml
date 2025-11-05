@@ -45,6 +45,7 @@
     <table class="table is-fullwidth">
         <thead>
             <tr>
+                <th></th>
                 <th>Post</th>
                 <th>Drafted</th>
                 <th>Published</th>
@@ -65,8 +66,24 @@
             {
                 @foreach (var article in Model.RecentArticles.Articles)
                 {
-                    <tr>
-                        <td><a href="/@article.Article.Slug" target="_blank">@article.Article.Title</a></td>
+                    <tr class="is-vertical-align-middle">
+                        <td>
+                            <a asp-action="EditArticle" asp-route-id="@article.Article.Uid" title="Edit" class="button is-vertical-align-middle is-small is-dark is-warning">
+                                <span class="icon">
+                                    <i class="fas fa-pencil"></i>
+                                </span>
+                            </a>
+                        </td>
+                        <td class="has-truncated-title">
+                            @if (article.Article.PublishedOn is not null)
+                            {
+                                <a title="@article.Article.Title" class="article-title-truncated" href="/@article.Article.Slug" target="_blank">@article.Article.Title</a>
+                            }
+                            else
+                            {
+                                <a title="@article.Article.Title" class="article-title-truncated" href="/preview/@article.Article.Uid" target="_blank">@article.Article.Title</a>
+                            }
+                        </td>
                         <td><partial name="DateDisplay" model="@(((DateTime?)article.Article.CreatedOn, false))" /></td>
                         <td><partial name="DateDisplay" model="@((article.Article.PublishedOn, false))" /></td>
                         <td>

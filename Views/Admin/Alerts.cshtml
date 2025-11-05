@@ -1,0 +1,47 @@
+@if (TempData["ArticleSuccess"] is true)
+{
+    TempData.Remove("ArticleSuccess");
+
+    <div class="message is-success">
+        <div class="message-body p-3">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-lg fa-check-circle"></i>
+                </span>
+                <span>Article created successfully!</span>
+            </span>
+        </div>
+    </div>
+}
+
+@if (TempData["EditSuccess"] is true)
+{
+    TempData.Remove("EditSuccess");
+
+    <div class="message is-success">
+        <div class="message-body p-3">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-lg fa-file-edit"></i>
+                </span>
+                <span>Article edited successfully.</span>
+            </span>
+        </div>
+    </div>
+}
+
+@if (TempData["DelSuccess"] is true)
+{
+    TempData.Remove("DelSuccess");
+
+    <div class="message is-success">
+        <div class="message-body p-3">
+            <span class="icon-text">
+                <span class="icon mr-2">
+                    <i class="fas fa-lg fa-file-circle-xmark"></i>
+                </span>
+                <span>Article deleted successfully.</span>
+            </span>
+        </div>
+    </div>
+}

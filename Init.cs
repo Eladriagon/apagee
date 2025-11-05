@@ -8,6 +8,7 @@ public static class Init
         await app.CheckFirstTimeUserSetup();
         await app.InitKeypair();
         await app.InitFirstTimeValues();
+        await app.InitMediaStorage();
 
         await app.Services.GetRequiredService<SettingsService>().RefreshSettings();
 
@@ -55,6 +56,33 @@ public static class Init
             Output.WriteLine($"{Output.Ansi.Green} % HttpSig keys loaded.");
         }
 
+        return app;
+    }
+
+    public static async Task<WebApplication> InitMediaStorage(this WebApplication app)
+    {
+        try
+        {
+            if (!Directory.Exists(Globals.MediaDir))
+            {
+                Output.WriteLine($"{Output.Ansi.Blue} 🖹 Created public media directory at: {Globals.MediaDir}");
+                Directory.CreateDirectory(Globals.MediaDir);
+            }
+
+            using (var fs = File.Create(Path.Combine(Globals.MediaDir, Globals.MEDIA_TMP_PROBE_FILENAME)))
+            {
+                fs.WriteByte((byte)'1');
+                fs.Close();
+            }
+
+            File.Delete(Path.Combine(Globals.MediaDir, Globals.MEDIA_TMP_PROBE_FILENAME));
+
+            Output.WriteLine($"{Output.Ansi.Green} 🖹 Media directory initialized. File count: {Output.Ansi.Bold}{Directory.GetFiles(Globals.MediaDir, "*", searchOption: SearchOption.AllDirectories).Length:#,#0}");
+        }
+        catch (Exception ex)
+        {
+            Output.WriteLine($"{Output.Ansi.Red} 🖹 Media storage error - is the directory writeable? ({ex.GetType().Name}: {ex.Message})");
+        }
         return app;
     }
     

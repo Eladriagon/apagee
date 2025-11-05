@@ -149,6 +149,7 @@ try
     builder.Services.AddSingleton<UserService>();
     builder.Services.AddSingleton<InboxService>();
     builder.Services.AddSingleton<InteractionService>();
+    builder.Services.AddSingleton<IFileService, MediaFileService>();
     builder.Services.AddSingleton<FedClient>();
     builder.Services.AddSingleton(provider =>
     {
@@ -176,7 +177,7 @@ try
             Console.ForegroundColor = ConsoleColor.Red;
             if (ex is ApageeException aex)
             {
-                Console.WriteLine($" ⚠ Apagee Error: {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"\n ⚠  Apagee Error: {ex.Message}\n\n{ex.StackTrace}");
             }
             else
             {
@@ -184,26 +185,6 @@ try
             }
             Console.ResetColor();
 
-            // Optional: prevent rethrowing so the app doesn’t kill the connection
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsync("Internal Server Error");
-        }
-    });
-
-    // -----------------------
-    // Request pipeline:
-    app.Use(async (context, next) =>
-    {
-        try
-        {
-            await next();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[UNHANDLED EXCEPTION] --- {ex}");
-            Console.WriteLine($"");
-
-            // Optional: prevent rethrowing so the app doesn’t kill the connection
             try
             {
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
@@ -211,10 +192,13 @@ try
             }
             catch
             {
-                // Skip - not required.
             }
         }
     });
+
+    // -----------------------
+    // Request pipeline:
+
     if (config.UsesReverseProxy)
     {
         app.UseForwardedHeaders(new ForwardedHeadersOptions

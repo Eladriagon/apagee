@@ -15,6 +15,12 @@ public static class ApageeExtensions
     public static string? Truncate(this string? str, int length, string suffix = "...") =>
         str is null || str.Length <= length ? str : string.Concat(str.AsSpan(0, length), suffix);
 
+    public static byte[] AsBase64Bytes(this string? str) =>
+        str is null ? [] : Convert.FromBase64String(str);
+
+    public static string AsBase64(this byte[] data) =>
+        Convert.ToBase64String(data);
+
     /// <summary>
     /// Converts a long string into a short status note.
     /// </summary>

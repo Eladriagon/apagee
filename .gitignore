@@ -11,6 +11,7 @@
 .keys/
 db/
 config.json
+wwwroot/media/
 
 # Build results
 [Dd]ebug/

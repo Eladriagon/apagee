@@ -1,5 +1,19 @@
 @model ArticleEditViewModel?
 
+@section head
+{
+    @if (ViewBag.PreviewArticle is true && Model?.Uid is not null)
+    {
+        <script type="text/javascript">
+            document.addEventListener("readystatechange", e => {
+                if (document.readyState !== 'complete') return;
+                let w = window.open('/preview/@(Model.Uid)', '_blank');
+                try { if (!w) throw 'blocked'; w.focus(); } catch { alert('Popup blocked, allow and try again!'); }
+            });
+        </script>
+    }
+}
+
 <div class="block mh100 is-flex is-flex-direction-column is-flex-wrap-nowrap">
 
     <form method="post" asp-action="SaveArticle" asp-antiforgery="true" asp-route-id="@Model?.Uid" class="is-flex-grow-1 is-flex is-flex-direction-column is-flex-wrap-nowrap">
@@ -12,12 +26,21 @@
             </div>
             <div class="level-right">
                 <div class="level-item">
-                    <button disabled="@(Model?.WasEverPublished ?? false)" title="@(Model?.WasEverPublished is true ? "Cannot save a draft once it's been published." : "Saves the article as a draft.")" class="button is-secondary is-outline" asp-action="SaveArticle" asp-route-id="@Model?.Uid" asp-route-isDraft="@(true)">
+                    <button disabled="@(Model?.WasEverPublished ?? false)" title="@(Model?.WasEverPublished is true ? "Cannot preview a draft once it's been published." : "Saves and previews the draft in a new window.")" class="button is-secondary" asp-action="SaveArticle" asp-route-id="@Model?.Uid" asp-route-isDraft="@true" asp-route-preview="@true">
+                        <span class="icon-text">
+                            <span class="icon corner-stack">
+                                <i class="fas fa-floppy-disk"></i>
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </span>
+                    </button>
+                </div>
+                <div class="level-item">
+                    <button disabled="@(Model?.WasEverPublished ?? false)" title="@(Model?.WasEverPublished is true ? "Cannot save a draft once it's been published." : "Saves the article as a draft.")" class="button is-secondary" asp-action="SaveArticle" asp-route-id="@Model?.Uid" asp-route-isDraft="@true">
                         <span class="icon-text">
                             <span class="icon">
-                                <i class="fas fa-pen-to-square"></i>
+                                <i class="fas fa-floppy-disk"></i>
                             </span>
-                            <span>Save</span>
                         </span>
                     </button>
                 </div>
@@ -55,7 +78,7 @@
         </p>
 
         <div class="field is-flex-grow-1 is-flex is-flex-direction-column is-flex-wrap-nowrap">
-            <textarea asp-for="Body" id="article" class="textarea is-resize-vertical is-flex-grow-1 is-family-monospace" placeholder="Your next *masterpiece* awaits..."></textarea>
+            <textarea asp-for="Body" id="article" class="textarea is-resize-vertical is-flex-grow-1 is-family-monospace media-paste-target" placeholder="Your next *masterpiece* awaits..."></textarea>
         </div>
         
     </form>
@@ -68,4 +91,6 @@
 
         </div>
     </div>
+
+    <partial name="Alerts" />
 </div>

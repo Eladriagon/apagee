@@ -6,6 +6,8 @@ public partial class Globals
     internal const string KEYRING_NAME = "Keys";
     internal const string ENC_KEY_ID = "Apagee.v1.key";
     internal const string HTTP_CLI_NAME_FED = "Fediverse";
+    internal const string MEDIA_TMP_PROBE_FILENAME = ".tmp.init";
+
     internal const string WEBFINGER_PATH = ".well-known/webfinger";
     internal const string NODEINFO_PATH = ".well-known/nodeinfo";
     internal const string NODEINFO_DOC_PATH = "nodeinfo/2.0";
@@ -25,14 +27,17 @@ public partial class Globals
     // Env Vars
     internal const string ENV_CONFIG_PATH = "APAGEE_CFG_PATH";
     internal const string ENV_KEYRING_DIR = "APAGEE_KEYRING_DIR";
+    internal const string ENV_MEDIA_DIR = "APAGEE_MEDIA_DIR";
     internal const string ENV_UNSAFE_KEYS = "APAGEE_UNSAFE_RUN_WITHOUT_KEYS";
 
     internal const string DEFAULT_KEYRING_DIR = ".keys";
+    internal const string DEFAULT_MEDIA_DIR = "wwwroot/media";
     internal const string DEFAULT_CONFIG_PATH = "config.json";
     internal const string DEFAULT_SCHEMA_DIR = "schema/";
 
     // Computed helpers
     internal static string KeyringDir => Path.GetFullPath(Environment.GetEnvironmentVariable(ENV_KEYRING_DIR) ?? DEFAULT_KEYRING_DIR);
+    internal static string MediaDir => Path.GetFullPath(Environment.GetEnvironmentVariable(ENV_MEDIA_DIR) ?? DEFAULT_MEDIA_DIR);
 
     internal static readonly bool IsVerboseDevelopment = Environment.GetEnvironmentVariable("APAGEE_DEV_VERBOSE") is "true";
 

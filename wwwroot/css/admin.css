@@ -25,6 +25,29 @@ span.e {
     font-style: normal;
 }
 
+span.icon.corner-stack *:nth-child(2) {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    font-size: 0.67rem;
+    text-shadow: 2px 2px var(--bulma-body-background-color), -2px 2px var(--bulma-body-background-color), 2px -2px var(--bulma-body-background-color), -2px -2px var(--bulma-body-background-color);
+}
+span.icon.corner-stack {
+    position: relative;
+}
+
+table td.has-truncated-title {
+    max-width: 250px;
+}
+
+.article-title-truncated {
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: block;
+}
+
 /* Checkboxes can be a bit bigger */
 input.checkbox[type=checkbox] {
     transform-origin: 50% 50%;
@@ -39,6 +62,11 @@ input.checkbox[type=checkbox] {
 }
 
 /* Stuff that should have been in Bulma in the first place... */
+.tags.has-addons > .tag .icon:first-child:last-child {
+    margin-inline-end: -.5rem;
+    margin-inline-start: -.5rem;
+}
+
 .x100,
 .w100 {
     width: 100%;
@@ -77,6 +105,12 @@ input.checkbox[type=checkbox] {
 
 .is-justify-self-center {
     justify-self: center;
+}
+
+.is-vertical-align-middle,
+tr.is-vertical-align-middle > td,
+tr.is-vertical-align-middle > th {
+    vertical-align: middle;
 }
 
 .invisible {

@@ -1,3 +1,6 @@
+using System.Buffers.Text;
+using System.Net;
+
 namespace Apagee.Controllers;
 
 [Authorize]
@@ -7,7 +10,9 @@ public class AdminController(UserService userService,
                              InteractionService interactionService,
                              SettingsService settingsService,
                              InboxService inboxService,
-                             FedClient client)
+                             IFileService fileService,
+                             FedClient client,
+                             IHttpClientFactory httpClientFactory)
     : BaseController
 {
     public UserService UserService { get; } = userService;
@@ -15,7 +20,9 @@ public class AdminController(UserService userService,
     public InteractionService InteractionService { get; } = interactionService;
     public SettingsService SettingsService { get; } = settingsService;
     public InboxService InboxService { get; } = inboxService;
+    public IFileService FileService { get; } = fileService;
     public FedClient Client { get; } = client;
+    public IHttpClientFactory HttpClientFactory { get; } = httpClientFactory;
 
     public Settings? SiteSettings => SettingsService.Current;
     public GlobalConfiguration? SiteConfig => GlobalConfiguration.Current;
@@ -152,7 +159,7 @@ public class AdminController(UserService userService,
 
     [HttpGet]
     [Route("articles/edit/{id}")]
-    public async Task<IActionResult> EditArticle(string id, [FromQuery] bool isDraft = false)
+    public async Task<IActionResult> EditArticle(string id)
     {
         try
         {
@@ -161,6 +168,11 @@ public class AdminController(UserService userService,
             if (article is null)
             {
                 return NotFound();
+            }
+
+            if (TempData["PreviewArticle"] is true)
+            {
+                ViewBag.PreviewArticle = true;
             }
 
             return View("ArticleEditor", new ArticleEditViewModel
@@ -178,9 +190,60 @@ public class AdminController(UserService userService,
     }
 
     [HttpPost]
+    [Route("articles/edit/{id}/addImage")]
+    public async Task<IActionResult> UploadMedia([FromRoute] string id, [FromForm] IFormFile file, [FromForm] string mimeType)
+    {
+        var fileData = await file.ReadToBase64();
+        var filePath = await FileService.SaveFile(fileData.AsBase64Bytes(), mimeType, id);
+
+        return Ok(new
+        {
+            md = $"![alt text here]({filePath})"
+        });
+    }
+
+    [HttpPost]
+    [Route("articles/media/proxyGet")]
+    public async Task<IActionResult> ProxyGetMedia([FromForm] string url)
+    {
+        try
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || !uri.Scheme.ToUpper().StartsWith("HTTP"))
+            {
+                throw new("Not an absolute URL or wrong protocol.");
+            }
+
+            var client = HttpClientFactory.CreateClient();
+
+            // Hello, fellow humans, how do you do?
+            client.DefaultRequestHeaders.UserAgent.Clear();
+            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0");
+
+            var data = await client.GetByteArrayAsync(uri);
+
+            if (data is not { Length: > 0 })
+            {
+                throw new("No content received.");
+            }
+            return Ok(new
+            {
+                file = data.AsBase64()
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to proxy media: {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
+            return Ok(new
+            {
+                error = true
+            });
+        }
+    }
+
+    [HttpPost]
     [Route("articles/save/{id?}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SaveArticle([FromForm] ArticleEditViewModel formArticle, [FromRoute] string? id = null, [FromQuery] bool? isDraft = false)
+    public async Task<IActionResult> SaveArticle([FromForm] ArticleEditViewModel formArticle, [FromRoute] string? id = null, [FromQuery] bool? isDraft = false, [FromQuery] bool? preview = false)
     {
         Article? article;
 
@@ -246,7 +309,11 @@ public class AdminController(UserService userService,
         {
             await PublishToFediverse(article);
         }
-        
+        if (article.PublishedOn is null && isDraft is true && preview is true)
+        {
+            TempData["PreviewArticle"] = true;
+            return RedirectToAction("EditArticle", new { id = article.Uid });
+        }
         return RedirectToAction("Articles");
     }
 
