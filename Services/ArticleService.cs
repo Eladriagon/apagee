@@ -13,6 +13,13 @@ public class ArticleService(StorageService storageService)
             using var conn = await StorageService.Conn();
 
             await conn.InsertAsync(newArticle);
+
+            await DeleteTags(newArticle);
+            if (newArticle.Tags is { Count: > 0 })
+            {
+                await AddTags(newArticle, newArticle.Tags);
+            }
+
             return await conn.GetAsync<Article>(newArticle.Uid);
         }
         catch (Exception ex)
@@ -44,7 +51,14 @@ public class ArticleService(StorageService storageService)
         {
             using var conn = await StorageService.Conn();
 
-            return await conn.QueryAsync<Article>($"SELECT * FROM Article WHERE Status = {(int)ArticleStatus.Published} AND UID {(inclusive ? ">=" : ">")} '{ulid ?? Ulid.MinValue.ToString()}' ORDER BY UID ASC LIMIT {count};");
+            var articles = await conn.QueryAsync<Article>($"SELECT * FROM Article WHERE Status = {(int)ArticleStatus.Published} AND UID {(inclusive ? ">=" : ">")} '{ulid ?? Ulid.MinValue.ToString()}' ORDER BY UID ASC LIMIT {count};");
+
+            foreach (var article in articles)
+            {
+                article.Tags = await GetTagsForArticle(article);
+            }
+
+            return articles;
         }
         catch (Exception ex)
         {
@@ -61,7 +75,14 @@ public class ArticleService(StorageService storageService)
         {
             using var conn = await StorageService.Conn();
 
-            return await conn.QueryAsync<Article>($"SELECT * FROM Article WHERE Status = {(int)ArticleStatus.Published} AND UID {(inclusive ? "<=" : "<")} '{ulid ?? Ulid.MaxValue.ToString()}' ORDER BY UID DESC LIMIT {count};");
+            var articles = await conn.QueryAsync<Article>($"SELECT * FROM Article WHERE Status = {(int)ArticleStatus.Published} AND UID {(inclusive ? "<=" : "<")} '{ulid ?? Ulid.MaxValue.ToString()}' ORDER BY UID DESC LIMIT {count};");
+
+            foreach (var article in articles)
+            {
+                article.Tags = await GetTagsForArticle(article);
+            }
+
+            return articles;
         }
         catch (Exception ex)
         {
@@ -80,7 +101,13 @@ public class ArticleService(StorageService storageService)
                 .From($"Article")
                 .Where($"Slug = {slug}");
 
-            return await conn.QueryFirstOrDefaultAsync<Article>(query.Sql, query.Parameters);
+            var article = await conn.QueryFirstOrDefaultAsync<Article>(query.Sql, query.Parameters);
+
+            if (article is null) return null;
+
+            article.Tags = await GetTagsForArticle(article);
+
+            return article;
         }
         catch (Exception ex)
         {
@@ -94,7 +121,13 @@ public class ArticleService(StorageService storageService)
         {
             using var conn = await StorageService.Conn();
 
-            return await conn.GetAsync<Article>(uid);
+            var article = await conn.GetAsync<Article>(uid);
+
+            if (article is null) return null;
+
+            article.Tags = await GetTagsForArticle(article);
+
+            return article;
         }
         catch (Exception ex)
         {
@@ -108,7 +141,14 @@ public class ArticleService(StorageService storageService)
         {
             using var conn = await StorageService.Conn();
 
-            return await conn.QueryAsync<Article>($"SELECT * FROM Article ORDER BY CreatedOn DESC LIMIT {count};");
+            var articles = await conn.QueryAsync<Article>($"SELECT * FROM Article ORDER BY CreatedOn DESC LIMIT {count};");
+
+            foreach (var article in articles)
+            {
+                article.Tags = await GetTagsForArticle(article);
+            }
+
+            return articles;
         }
         catch (Exception ex)
         {
@@ -126,7 +166,14 @@ public class ArticleService(StorageService storageService)
                 .Select($"*")
                 .From($"Article");
 
-            return await conn.QueryAsync<Article>(query.Sql, query.Parameters);
+            var articles = await conn.QueryAsync<Article>(query.Sql, query.Parameters);
+            
+            foreach (var article in articles)
+            {
+                article.Tags = await GetTagsForArticle(article);
+            }
+
+            return articles;
         }
         catch (Exception ex)
         {
@@ -141,6 +188,12 @@ public class ArticleService(StorageService storageService)
             using var conn = await StorageService.Conn();
 
             await conn.UpdateAsync(article);
+
+            await DeleteTags(article);
+            if (article.Tags is { Count: > 0 })
+            {
+                await AddTags(article, article.Tags);
+            }
         }
         catch (Exception ex)
         {
@@ -154,11 +207,82 @@ public class ArticleService(StorageService storageService)
         {
             using var conn = await StorageService.Conn();
 
+            await DeleteTags(article);
             await conn.DeleteAsync(article);
         }
         catch (Exception ex)
         {
             throw new ApageeException($"Failed to delete article '{article.Uid}' - {ex.Message}", ex);
+        }
+    }
+
+    public async Task DeleteTags(Article article)
+    {
+        try
+        {
+            using var conn = await StorageService.Conn();
+
+            await conn.ExecuteAsync("DELETE FROM Tags WHERE ArticleUID = @uid", new { uid = article.Uid });
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Failed to delete tags for article '{article.Uid}' - {ex.Message}", ex);
+        }
+    }
+
+    public async Task AddTags(Article article, IList<string> tags)
+    {
+        try
+        {
+            using var conn = await StorageService.Conn();
+
+            foreach (var tag in tags)
+            {
+                await conn.ExecuteAsync("INSERT INTO Tags (ArticleUID, Tag) VALUES (@uid, @tag)", new { uid = article.Uid, tag });
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Failed to add tags for article '{article.Uid}' - {ex.Message}", ex);
+        }
+    }
+
+    public async Task<IList<string>?> GetTagsForArticle(Article article)
+    {
+        try
+        {
+            using var conn = await StorageService.Conn();
+
+            return (await conn.QueryAsync<string>("SELECT Tag FROM Tags WHERE ArticleUID = @uid", new { uid = article.Uid }))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Failed to add tags for article '{article.Uid}' - {ex.Message}", ex);
+        }
+    }
+
+    public async Task<IEnumerable<Article>?> GetArticlesByTag(string tag, bool includeAll = false)
+    {
+        if (tag is not { Length: > 0 }) return null;
+
+        try
+        {
+            using var conn = await StorageService.Conn();
+
+            var articleList = await conn.QueryAsync<string>("SELECT ArticleUID FROM Tags WHERE Tag = @tag", new { tag });
+
+            var articles = new List<Article>();
+            foreach (var uid in articleList)
+            {
+                var a = await GetByUid(uid);
+                if (a is null || (!includeAll && a is not { Status: ArticleStatus.Published })) continue;
+                articles.Add(a);
+            }
+            return articles.OrderByDescending(a => a.PublishedOn);
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Failed to get article list for tag '{tag}' - {ex.Message}", ex);
         }
     }
 }

@@ -6,8 +6,9 @@
 
         __loaded = true;
 
-        initFileUploads();
-        initMediaPasteArea();
+        try { initFileUploads(); } catch {}
+        try { initMediaPasteArea(); } catch {}
+        try { initTagEditor(); } catch {}
     }
 
     function initFileUploads()
@@ -28,6 +29,75 @@
         });
     }
 
+    function initTagEditor()
+    {
+        const input = document.querySelector('#tagList');
+        const container = document.querySelector('#tag-preview');
+        if (!input || !container) return;
+
+        let timer = null;
+        let controller = null;
+
+        const render = (tags) =>
+        {
+            container.innerHTML = '';
+            if (!Array.isArray(tags) || tags.length === 0)
+            {
+                const s = document.createElement('span');
+                s.className = 'tag is-danger htag';
+                s.innerHTML = input.value.trim().length === 0 ? `<i>No tags.</i>` : `<i>No valid tags.</i>`;
+                container.appendChild(s);
+                return;
+            }
+            tags.forEach((t) =>
+            {
+                const span = document.createElement('span');
+                span.className = 'tag is-primary htag';
+                const b = document.createElement('b');
+                b.textContent = `#${String(t)}`;
+                span.appendChild(b);
+                container.appendChild(span);
+            });
+        };
+
+        const send = async (value) =>
+        {
+            if (controller) controller.abort();
+            controller = new AbortController();
+
+            try
+            {
+                const res = await fetch(`/admin/articles/edit/${window.location.pathname.split('/')[4]}/parseTags`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+                    },
+                    body: 'tags=' + encodeURIComponent(value),
+                    credentials: 'same-origin',
+                    signal: controller.signal
+                });
+
+                if (!res.ok) throw new Error('Request failed');
+                const data = await res.json();
+                render(data);
+            }
+            catch (err)
+            {
+                if (err.name !== 'AbortError') render([]);
+            }
+        };
+
+        const onInput = () =>
+        {
+            clearTimeout(timer);
+            timer = setTimeout(() => send(input.value.trim()), 500);
+        };
+
+        input.addEventListener('input', onInput);
+        onInput();
+    }
+
     function initMediaPasteArea()
     {
         document.addEventListener('paste', async (ev) =>
@@ -37,6 +107,13 @@
 
             ev.preventDefault();
             target.focus();
+
+            if (window.location.pathname.indexOf('/edit/') === -1)
+            {
+                alert("Sorry, you need to save this draft first, before you can paste images.");
+                return;
+            }
+
             selectHttpUrlBeforeCaret(target);
 
             let cbData = ev.clipboardData;

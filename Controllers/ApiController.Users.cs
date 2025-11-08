@@ -167,35 +167,12 @@ public partial class ApiController : BaseController
 
     [HttpGet]
     [Route("api/users/{username}/collections/tags")]
-    public IActionResult GetTags([FromRoute] string username)
+    public IActionResult GetFeaturedTags([FromRoute] string username)
     {
         return Ok(new APubOrderedCollection
         {
             Id = CurrentAtomId,
             TotalItems = 0
         });
-    }
-
-    private bool TryRedirectHtml(object obj, out string redirect)
-    {
-        redirect = "";
-        if (Request.Headers.Accept.ToString().ToLower().Contains("text/html"))
-        {
-            var polyUrl = obj is APubObject o
-                ? o.Url
-                : obj is APubLink l
-                    ? l.Url
-                    : obj is APubPolyBase { Count: 1 } p
-                        ? (p[0].IsLink ? ((APubLink)p[0]).Url : p[0].IsObject ? ((APubObject)p[0]).Url : null)
-                        : null;
-
-            var target = polyUrl is { Count: 1 } && polyUrl[0].IsLink && ((APubLink)polyUrl[0]).Href is not null ? ((APubLink)polyUrl[0]).Href : null;
-            if (target is not null)
-            {
-                redirect = target.PathAndQuery;
-                return true;
-            }
-        }
-        return false;
     }
 }

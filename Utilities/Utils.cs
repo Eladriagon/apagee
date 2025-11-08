@@ -1,4 +1,6 @@
 
+using System.Collections;
+
 namespace Apagee.Utilities;
 
 public static class Utils
@@ -20,7 +22,7 @@ public static class Utils
     public static string MarkdownToHtml(string md)
     {
         var doc = Markdig.Markdown.Parse(md, MarkdownConfig);
-        
+
         foreach (var para in doc.Descendants<ParagraphBlock>())
         {
             if (para.Inline is null) continue;
@@ -38,6 +40,14 @@ public static class Utils
         }
         return Markdig.Markdown.ToHtml(doc);
     }
+    
+    /// <summary>
+    /// Extracts a list of tags from a string, e.g. "this is a #string with some #hash-tags" returns <c>["string", "hash"]</c>.
+    /// </summary>
+    public static IEnumerable<string> ExtractTags(string input)
+        => input is not { Length: > 0 } ? [] : Globals.RgxTagExtractor()
+                                                      .Matches(input)
+                                                      .Select(m => m.Groups["tag"].Value);
 
     public static bool IsPng(string? b64)
     {

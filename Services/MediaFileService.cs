@@ -27,9 +27,16 @@ public class MediaFileService : IFileService
             Directory.CreateDirectory(Path.Combine(Globals.MediaDir, folderName));
         }
 
-        var filename = Path.Combine(Globals.MediaDir, $"{folderName}/{Ulid.NewUlid()}{GetExtensionForType(mimeType)}".TrimStart('/'));
+        // SHA3-256 the filename and take the first 32 characters as the filename. If the file already exist, we can assume
+        // that it's the same file and avoid duplicates.
+        var fileNamePart = Convert.ToHexStringLower(SHA3_256.HashData(contents))[..32] + GetExtensionForType(mimeType);
 
-        await File.WriteAllBytesAsync(filename, contents);
+        var filename = Path.Combine(Globals.MediaDir, $"{folderName}/{fileNamePart}".TrimStart('/'));
+
+        if (!File.Exists(filename))
+        {
+            await File.WriteAllBytesAsync(filename, contents);
+        }
 
         // Special (and default) case where we need to remove this path from the start.
         return Path.GetRelativePath(Environment.CurrentDirectory, filename).Replace("\\", "/").TrimStart('/').Replace("wwwroot", "");
@@ -52,7 +59,7 @@ public class MediaFileService : IFileService
         }
     }
 
-    private string GetExtensionForType(string mimeType) =>
+    private static string GetExtensionForType(string mimeType) =>
         mimeType switch
         {
             MIME_PNG => ".png",

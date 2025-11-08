@@ -81,16 +81,27 @@
             <textarea asp-for="Body" id="article" class="textarea is-resize-vertical is-flex-grow-1 is-family-monospace media-paste-target" placeholder="Your next *masterpiece* awaits..."></textarea>
         </div>
         
+        <div class="level">
+            <div class="level-left is-flex-grow-1">
+                <div class="level is-flex-grow-1">
+                    <div class="field is-flex-grow-1">
+                        <div class="control has-icons-left">
+                            <input asp-for="Tags" class="input" id="tagList" placeholder="#list #of #article #tags" />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-hashtag"></i>
+                            </span>
+                        </div>
+                        <div class="htags tags mt-2" id="tag-preview">
+                            <span class="tag is-primary htag"><b>#···</b></span>
+                            <span class="tag is-primary htag"><b>#···</b></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="level-right is-flex-grow-0">
+                
+            </div>
+        </div>
     </form>
-
-    <div class="level mt-3">
-        <div class="level-left">
-
-        </div>
-        <div class="level-right">
-
-        </div>
-    </div>
-
     <partial name="Alerts" />
 </div>

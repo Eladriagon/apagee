@@ -1,0 +1,11 @@
+@model Article
+
+@if (Model.Tags?.Any() ?? false)
+{
+    <div class="tags mt-3">
+        @foreach (var t in Model.Tags)
+        {
+            <a href="/tag/@t" class="tag"><span class="hash">#</span>@t</a>
+        }
+    </div>
+}

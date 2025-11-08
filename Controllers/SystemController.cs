@@ -42,6 +42,7 @@ public partial class SystemController(UserService userService,
             fcount = await InboxService.GetFollowerCount();
         }
 
+        ViewBag.PageTitle = "Home";
         return View("Public/ListView", new ArticleListViewModel
         {
             Articles = articles.OrderByDescending(a => a.PublishedOn).Select(a => new ArticleViewModel { Article = a }),
@@ -74,9 +75,44 @@ public partial class SystemController(UserService userService,
             fcount = await InboxService.GetFollowerCount();
         }
 
+        ViewBag.PageTitle = $"Author: {GlobalConfiguration.Current!.AuthorDisplayName ?? GlobalConfiguration.Current!.FediverseUsername}";
         return View("Public/AuthorView", new ArticleListViewModel
         {
             Articles = [],
+            AuthorUsername = Config.FediverseUsername,
+            AuthorDisplayName = Config.AuthorDisplayName,
+            AuthorBio = Config.FediverseBio,
+            SiteSettings = SettingsService.Current,
+            FollowerCount = fcount,
+            ThemeCss = SettingsService.Current?.ThemeCss
+        });
+    }
+
+    [Route("/tag/{tagName}")]
+    public async Task<IActionResult> ViewTagList([FromRoute] string tagName)
+    {
+        if (!Globals.RgxTag().IsMatch(tagName))
+        {
+            return BadRequest400("Invalid request URL.");
+        }
+
+        if (Request.Headers.Accept.ToString().ToLower().Contains(Globals.JSON_LD_CONTENT_TYPE)
+            || Request.Headers.Accept.ToString().ToLower().Contains(Globals.JSON_ACT_CONTENT_TYPE))
+        {
+            return Redirect($"/api/tags/{tagName}");
+        }
+
+        uint? fcount = null;
+        if (SettingsService.Current?.DisplayFollowerCount is true)
+        {
+            fcount = await InboxService.GetFollowerCount();
+        }
+
+        var articles = await ArticleService.GetArticlesByTag(tagName);
+        ViewBag.PageTitle = "Tag #" + tagName;
+        return View("Public/ListView", new ArticleListViewModel
+        {
+            Articles = articles?.Select(a => new ArticleViewModel { Article = a }) ?? [],
             AuthorUsername = Config.FediverseUsername,
             AuthorDisplayName = Config.AuthorDisplayName,
             AuthorBio = Config.FediverseBio,

@@ -19,6 +19,7 @@ public static class APubConstants
     public const string TYPE_OBJ_IMAGE = "Image";
     public const string TYPE_OBJ_NOTE = "Note";
     public const string TYPE_OBJ_ARTICLE = "Article";
+    public const string TYPE_OBJ_HASHTAG = "Hashtag";
     public const string TYPE_OBJ_PROP_VAL = "PropertyValue";
 
     // Actors

@@ -13,13 +13,16 @@ Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 * Cross-platform (Windows or Linux)
 * Reverse proxy support
 * Full fediverse participation
+  * Receive follows and (optionally) auto-follow back
+  * Deliver new articles published in Apagee as notes to fediverse followers (appears on timelines as a "status")
+  * Track count of boosts/shares and likes/favorites
+  * #hashtag support
 * Admin web interface
 
 ## Instructions
 
-### ⚠️ THIS IS PRE-ALPHA! ⚠️
-
-You have been warned. 🙂 (It's not dangerous, just buggy.)
+> [!WARNING]
+> This is still in alpha. You're welcome to install it and try it out, but things may change while Apagee is still in active development!
 
 ### Linux (Debian)
 
@@ -60,7 +63,12 @@ The releases contain precompiled binaries that should run on most Linux and Wind
 * [x] Accept and track followers, and respond to follow requests
 * [x] Custom profile properties
 * [x] Send Fediverse activities
-* [ ] Receive boosts/favorites from Fediverse
-* [ ] Tags
-* [ ] Media (paste from clipboard)
+* [x] Receive boosts/favorites from Fediverse
+* [x] Tags
+* [x] Media (paste from clipboard)
+* [ ] Better emoji support (Noto Color Emoji or Twemoji?)
 * [ ] Dockerize and publish image
+* [ ] "Primary" image for Fediverse posts
+* [ ] Read more cutoff tag
+* [ ] Project logo
+* [ ] Project documentation

@@ -34,6 +34,7 @@ public class PageController(ArticleService articleService, InteractionService in
 
             var interactions = await InteractionService.GetInteractionCounts(article);
 
+            ViewBag.PageTitle = article.Title;
             return View("Public/ArticleView", new ArticleListViewModel
             {
                 Articles = [new ArticleViewModel

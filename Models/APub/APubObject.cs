@@ -125,6 +125,7 @@ public class APubObject : APubBase
                 ["en"] = content,
             },
             Attachment = [],
+            Tag = article.Tags?.Select(t => new APubTag(t, $"https://{GlobalConfiguration.Current!.PublicHostname}/api/tags/{t}")).ToArray() ?? [],
             Likes = new()
             {
                 Id = $"{id}/likes",

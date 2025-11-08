@@ -46,7 +46,13 @@ public partial class Globals
     // Regex
     [GeneratedRegex(@"^[a-zA-Z0-9_]{1,30}$")]
     public static partial Regex RgxFediverseUsername();
-    
+
     [GeneratedRegex(@"<.*?>")]
     public static partial Regex RgxStripHtml();
+
+    [GeneratedRegex(@"#(?<tag>(?=[\p{L}\p{N}_\u00B7\u30FB\u200C]*\p{L})[\p{L}\p{N}_\u00B7\u30FB\u200C]+)")]
+    public static partial Regex RgxTagExtractor();
+
+    [GeneratedRegex(@"^(?=[\p{L}\p{N}_\u00B7\u30FB\u200C]*\p{L})[\p{L}\p{N}_\u00B7\u30FB\u200C]+$")]
+    public static partial Regex RgxTag();
 }

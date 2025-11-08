@@ -13,8 +13,14 @@ public class Article
     public string? Body { get; set; }
     public BodyMode BodyMode { get; set; }
 
-    // If we end up having a <!-- more --> or something similar, add support for that here.
     [Write(false)]
-    public string? ArticleSummary => Utils.MarkdownToHtml($"{(Body is not null ? "\n\n" + Body.Replace("\r", "").Split("\n\n")[0].Truncate(400) : "")}").Trim()
-        + Utils.MarkdownToHtml($"[Read more at {GlobalConfiguration.Current!.PublicHostname}...](https://{GlobalConfiguration.Current!.PublicHostname}/{Slug})");
+    public IList<string>? Tags { get; set; }
+
+    [Write(false)]
+    public string? ArticleLocalSummary =>
+        Utils.MarkdownToHtml($"{(Body is not null ? "\n\n" + Body.Replace("\r", "").Split("\n\n")[0].Truncate(400) : "")}").Trim();
+
+    [Write(false)]
+    public string? ArticleSummary =>
+        ArticleLocalSummary + Utils.MarkdownToHtml($"[Read more at {GlobalConfiguration.Current!.PublicHostname}...](https://{GlobalConfiguration.Current!.PublicHostname}/{Slug})");
 }

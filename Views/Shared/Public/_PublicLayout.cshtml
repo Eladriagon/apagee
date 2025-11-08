@@ -1,9 +1,6 @@
-@using Microsoft.AspNetCore.Authentication
 @{
     var vm = (ArticleListViewModel)Model;
-    var title = vm.Articles.Count() == 1
-        ? vm.Articles.Single().Article.Title
-        : "Articles";
+    var title = ViewBag.PageTitle is string { Length: > 0 } t ? t : "Articles";
 }
 
 <!DOCTYPE html>
@@ -19,8 +16,8 @@
     {
         @* Article-specific meta properties *@
         <meta property="og:title" content="@a.Article.Title">
-        <meta property="og:description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")">
-        <meta name="description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleSummary ?? "", "")">
+        <meta property="og:description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleLocalSummary ?? "", "")">
+        <meta name="description" content="@Globals.RgxStripHtml().Replace(a.Article.ArticleLocalSummary ?? "", "")">
         <meta property="og:published_time" content="@(a.Article.PublishedOn?.ToString("s"))Z">
         <meta property="og:url" content="https://@GlobalConfiguration.Current?.PublicHostname/@vm.Articles.First().Article.Slug">
     }

@@ -140,7 +140,7 @@ public partial class ApiController : BaseController
             TotalItems = await InteractionService.GetInteractionCount(id, InteractionType.Announce)
         });
     }
-    
+
     [HttpGet]
     [Route("api/users/{username}/statuses/{id}/replies")]
     [Route("api/users/{username}/articles/{id}/replies")]
@@ -169,5 +169,21 @@ public partial class ApiController : BaseController
                 Items = []
             });
         }
+    }
+        
+    [HttpGet]
+    [Route("api/tags/{tag}")]
+    public IActionResult GetTags([FromRoute] string tag)
+    {
+        if (RequestIsForHtml())
+        {
+            return Redirect($"/tag/{tag}");
+        }
+        
+        // This is how Mastodon responds to the tag endpoint.
+        return Ok(new APubOrderedCollection
+        {
+            Id = CurrentAtomId
+        });
     }
 }

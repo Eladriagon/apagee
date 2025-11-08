@@ -14,7 +14,7 @@
 <div class="articles">
     @if (!Model.Articles.Any())
     {
-        <h2>This Apagee instance currently doesn't have any published articles.</h2>
+        <h2 class="empty-message">There are no published articles to view here at this time.</h2>
     }
     else
     {
@@ -27,10 +27,12 @@
                     <div class="published">
                         <time datetime="@(article.Article.PublishedOn?.ToString("s"))Z">@(article.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
                     </div>
+
+                    <partial name="Public/Tags" model="article.Article" />
                 </header>
                 
                 <section class="content">
-                    @Html.Raw(article.Article.ArticleSummary)
+                    @Html.Raw(article.Article.ArticleLocalSummary)
                 </section>
             </article>
         }

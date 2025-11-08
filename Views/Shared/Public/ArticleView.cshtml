@@ -66,6 +66,8 @@
                     <time datetime="@(article.Article.PublishedOn?.ToString("s"))Z">@(article.Article.PublishedOn?.ToString("MMMM d, yyyy"))</time>
                 </div>
             }
+
+            <partial name="Public/Tags" model="@article.Article" />
         </header>
         
         <section class="content">

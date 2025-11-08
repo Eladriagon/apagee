@@ -180,12 +180,28 @@ public class AdminController(UserService userService,
                 Uid = article.Uid,
                 Title = article.Title,
                 Body = article.Body,
+                Tags = string.Join(" ", article.Tags?.Select(t => "#" + t) ?? []),
                 WasEverPublished = article.PublishedOn is not null
             });
         }
         catch (Exception ex)
         {
             throw new ApageeException($"Error fetching article \"{id}\" to preview delete - {ex.Message}", ex);
+        }
+    }
+
+    [HttpPost]
+    [Route("articles/edit/{id}/parseTags")]
+    public async Task<IActionResult> ParseTags([FromRoute] string id, [FromForm] string tags)
+    {
+        try
+        {
+            if (tags is not { Length: > 0 }) return Ok(Array.Empty<string>());
+            return Ok(Utils.ExtractTags(tags));
+        }
+        catch (Exception ex)
+        {
+            throw new ApageeException($"Failed to parse tags from article {id} via input '{tags}': {ex.GetType().FullName}: {ex.Message}", ex);
         }
     }
 
@@ -198,7 +214,7 @@ public class AdminController(UserService userService,
 
         return Ok(new
         {
-            md = $"![alt text here]({filePath})"
+            md = $"![alt text]({filePath})"
         });
     }
 
@@ -245,76 +261,88 @@ public class AdminController(UserService userService,
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SaveArticle([FromForm] ArticleEditViewModel formArticle, [FromRoute] string? id = null, [FromQuery] bool? isDraft = false, [FromQuery] bool? preview = false)
     {
-        Article? article;
+        try
+        {
+            Article? article;
 
-        if (formArticle.Uid is not null)
-        {
-            article = await ArticleService.GetByUid(formArticle.Uid) ?? throw new ApageeException($"Edit article not found: {formArticle.Uid}");
-            article.Title = formArticle.Title;
-            article.Body = formArticle.Body;
-        }
-        else
-        {
-            article = (Article?)new()
+            if (formArticle.Uid is not null)
             {
-                Uid = Ulid.NewUlid().ToString(),
-                Title = formArticle.Title,
-                Slug = "",
-                Body = formArticle.Body,
-                CreatedOn = DateTime.UtcNow
-            };
-        }
+                article = await ArticleService.GetByUid(formArticle.Uid) ?? throw new ApageeException($"Edit article not found: {formArticle.Uid}");
+                article.Title = formArticle.Title;
+                article.Body = formArticle.Body;
+            }
+            else
+            {
+                article = new()
+                {
+                    Uid = Ulid.NewUlid().ToString(),
+                    Title = formArticle.Title,
+                    Slug = "",
+                    Body = formArticle.Body,
+                    CreatedOn = DateTime.UtcNow
+                };
+            }
 
-        // If it's null here, it's because it wasn't found
-        // Also check the IDs match
-        if (article is null || (id is not null && formArticle.Uid != id))
-        {
-            return StatusCode(StatusCodes.Status400BadRequest, new { error = "Invalid article ID for editing." });
-        }
+            // If it's null here, it's because it wasn't found
+            // Also check the IDs match
+            if (article is null || (id is not null && formArticle.Uid != id))
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = "Invalid article ID for editing." });
+            }
 
-        if (string.IsNullOrWhiteSpace(article.Title))
-        {
-            TempData["ArticleError"] = "Forgetting something?";
-            TempData["ArticleSubError"] = "Title is missing.";
-            return View("ArticleEditor");
-        }
+            if (string.IsNullOrWhiteSpace(article.Title))
+            {
+                TempData["ArticleError"] = "Forgetting something?";
+                TempData["ArticleSubError"] = "Title is missing.";
+                return View("ArticleEditor");
+            }
 
-        if (string.IsNullOrWhiteSpace(article.Body))
-        {
-            TempData["ArticleError"] = "Forgetting something?";
-            TempData["ArticleSubError"] = "Article body is missing.";
-            return View("ArticleEditor");
-        }
+            if (string.IsNullOrWhiteSpace(article.Body))
+            {
+                TempData["ArticleError"] = "Forgetting something?";
+                TempData["ArticleSubError"] = "Article body is missing.";
+                return View("ArticleEditor");
+            }
 
-        var sendToFollowers = article.PublishedOn is null && isDraft is not true;
+            var sendToFollowers = article.PublishedOn is null && isDraft is not true;
 
-        // Compute extra properties
-        article.Slug = article.Title.ToUrlSlug();
-        article.BodyMode = BodyMode.Markdown;
-        article.Status = isDraft is true ? ArticleStatus.Draft : ArticleStatus.Published;
-        article.PublishedOn = isDraft is true ? null : DateTime.UtcNow;
+            // Compute extra properties
+            article.Slug = article.Title.ToUrlSlug();
+            article.BodyMode = BodyMode.Markdown;
+            article.Status = isDraft is true ? ArticleStatus.Draft : ArticleStatus.Published;
+            article.PublishedOn = isDraft is true ? null : DateTime.UtcNow;
 
-        if (id is null)
-        {
-            await ArticleService.Create(article);
-            TempData["NewSuccess"] = true;
-        }
-        else
-        {
-            await ArticleService.Update(article);
-            TempData["EditSuccess"] = true;
-        }
+            // Set tags parsed from input field
+            article.Tags = formArticle.Tags?.Trim() is { Length: > 0 } t
+                ? Utils.ExtractTags(t).ToList()
+                : null;
 
-        if (sendToFollowers)
-        {
-            await PublishToFediverse(article);
+            if (id is null)
+            {
+                await ArticleService.Create(article);
+                TempData["NewSuccess"] = true;
+            }
+            else
+            {
+                await ArticleService.Update(article);
+                TempData["EditSuccess"] = true;
+            }
+
+            if (sendToFollowers)
+            {
+                await PublishToFediverse(article);
+            }
+            if (article.PublishedOn is null && isDraft is true && preview is true)
+            {
+                TempData["PreviewArticle"] = true;
+                return RedirectToAction("EditArticle", new { id = article.Uid });
+            }
+            return RedirectToAction("Articles");
         }
-        if (article.PublishedOn is null && isDraft is true && preview is true)
+        catch (Exception ex)
         {
-            TempData["PreviewArticle"] = true;
-            return RedirectToAction("EditArticle", new { id = article.Uid });
+            throw new ApageeException($"Error while saving article '{id}' - {ex.GetType().FullName}: {ex.Message}", ex);
         }
-        return RedirectToAction("Articles");
     }
 
     [HttpGet]
