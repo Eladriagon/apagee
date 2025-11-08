@@ -152,6 +152,8 @@ public partial class ApiController : BaseController
                     case APubConstants.TYPE_ACT_FOLLOW when json["object"] is JsonValue
                         || json["object"] is JsonArray arr && arr[0] is JsonValue:
 
+                        await InboxService.Create(item);
+
                         var v = json["object"] as JsonValue ?? (json["object"] as JsonArray)?[0] as JsonValue;
                         if (v is null) break;
 
@@ -202,6 +204,9 @@ public partial class ApiController : BaseController
                         && obj["id"] is JsonValue origId
                         && obj["object"] is JsonValue origTarget
                         && origId.GetValue<string>() is { Length: > 0 }:
+
+                        await InboxService.Create(item);
+
                         if (origTarget.GetValue<string>().ToUpper() == ActorId.ToUpper())
                         {
                             var follower = APubFollower.FromJson(json);
@@ -249,10 +254,13 @@ public partial class ApiController : BaseController
                         }
                         break;
 
+                    // Receive: Announce / Like
                     case APubConstants.TYPE_ACT_ANNOUNCE when json["object"] is JsonValue
                         || json["object"] is JsonArray arr && arr[0] is JsonValue:
                     case APubConstants.TYPE_ACT_LIKE when json["object"] is JsonValue
                         || json["object"] is JsonArray arr2 && arr2[0] is JsonValue:
+
+                        await InboxService.Create(item);
 
                         var ann = (json["object"] as JsonValue ?? (json["object"] as JsonArray)?[0] as JsonValue)?.GetValue<string>();
                         if (ann is null) break;
@@ -295,7 +303,7 @@ public partial class ApiController : BaseController
 
                         break;
 
-
+                    // Receive: ???
                     default:
                         Console.WriteLine($"[⁂] « <{item.ID}> {item.Type} (Unknown type, ignored)");
                         DebugHelper.LogInboxActivity(item);
@@ -303,8 +311,6 @@ public partial class ApiController : BaseController
                 }
             }
         }
-
-        await InboxService.Create(item);
 
         return Accepted();
     }
