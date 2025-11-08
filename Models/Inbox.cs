@@ -3,6 +3,7 @@ namespace Apagee.Models;
 [Table(nameof(Inbox))]
 public class Inbox
 {
+    [ExplicitKey]
     public required string ID { get; set; }
 
     public required string UID { get; set; }

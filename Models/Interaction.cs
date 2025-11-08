@@ -5,6 +5,7 @@ namespace Apagee.Models;
 [Table(nameof(Interaction))]
 public class Interaction
 {
+    [ExplicitKey]
     public required string ID { get; set; }
 
     public required string ArticleUID { get; set; }
