@@ -310,7 +310,7 @@ public class AdminController(UserService userService,
             article.Slug = article.Title.ToUrlSlug();
             article.BodyMode = BodyMode.Markdown;
             article.Status = isDraft is true ? ArticleStatus.Draft : ArticleStatus.Published;
-            article.PublishedOn = isDraft is true ? null : DateTime.UtcNow;
+            article.PublishedOn = isDraft is true ? null : article.PublishedOn ?? DateTime.UtcNow;
 
             // Set tags parsed from input field
             article.Tags = formArticle.Tags?.Trim() is { Length: > 0 } t

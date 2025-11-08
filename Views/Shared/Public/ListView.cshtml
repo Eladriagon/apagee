@@ -18,6 +18,10 @@
     }
     else
     {
+        @if (ViewBag.ListTitle is string { Length: > 0 } title)
+        {
+            <h1 class="list-title">@title</h1>
+        }
         foreach (var article in Model.Articles)
         {
             <article>

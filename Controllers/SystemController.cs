@@ -109,7 +109,9 @@ public partial class SystemController(UserService userService,
         }
 
         var articles = await ArticleService.GetArticlesByTag(tagName);
+        
         ViewBag.PageTitle = "Tag #" + tagName;
+        ViewBag.ListTitle = "Articles tagged #" + tagName;
         return View("Public/ListView", new ArticleListViewModel
         {
             Articles = articles?.Select(a => new ArticleViewModel { Article = a }) ?? [],
