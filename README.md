@@ -73,6 +73,7 @@ The releases contain precompiled binaries that should run on most Linux and Wind
 * [x] Receive boosts/favorites from Fediverse
 * [x] Tags
 * [x] Media (paste from clipboard)
+* [ ] Advertising a quote policy and accepting [quote requests](https://codeberg.org/fediverse/fep/src/branch/main/fep/044f/fep-044f.md)
 * [ ] Better emoji support (Noto Color Emoji or Twemoji?)
 * [ ] Dockerize and publish image
 * [ ] "Primary" image for Fediverse posts
