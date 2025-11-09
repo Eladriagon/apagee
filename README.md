@@ -6,8 +6,6 @@
  <a href="https://github.com/Eladriagon/apagee/actions/workflows/dotnet.yml">![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/eladriagon/apagee/dotnet.yml?event=release&style=for-the-badge)</a> <a href="https://github.com/Eladriagon/apagee/stargazers">![GitHub Repo stars](https://img.shields.io/github/stars/eladriagon/apagee?style=for-the-badge&logo=github&label=%E2%AD%90%20stars&color=%23e8bf36)</a>
  <a href="https://thepride.network/@eladriagon">![Mastodon Follow](https://img.shields.io/mastodon/follow/115376968747924209?domain=thepride.network&style=for-the-badge&logo=mastodon)</a>
 
-
-
 Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 
 ## Apa-what?

@@ -22,7 +22,7 @@ class Apagee
                 }
 
                 const lang = langClass.replace(findPrefix, '').trim();
-                if (!lang || pre.querySelector('.' + className))
+                if (!lang || pre.querySelector('.' + className) || lang === 'plaintext')
                 {
                     return;
                 }
