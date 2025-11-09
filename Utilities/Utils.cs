@@ -1,5 +1,6 @@
 
 using System.Collections;
+using Markdig.Extensions.Diagrams;
 
 namespace Apagee.Utilities;
 
@@ -7,16 +8,15 @@ public static class Utils
 {
     private static MarkdownPipeline MarkdownConfig =>
         new MarkdownPipelineBuilder()
-            .UseAlertBlocks()
+            .UseColorCode()
             .UsePipeTables()
-            .UseEmphasisExtras()
             .UseGenericAttributes()
             .UseAutoIdentifiers()
             .UseFootnotes()
             .UseAutoLinks()
             .UseMediaLinks()
-            .UseDiagrams()
-            .UseColorCode()
+            .UseAlertBlocks()
+            .UseEmphasisExtras()
             .Build();
 
     public static string MarkdownToHtml(string md)
@@ -38,7 +38,7 @@ public static class Utils
                 }
             }
         }
-        return Markdig.Markdown.ToHtml(doc);
+        return Markdig.Markdown.ToHtml(doc, MarkdownConfig);
     }
     
     /// <summary>
