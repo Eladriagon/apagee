@@ -8,15 +8,14 @@ public static class Utils
 {
     private static MarkdownPipeline MarkdownConfig =>
         new MarkdownPipelineBuilder()
-            .UseColorCode()
-            .UsePipeTables()
+            .UseEmphasisExtras()
             .UseGenericAttributes()
             .UseAutoIdentifiers()
+            .UsePipeTables()
             .UseFootnotes()
             .UseAutoLinks()
             .UseMediaLinks()
             .UseAlertBlocks()
-            .UseEmphasisExtras()
             .Build();
 
     public static string MarkdownToHtml(string md)

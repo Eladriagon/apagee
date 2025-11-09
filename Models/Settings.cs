@@ -10,7 +10,9 @@ public sealed class Settings
 
     public string? ThemeCss { get; set; }
 
-    public bool EnableFontAwesome { get; set; }
+    public string? HeadContent { get; set; }
+
+    public string? EndBodyContent { get; set; }
 
     public string? Favicon { get; set; }
     

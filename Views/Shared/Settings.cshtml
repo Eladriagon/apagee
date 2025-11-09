@@ -21,11 +21,27 @@
     <h2 class="subtitle is-3">Theme and Styling</h2>
 
     <div class="field">
-        <label class="label" for="Theme CSS">Public Theme CSS</label>
+        <label class="label" asp-for="ThemeCss">Public Theme CSS</label>
         <div class="control">
             <textarea class="textarea is-family-monospace" asp-for="ThemeCss" rows="10"></textarea>
         </div>
         <span class="help">This is the CSS style applied to your public posts. It does not affect the admin area. You can use @@imports and any other valid CSS here.</span>
+    </div>
+
+    <div class="field">
+        <label class="label" asp-for="HeadContent">&lt;head&gt; Content</label>
+        <div class="control">
+            <textarea class="textarea is-family-monospace" asp-for="HeadContent" rows="5"></textarea>
+        </div>
+        <span class="help">Enter any HTML here (e.g. CSS links) that you want to include at the bottom of the &lt;head&gt; tag.</span>
+    </div>
+
+    <div class="field">
+        <label class="label" asp-for="EndBodyContent">&lt;body&gt; Content</label>
+        <div class="control">
+            <textarea class="textarea is-family-monospace" asp-for="EndBodyContent" rows="5"></textarea>
+        </div>
+        <span class="help">Enter any HTML here (e.g. script tags) that you want to include just before the closing &lt;body&gt; tag.</span>
     </div>
 
     <h3 class="subtitle is-4">Images</h3>
@@ -34,7 +50,7 @@
         <label class="label" asp-for="Favicon">Favicon</label>
 
         <div class="file has-name is-boxed">
-            <label class="file-label">
+            <label class="file-label" asp-for="FaviconInput">
                 <input asp-for="FaviconInput" type="file" accept=".png,.ico" class="file-input" />
                 <span class="file-cta">
                     <span class="file-icon">
@@ -56,7 +72,7 @@
         <label class="label" asp-for="AuthorAvatar">Author Avatar</label>
 
         <div class="file has-name is-boxed">
-            <label class="file-label">
+            <label class="file-label" asp-for="AuthorAvatarInput">
                 <input asp-for="AuthorAvatarInput" type="file" accept=".png,.jpg,.jpeg" class="file-input" />
                 <span class="file-cta">
                     <span class="file-icon">
@@ -78,7 +94,7 @@
         <label class="label" asp-for="BannerImage">Banner Image</label>
 
         <div class="file has-name is-boxed">
-            <label class="file-label">
+            <label class="file-label" asp-for="BannerImageInput">
                 <input asp-for="BannerImageInput" type="file" accept=".png,.jpg,.jpeg" class="file-input" />
                 <span class="file-cta">
                     <span class="file-icon">
@@ -94,13 +110,6 @@
             <img src="/banner.png" alt="Banner for @(GlobalConfiguration.Current?.FediverseUsername)" style="width: 200px !important; height: 100px !important;" />
         }
         <span class="help">This is your Fediverse and site banner. Appears in link previews and Fediverse profiles. Must be 2:1 aspect. 2000x1000 recommended.</span>
-    </div>
-
-    <div class="field">
-        <label class="label">
-            <input asp-for="EnableFontAwesome" class="checkbox" />
-            Enable Font Awesome?
-        </label>
     </div>
 
     <hr />
@@ -127,7 +136,7 @@
     </div>
 
     <div class="field">
-        <label class="label">
+        <label class="label" asp-for="AutoReciprocateFollows">
             <input asp-for="AutoReciprocateFollows" class="checkbox" />
             Automatically reciprocate follows?
         </label>
@@ -135,7 +144,7 @@
     </div>
 
     <div class="field">
-        <label class="label">
+        <label class="label" asp-for="DisplayFollowerCount">
             <input asp-for="DisplayFollowerCount" class="checkbox" />
             Display follower count?
         </label>
@@ -213,7 +222,7 @@
     </div>
 
     <div class="field">
-        <label class="label">
+        <label class="label" asp-for="ShowBioOnSite">
             <input asp-for="ShowBioOnSite" class="checkbox" />
             Show bio on articles?
         </label>
