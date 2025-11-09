@@ -9,23 +9,6 @@ public sealed class ContextResponseWrapperFilter : IAsyncResultFilter
             ["manuallyApprovesFollowers"] = "as:manuallyApprovesFollowers",
             ["toot"] = "http://joinmastodon.org/ns#",
             ["Hashtag"] = "https://www.w3.org/ns/activitystreams#Hashtag",
-            ["gts"] = "https://gotosocial.org/ns#",
-            ["quoteAuthorization"] = new Dictionary<string, object> {
-                ["@id"] = "https://w3id.org/fep/044f#quoteAuthorization",
-                ["@type"] = "@id"
-            },
-            ["interactionPolicy"] = new Dictionary<string, object> {
-                ["@id"] = "gts:interactionPolicy",
-                ["@type"] = "@id"
-            },
-            ["canQuote"] = new Dictionary<string, object> {
-                ["@id"] = "gts:canQuote",
-                ["@type"] = "@id"
-            },
-            ["automaticApproval"] = new Dictionary<string, object> {
-                ["@id"] = "gts:automaticApproval",
-                ["@type"] = "@id"
-            },
             ["alsoKnownAs"] = new Dictionary<string, object> {
                 ["@id"] = "as:alsoKnownAs",
                 ["@type"] = "@id"
