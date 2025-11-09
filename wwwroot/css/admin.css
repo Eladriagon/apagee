@@ -48,6 +48,10 @@ table td.has-truncated-title {
     display: block;
 }
 
+ .is-not-wrapped {
+    white-space: pre;
+ }
+
 /* Checkboxes can be a bit bigger */
 input.checkbox[type=checkbox] {
     transform-origin: 50% 50%;

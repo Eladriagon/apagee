@@ -23,7 +23,7 @@
     <div class="field">
         <label class="label" asp-for="ThemeCss">Public Theme CSS</label>
         <div class="control">
-            <textarea class="textarea is-family-monospace" asp-for="ThemeCss" rows="10"></textarea>
+            <textarea class="textarea is-family-monospace is-not-wrapped" asp-for="ThemeCss" rows="10"></textarea>
         </div>
         <span class="help">This is the CSS style applied to your public posts. It does not affect the admin area. You can use @@imports and any other valid CSS here.</span>
     </div>
@@ -31,7 +31,7 @@
     <div class="field">
         <label class="label" asp-for="HeadContent">&lt;head&gt; Content</label>
         <div class="control">
-            <textarea class="textarea is-family-monospace" asp-for="HeadContent" rows="5"></textarea>
+            <textarea class="textarea is-family-monospace is-not-wrapped" asp-for="HeadContent" rows="5"></textarea>
         </div>
         <span class="help">Enter any HTML here (e.g. CSS links) that you want to include at the bottom of the &lt;head&gt; tag.</span>
     </div>
@@ -39,7 +39,7 @@
     <div class="field">
         <label class="label" asp-for="EndBodyContent">&lt;body&gt; Content</label>
         <div class="control">
-            <textarea class="textarea is-family-monospace" asp-for="EndBodyContent" rows="5"></textarea>
+            <textarea class="textarea is-family-monospace is-not-wrapped" asp-for="EndBodyContent" rows="5"></textarea>
         </div>
         <span class="help">Enter any HTML here (e.g. script tags) that you want to include just before the closing &lt;body&gt; tag.</span>
     </div>
