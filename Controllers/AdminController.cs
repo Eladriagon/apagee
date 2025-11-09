@@ -265,9 +265,14 @@ public class AdminController(UserService userService,
         {
             Article? article;
 
+            var hasAnyChanges = true;
+
             if (formArticle.Uid is not null)
             {
                 article = await ArticleService.GetByUid(formArticle.Uid) ?? throw new ApageeException($"Edit article not found: {formArticle.Uid}");
+
+                hasAnyChanges = article.Title != formArticle.Title || article.Body != formArticle.Body;
+
                 article.Title = formArticle.Title;
                 article.Body = formArticle.Body;
             }
@@ -306,6 +311,11 @@ public class AdminController(UserService userService,
 
             var sendToFollowers = article.PublishedOn is null && isDraft is not true;
 
+            var sendUpdate = hasAnyChanges
+                          && article.PublishedOn is not null
+                          && isDraft is not true
+                          && article.PublishedOn < DateTime.UtcNow;
+
             // Compute extra properties
             article.Slug = article.Title.ToUrlSlug();
             article.BodyMode = BodyMode.Markdown;
@@ -332,12 +342,24 @@ public class AdminController(UserService userService,
             {
                 await PublishToFediverse(article);
             }
+            else if (sendUpdate)
+            {
+                await PublishUpdateToFediverse(article);
+            }
+
             if (article.PublishedOn is null && isDraft is true && preview is true)
             {
                 TempData["PreviewArticle"] = true;
-                return RedirectToAction("EditArticle", new { id = article.Uid });
             }
-            return RedirectToAction("Articles");
+
+            // Published? Go back to the list.
+            if (sendToFollowers || sendUpdate)
+            {
+                return RedirectToAction("Articles");
+            }
+
+            // Otherwise, keep showing the editor.
+            return RedirectToAction("EditArticle", new { id = article.Uid });
         }
         catch (Exception ex)
         {
@@ -483,14 +505,39 @@ public class AdminController(UserService userService,
         // so this is here as a test/proof of concept
         // only.
         var followers = await InboxService.GetFollowerList();
+        var actArticle = APubStatus.FromArticle(article);
         foreach (var f in followers)
         {
-            var actArticle = APubStatus.FromArticle(article);
             await Client.PostInboxFromActor(f, new Create()
             {
                 Id = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}/statuses/{article.Uid}/activity",
                 Actor = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}",
                 Published = article.PublishedOn,
+                To = actArticle.To,
+                Cc = actArticle.Cc,
+                Object = actArticle
+            });
+        }
+    }
+
+    private async Task PublishUpdateToFediverse(Article article)
+    {
+        // TODO: Extremely very super not performant.
+        // Involves adding a background worker/thread
+        // so this is here as a test/proof of concept
+        // only.
+        var updateTime = DateTime.UtcNow;
+        var updateTs = updateTime.ToUnixTimestamp();
+        var followers = await InboxService.GetFollowerList();
+        var actArticle = APubStatus.FromArticle(article);
+
+        foreach (var f in followers)
+        {
+            await Client.PostInboxFromActor(f, new Update()
+            {
+                Id = $"{actArticle.Id}#update/{updateTs}",
+                Actor = $"https://{SiteConfig?.PublicHostname}/api/users/{SiteConfig?.FediverseUsername}",
+                Updated = updateTime,
                 To = actArticle.To,
                 Cc = actArticle.Cc,
                 Object = actArticle

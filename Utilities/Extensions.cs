@@ -22,6 +22,19 @@ public static class ApageeExtensions
         Convert.ToBase64String(data);
 
     /// <summary>
+    /// Converts the datetime to a Unix timestamp.
+    /// </summary>
+    /// <remarks>How is this not in the framework yet? Seriously?</remarks>
+    public static long ToUnixTimestamp(this DateTime dt) =>
+        (long)Math.Floor(dt.Subtract(new DateTime(1970, 1, 1)).TotalSeconds);
+
+    /// <summary>
+    /// Converts the datetime to a Unix millisecond-format timestamp.
+    /// </summary>
+    public static long ToUnixTimestampMs(this DateTime dt) =>
+        (long)Math.Floor(dt.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds);
+
+    /// <summary>
     /// Converts a long string into a short status note.
     /// </summary>
     public static string? ToStatusNote(this string? str)
