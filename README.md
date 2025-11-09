@@ -1,4 +1,12 @@
-# Apagee
+<div align="center">
+<h1>Apagee</h1>
+</div>
+
+![GitHub Release](https://img.shields.io/github/v/release/eladriagon/apagee?style=for-the-badge)
+ ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/eladriagon/apagee/dotnet.yml?event=release&style=for-the-badge) ![GitHub Repo stars](https://img.shields.io/github/stars/eladriagon/apagee?style=for-the-badge&logo=github&label=%E2%AD%90%20stars&color=%23e8bf36)
+ ![Mastodon Follow](https://img.shields.io/mastodon/follow/115376968747924209?domain=thepride.network&style=for-the-badge&logo=mastodon)
+
+
 
 Apagee is a self-hosted, minimalistic, fediverse-first, solo blog engine.
 
