@@ -1,4 +1,5 @@
 <div align="center">
+<img src="https://raw.githubusercontent.com/Eladriagon/apagee/refs/heads/main/assets/logo-256.png" alt="Apagee logo" />
 <h1>Apagee</h1>
 </div>
 
